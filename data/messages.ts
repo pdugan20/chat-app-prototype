@@ -1,0 +1,102 @@
+import { Message } from '../types/message';
+
+export const initialMessages: Message[] = [
+  {
+    id: '1',
+    text: 'Yo! Have you seen the trailer for that new horror movie Sinners? It looks insane!',
+    isSender: true,
+    timestamp: 'Monday 2:14 PM',
+    hasReaction: true,
+    reactionType: 'heart',
+  },
+  {
+    id: '2',
+    text: "OMG yes! I've been seeing ads for it everywhere. The reviews are saying it's terrifying.",
+    isSender: false,
+    timestamp: '2:15 PM',
+  },
+  {
+    id: '3',
+    text: "I really want to see it but I don't want to go alone 😂",
+    isSender: false,
+    timestamp: '2:15 PM',
+  },
+  {
+    id: '4',
+    text: "We should totally go together! I've been wanting to check it out too.",
+    isSender: true,
+    timestamp: '2:16 PM',
+    hasReaction: true,
+    reactionType: 'thumbsUp',
+  },
+  {
+    id: '5',
+    text: 'When are you free? I could do this weekend?',
+    isSender: true,
+    timestamp: '2:16 PM',
+  },
+  {
+    id: '6',
+    text: 'This weekend works for me! Saturday night maybe? I heard the AMC on 5th has recliner seats now.',
+    isSender: false,
+    timestamp: '2:17 PM',
+  },
+  {
+    id: '7',
+    text: 'Saturday night is perfect! Let me check the showtimes...',
+    isSender: true,
+    timestamp: '2:18 PM',
+  },
+  {
+    id: '8',
+    text: 'Looks like they have a 7:30 and a 10:15 showing. Which one do you prefer?',
+    isSender: true,
+    timestamp: '2:18 PM',
+  },
+  {
+    id: '9',
+    text: "I'm cool with either, but the later one might be creepier 🎬",
+    isSender: true,
+    timestamp: '2:18 PM',
+  },
+  {
+    id: '10',
+    text: "Let's do the 7:30! I have brunch plans on Sunday so I don't want to be out too late.",
+    isSender: false,
+    timestamp: '2:19 PM',
+  },
+  {
+    id: '11',
+    text: "Should we grab dinner before? There's that new taco place next to the theater!",
+    isSender: false,
+    timestamp: '2:19 PM',
+  },
+  {
+    id: '12',
+    text: "Dinner before sounds great! I've been wanting to try that taco place. Meet at 6?",
+    isSender: true,
+    timestamp: '2:20 PM',
+  },
+  {
+    id: '13',
+    text: "Perfect! 6pm at Taco Loco, then 7:30 for Sinners. I'm so excited but I'll probably be hiding behind my popcorn the whole time 🙈",
+    isSender: false,
+    timestamp: '2:21 PM',
+    hasReaction: true,
+    reactionType: 'haha',
+  },
+  {
+    id: '14',
+    text: "Haha don't worry, I'll be there to protect you from the fictional demons 😄 I'll book the tickets online tonight so we're guaranteed good seats!",
+    isSender: true,
+    timestamp: '2:21 PM',
+  },
+  {
+    id: '15',
+    text: "You're the best! Can't wait for Saturday. This movie better be as scary as everyone says it is!",
+    isSender: false,
+    timestamp: '2:22 PM',
+    hasReaction: true,
+    reactionType: 'thumbsUp',
+  },
+];
