@@ -6,17 +6,22 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Text,
   Keyboard,
   Animated,
 } from 'react-native';
+
+declare const global: {
+  resetAllChats?: boolean;
+  pendingChatUpdate?: { id: string; [key: string]: unknown };
+  forceInboxRefresh?: boolean;
+};
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
 import NavigationBar from './NavigationBar';
 import TimestampHeader from './TimestampHeader';
-import { initialMessages, allConversations } from '../data/messages';
+import { initialMessages } from '../data/messages';
 import { Colors, Typography, Spacing } from '../constants/theme';
 import { RootStackParamList } from '../types/navigation';
 
@@ -43,13 +48,14 @@ interface ChatScreenProps {
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
-  const { contactName, contactAvatar, chatId } = route.params;
+  const { contactName, chatId } = route.params;
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [currentConversationIndex, setCurrentConversationIndex] = useState(0);
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const deliveredOpacity = useRef(new Animated.Value(0)).current;
+  const deliveredScale = useRef(new Animated.Value(0.7)).current;
 
   useEffect(() => {
     // Scroll to bottom when new messages are added
@@ -58,43 +64,33 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }, 100);
   }, [messages]);
 
-  useEffect(() => {
-    // Scroll to bottom immediately when component mounts
-    const scrollToBottom = () => {
-      scrollViewRef.current?.scrollToEnd({ animated: false });
-    };
-    
-    // Immediate scroll - no delays to avoid jumpiness during transition
-    scrollToBottom();
-    
-    // Single backup attempt for safety
-    setTimeout(scrollToBottom, 50);
-  }, []);
+  // Scroll to bottom when ScrollView is fully laid out
+  const handleScrollViewLayout = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: false });
+  };
 
-  // Also listen for focus events to ensure scroll happens before transition
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // Scroll immediately when screen comes into focus
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: false });
-      }, 0);
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+  // Also handle content size changes to maintain scroll position
+  const handleContentSizeChange = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: false });
+  };
 
   // Store the latest user message to update inbox on blur
-  const lastSentMessageRef = useRef<{text: string, timestamp: string} | null>(null);
+  const lastSentMessageRef = useRef<{ text: string; timestamp: string } | null>(
+    null
+  );
 
   // Update inbox when navigating back
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      console.log('beforeRemove fired, lastSentMessage:', lastSentMessageRef.current);
+      console.log(
+        'beforeRemove fired, lastSentMessage:',
+        lastSentMessageRef.current
+      );
       // Update inbox if there was a new message sent
       if (lastSentMessageRef.current) {
         // Store the update in global navigation state
         console.log('Setting update for chatId:', chatId);
-        (global as any).pendingChatUpdate = {
+        global.pendingChatUpdate = {
           id: chatId,
           lastMessage: `You: ${lastSentMessageRef.current.text}`,
           timestamp: lastSentMessageRef.current.timestamp,
@@ -161,16 +157,32 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     lastSentMessageRef.current = { text, timestamp: currentTime };
     console.log('Stored in ref:', lastSentMessageRef.current);
 
-    // Show "Delivered" after 1.5s delay
+    // Show "Delivered" after 1.5s delay with fade-in animation
     setTimeout(() => {
       setMessages(prev =>
         prev.map(msg =>
           msg.id === newMessage.id ? { ...msg, showDelivered: true } : msg
         )
       );
+
+      // Animate the delivered text fade-in and scale-up
+      deliveredOpacity.setValue(0);
+      deliveredScale.setValue(0.7);
+
+      Animated.parallel([
+        Animated.timing(deliveredOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(deliveredScale, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }, 1500);
   };
-
 
   // Function to check if we should show timestamp between messages
   const shouldShowTimestamp = (currentIndex: number) => {
@@ -246,6 +258,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
             style={styles.messagesContainer}
             contentContainerStyle={styles.messagesContent}
             showsVerticalScrollIndicator={false}
+            onLayout={handleScrollViewLayout}
+            onContentSizeChange={handleContentSizeChange}
           >
             {messages.map((message, index) => (
               <React.Fragment key={message.id}>
@@ -266,9 +280,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
                 {message.isSender &&
                   message.showDelivered &&
                   isLastInGroup(index) && (
-                    <View style={styles.deliveredContainer}>
-                      <Text style={styles.deliveredText}>Delivered</Text>
-                    </View>
+                    <Animated.View
+                      style={[
+                        styles.deliveredContainer,
+                        { opacity: deliveredOpacity },
+                      ]}
+                    >
+                      <Animated.Text
+                        style={[
+                          styles.deliveredText,
+                          { transform: [{ scaleX: deliveredScale }] },
+                        ]}
+                      >
+                        Delivered
+                      </Animated.Text>
+                    </Animated.View>
                   )}
               </React.Fragment>
             ))}

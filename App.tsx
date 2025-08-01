@@ -1,12 +1,19 @@
 import React from 'react';
-import { TouchableOpacity, Text, View, Image, Alert } from 'react-native';
+import { TouchableOpacity, Text, View, Alert, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SymbolView } from 'expo-symbols';
 import { RootStackParamList } from './types/navigation';
+import { Colors } from './constants/theme';
 import InboxScreen from './components/InboxScreen';
 import ChatScreen from './components/ChatScreen';
+
+declare const global: {
+  resetAllChats?: boolean;
+  pendingChatUpdate?: { id: string; [key: string]: unknown };
+  forceInboxRefresh?: boolean;
+};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -21,8 +28,12 @@ export default function App() {
           style: 'destructive',
           onPress: () => {
             // Clear the global pending update and reset chats
-            (global as any).pendingChatUpdate = null;
-            (global as any).resetAllChats = true;
+            global.pendingChatUpdate = undefined;
+            global.resetAllChats = true;
+            // Force a re-render by triggering focus effect
+            setTimeout(() => {
+              global.forceInboxRefresh = true;
+            }, 100);
             console.log('Reset all chats triggered');
           },
         },
@@ -58,51 +69,30 @@ export default function App() {
                 hideWhenScrolling: true,
               },
               headerLeft: () => (
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: 26,
-                    marginTop: -2,
-                  }}
-                >
-                  <Text style={{ color: '#0078ff', fontSize: 17 }}>Edit</Text>
+                <TouchableOpacity style={headerStyles.editButton}>
+                  <Text style={headerStyles.editText}>Edit</Text>
                 </TouchableOpacity>
               ),
               headerRight: () => (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 16,
-                    alignItems: 'center',
-                    height: 26,
-                    marginTop: -4,
-                  }}
-                >
+                <View style={headerStyles.rightButtonContainer}>
                   <TouchableOpacity
-                    style={{ alignItems: 'center', justifyContent: 'center' }}
+                    style={headerStyles.iconButton}
                     onPress={handleEllipsisPress}
                   >
                     <SymbolView
                       name='ellipsis.circle'
                       size={24}
                       type='monochrome'
-                      tintColor='#0078ff'
+                      tintColor={Colors.systemBlue}
                       weight='regular'
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: -2,
-                    }}
-                  >
+                  <TouchableOpacity style={headerStyles.composeButton}>
                     <SymbolView
                       name='square.and.pencil'
                       size={24}
                       type='monochrome'
-                      tintColor='#0078ff'
+                      tintColor={Colors.systemBlue}
                       weight='regular'
                     />
                   </TouchableOpacity>
@@ -121,56 +111,29 @@ export default function App() {
               headerBackTitle: '',
               headerStyle: {
                 backgroundColor: 'transparent',
-                elevation: 1000,
-                zIndex: 1000,
               },
               headerLeft: () => (
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: 26,
-                    marginTop: -2,
-                    opacity: 0,
-                  }}
-                >
-                  <Text style={{ color: '#0078ff', fontSize: 17 }}>Edit</Text>
+                <TouchableOpacity style={headerStyles.hiddenEditButton}>
+                  <Text style={headerStyles.hiddenEditText}>Edit</Text>
                 </TouchableOpacity>
               ),
               headerRight: () => (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 16,
-                    alignItems: 'center',
-                    height: 26,
-                    marginTop: -4,
-                    opacity: 0,
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{ alignItems: 'center', justifyContent: 'center' }}
-                  >
+                <View style={headerStyles.hiddenRightButtonContainer}>
+                  <TouchableOpacity style={headerStyles.iconButton}>
                     <SymbolView
                       name='ellipsis.circle'
                       size={24}
                       type='monochrome'
-                      tintColor='#0078ff'
+                      tintColor={Colors.systemBlue}
                       weight='regular'
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: -2,
-                    }}
-                  >
+                  <TouchableOpacity style={headerStyles.hiddenComposeButton}>
                     <SymbolView
                       name='square.and.pencil'
                       size={24}
                       type='monochrome'
-                      tintColor='#0078ff'
+                      tintColor={Colors.systemBlue}
                       weight='regular'
                     />
                   </TouchableOpacity>
@@ -184,3 +147,56 @@ export default function App() {
     </>
   );
 }
+
+const headerStyles = StyleSheet.create({
+  composeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -2,
+  },
+  editButton: {
+    alignItems: 'center',
+    height: 26,
+    justifyContent: 'center',
+    marginTop: -2,
+  },
+  editText: {
+    color: Colors.systemBlue,
+    fontSize: 17,
+  },
+  hiddenComposeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -2,
+  },
+  hiddenEditButton: {
+    alignItems: 'center',
+    height: 26,
+    justifyContent: 'center',
+    marginTop: -2,
+    opacity: 0,
+  },
+  hiddenEditText: {
+    color: Colors.systemBlue,
+    fontSize: 17,
+  },
+  hiddenRightButtonContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+    height: 26,
+    marginTop: -4,
+    opacity: 0,
+  },
+  iconButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightButtonContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+    height: 26,
+    marginTop: -4,
+  },
+});

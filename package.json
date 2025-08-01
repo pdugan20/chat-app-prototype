@@ -9,8 +9,8 @@
     "build:ios": "expo build:ios",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "android": "expo run:android"
   },
   "dependencies": {

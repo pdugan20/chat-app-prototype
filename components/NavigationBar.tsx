@@ -15,7 +15,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   onBackPress,
   onContactPress,
 }) => {
-
   return (
     <BlurView intensity={50} style={styles.container}>
       <View style={styles.content}>
@@ -29,13 +28,10 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.centerContent}
-          onPress={onContactPress}
-        >
+        <TouchableOpacity style={styles.centerContent} onPress={onContactPress}>
           <View style={styles.profilePicture}>
             <Image
-              source={require('../assets/profile-photo.png')}
+              source={require('../assets/profile-photos/Ruth.png')}
               style={styles.profileImage}
               resizeMode='cover'
             />
@@ -72,8 +68,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     height: 44,
     justifyContent: 'center',
-    width: 44,
     paddingLeft: -8,
+    width: 44,
   },
   centerContent: {
     alignItems: 'center',
