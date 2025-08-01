@@ -8,18 +8,13 @@ interface NavigationBarProps {
   contactName: string;
   onBackPress?: () => void;
   onContactPress?: () => void;
-  onDeveloperMenuTrigger?: () => void;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({
   contactName,
   onBackPress,
   onContactPress,
-  onDeveloperMenuTrigger,
 }) => {
-  const handleLongPress = () => {
-    onDeveloperMenuTrigger?.();
-  };
 
   return (
     <BlurView intensity={50} style={styles.container}>
@@ -37,8 +32,6 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         <TouchableOpacity
           style={styles.centerContent}
           onPress={onContactPress}
-          onLongPress={handleLongPress}
-          delayLongPress={1000}
         >
           <View style={styles.profilePicture}>
             <Image
@@ -77,9 +70,10 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 const styles = StyleSheet.create({
   backButton: {
     alignItems: 'flex-start',
-    height: Layout.navigationButtonSize,
+    height: 44,
     justifyContent: 'center',
-    width: Layout.navigationButtonSize,
+    width: 44,
+    paddingLeft: -8,
   },
   centerContent: {
     alignItems: 'center',

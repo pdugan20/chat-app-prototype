@@ -10,13 +10,15 @@ import {
   Keyboard,
   Animated,
 } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
 import NavigationBar from './NavigationBar';
 import TimestampHeader from './TimestampHeader';
-import DeveloperBottomSheet from './DeveloperBottomSheet';
 import { initialMessages, allConversations } from '../data/messages';
 import { Colors, Typography, Spacing } from '../constants/theme';
+import { RootStackParamList } from '../types/navigation';
 
 interface Message {
   id: string;
@@ -28,12 +30,24 @@ interface Message {
   showDelivered?: boolean;
 }
 
-const ChatScreen: React.FC = () => {
+type ChatScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Chat'
+>;
+
+type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>;
+
+interface ChatScreenProps {
+  navigation: ChatScreenNavigationProp;
+  route: ChatScreenRouteProp;
+}
+
+const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
+  const { contactName, contactAvatar, chatId } = route.params;
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [currentConversationIndex, setCurrentConversationIndex] = useState(0);
-  const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -43,6 +57,55 @@ const ChatScreen: React.FC = () => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [messages]);
+
+  useEffect(() => {
+    // Scroll to bottom immediately when component mounts
+    const scrollToBottom = () => {
+      scrollViewRef.current?.scrollToEnd({ animated: false });
+    };
+    
+    // Immediate scroll - no delays to avoid jumpiness during transition
+    scrollToBottom();
+    
+    // Single backup attempt for safety
+    setTimeout(scrollToBottom, 50);
+  }, []);
+
+  // Also listen for focus events to ensure scroll happens before transition
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Scroll immediately when screen comes into focus
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      }, 0);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // Store the latest user message to update inbox on blur
+  const lastSentMessageRef = useRef<{text: string, timestamp: string} | null>(null);
+
+  // Update inbox when navigating back
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      console.log('beforeRemove fired, lastSentMessage:', lastSentMessageRef.current);
+      // Update inbox if there was a new message sent
+      if (lastSentMessageRef.current) {
+        // Store the update in global navigation state
+        console.log('Setting update for chatId:', chatId);
+        (global as any).pendingChatUpdate = {
+          id: chatId,
+          lastMessage: `You: ${lastSentMessageRef.current.text}`,
+          timestamp: lastSentMessageRef.current.timestamp,
+          unread: false,
+        };
+        lastSentMessageRef.current = null; // Clear after updating
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, chatId]);
 
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
@@ -76,6 +139,12 @@ const ChatScreen: React.FC = () => {
   }, [keyboardHeight]);
 
   const handleSendMessage = (text: string) => {
+    console.log('handleSendMessage called with:', text, 'chatId:', chatId);
+    const currentTime = new Date().toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
@@ -88,6 +157,10 @@ const ChatScreen: React.FC = () => {
     };
     setMessages(prev => [...prev, newMessage]);
 
+    // Store the message to update inbox later
+    lastSentMessageRef.current = { text, timestamp: currentTime };
+    console.log('Stored in ref:', lastSentMessageRef.current);
+
     // Show "Delivered" after 1.5s delay
     setTimeout(() => {
       setMessages(prev =>
@@ -98,23 +171,6 @@ const ChatScreen: React.FC = () => {
     }, 1500);
   };
 
-  const handleResetMessages = () => {
-    setMessages(allConversations[currentConversationIndex].messages);
-  };
-
-  const handleSwitchConversation = () => {
-    const nextIndex = (currentConversationIndex + 1) % allConversations.length;
-    setCurrentConversationIndex(nextIndex);
-    setMessages(allConversations[nextIndex].messages);
-  };
-
-  const handleDeveloperMenuTrigger = () => {
-    setShowDeveloperMenu(true);
-  };
-
-  const handleDeveloperMenuClose = () => {
-    setShowDeveloperMenu(false);
-  };
 
   // Function to check if we should show timestamp between messages
   const shouldShowTimestamp = (currentIndex: number) => {
@@ -231,22 +287,13 @@ const ChatScreen: React.FC = () => {
 
       <View style={styles.navigationBarContainer}>
         <NavigationBar
-          contactName={allConversations[currentConversationIndex].name}
+          contactName={contactName}
           onBackPress={() => {
-            console.log('Back pressed');
-            handleResetMessages();
+            navigation.goBack();
           }}
           onContactPress={() => console.log('Contact pressed')}
-          onDeveloperMenuTrigger={handleDeveloperMenuTrigger}
         />
       </View>
-
-      <DeveloperBottomSheet
-        visible={showDeveloperMenu}
-        onClose={handleDeveloperMenuClose}
-        onResetMessages={handleResetMessages}
-        onSwitchConversation={handleSwitchConversation}
-      />
     </View>
   );
 };
