@@ -23,6 +23,9 @@ export const Colors = {
   border: '#e9e9eb',
   inputBorder: '#e9e9eb',
   reactionBorder: '#ffffff',
+
+  // Overlay Colors
+  overlayBackground: 'rgba(0, 0, 0, 0.5)',
 } as const;
 
 export const Typography = {

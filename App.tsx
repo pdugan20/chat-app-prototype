@@ -5,7 +5,7 @@ import ChatScreen from './components/ChatScreen';
 export default function App() {
   return (
     <>
-      <StatusBar style='light' />
+      <StatusBar style='dark' />
       <ChatScreen />
     </>
   );

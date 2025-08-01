@@ -100,3 +100,123 @@ export const initialMessages: Message[] = [
     reactionType: 'thumbsUp',
   },
 ];
+
+export const conversation2: Message[] = [
+  {
+    id: '1',
+    text: 'Hey! How was your weekend?',
+    isSender: false,
+    timestamp: 'Monday 10:30 AM',
+  },
+  {
+    id: '2',
+    text: 'It was great! I went hiking with some friends. The weather was perfect!',
+    isSender: true,
+    timestamp: '10:32 AM',
+    hasReaction: true,
+    reactionType: 'heart',
+  },
+  {
+    id: '3',
+    text: 'That sounds amazing! Where did you go?',
+    isSender: false,
+    timestamp: '10:33 AM',
+  },
+  {
+    id: '4',
+    text: 'We went to Eagle Mountain. The views were incredible!',
+    isSender: true,
+    timestamp: '10:35 AM',
+  },
+  {
+    id: '5',
+    text: 'I need to check that out sometime. Do you have any photos?',
+    isSender: false,
+    timestamp: '10:36 AM',
+  },
+  {
+    id: '6',
+    text: 'Yes! I took tons. Let me send you some of the best ones.',
+    isSender: true,
+    timestamp: '10:37 AM',
+  },
+];
+
+export const conversation3: Message[] = [
+  {
+    id: '1',
+    text: 'Did you finish the project we discussed last week?',
+    isSender: false,
+    timestamp: 'Monday 3:45 PM',
+  },
+  {
+    id: '2',
+    text: 'Almost done! I just need to review the final section.',
+    isSender: true,
+    timestamp: '3:47 PM',
+  },
+  {
+    id: '3',
+    text: 'Great! Can you send it over by tomorrow?',
+    isSender: false,
+    timestamp: '3:48 PM',
+  },
+  {
+    id: '4',
+    text: 'Absolutely! I should have it ready by this evening.',
+    isSender: true,
+    timestamp: '3:50 PM',
+    hasReaction: true,
+    reactionType: 'thumbsUp',
+  },
+  {
+    id: '5',
+    text: 'Perfect. Thanks for your hard work on this!',
+    isSender: false,
+    timestamp: '3:51 PM',
+  },
+];
+
+export const conversation4: Message[] = [
+  {
+    id: '1',
+    text: 'Happy birthday! 🎉',
+    isSender: false,
+    timestamp: 'Monday 9:00 AM',
+    hasReaction: true,
+    reactionType: 'heart',
+  },
+  {
+    id: '2',
+    text: 'Thank you so much! 😊',
+    isSender: true,
+    timestamp: '9:02 AM',
+  },
+  {
+    id: '3',
+    text: 'Are you doing anything special to celebrate?',
+    isSender: false,
+    timestamp: '9:03 AM',
+  },
+  {
+    id: '4',
+    text: 'Just dinner with family tonight, but I might go out with friends this weekend!',
+    isSender: true,
+    timestamp: '9:05 AM',
+  },
+  {
+    id: '5',
+    text: 'That sounds perfect! Have a wonderful day! 🎂',
+    isSender: false,
+    timestamp: '9:06 AM',
+    hasReaction: true,
+    reactionType: 'doubleExclamation',
+  },
+];
+
+export const allConversations = [
+  { id: 0, name: 'Ruth', messages: initialMessages },
+  { id: 1, name: 'Sarah', messages: conversation2 },
+  { id: 2, name: 'Mike', messages: conversation3 },
+  { id: 3, name: 'Emma', messages: conversation4 },
+];

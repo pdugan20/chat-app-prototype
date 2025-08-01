@@ -14,7 +14,8 @@ import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
 import NavigationBar from './NavigationBar';
 import TimestampHeader from './TimestampHeader';
-import { initialMessages } from '../data/messages';
+import DeveloperBottomSheet from './DeveloperBottomSheet';
+import { initialMessages, allConversations } from '../data/messages';
 import { Colors, Typography, Spacing } from '../constants/theme';
 
 interface Message {
@@ -31,6 +32,8 @@ const ChatScreen: React.FC = () => {
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [currentConversationIndex, setCurrentConversationIndex] = useState(0);
+  const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -93,6 +96,24 @@ const ChatScreen: React.FC = () => {
         )
       );
     }, 1500);
+  };
+
+  const handleResetMessages = () => {
+    setMessages(allConversations[currentConversationIndex].messages);
+  };
+
+  const handleSwitchConversation = () => {
+    const nextIndex = (currentConversationIndex + 1) % allConversations.length;
+    setCurrentConversationIndex(nextIndex);
+    setMessages(allConversations[nextIndex].messages);
+  };
+
+  const handleDeveloperMenuTrigger = () => {
+    setShowDeveloperMenu(true);
+  };
+
+  const handleDeveloperMenuClose = () => {
+    setShowDeveloperMenu(false);
   };
 
   // Function to check if we should show timestamp between messages
@@ -210,14 +231,22 @@ const ChatScreen: React.FC = () => {
 
       <View style={styles.navigationBarContainer}>
         <NavigationBar
-          contactName='Ruth'
+          contactName={allConversations[currentConversationIndex].name}
           onBackPress={() => {
             console.log('Back pressed');
-            setMessages(initialMessages);
+            handleResetMessages();
           }}
           onContactPress={() => console.log('Contact pressed')}
+          onDeveloperMenuTrigger={handleDeveloperMenuTrigger}
         />
       </View>
+
+      <DeveloperBottomSheet
+        visible={showDeveloperMenu}
+        onClose={handleDeveloperMenuClose}
+        onResetMessages={handleResetMessages}
+        onSwitchConversation={handleSwitchConversation}
+      />
     </View>
   );
 };

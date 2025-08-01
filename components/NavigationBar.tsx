@@ -8,13 +8,19 @@ interface NavigationBarProps {
   contactName: string;
   onBackPress?: () => void;
   onContactPress?: () => void;
+  onDeveloperMenuTrigger?: () => void;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({
   contactName,
   onBackPress,
   onContactPress,
+  onDeveloperMenuTrigger,
 }) => {
+  const handleLongPress = () => {
+    onDeveloperMenuTrigger?.();
+  };
+
   return (
     <BlurView intensity={50} style={styles.container}>
       <View style={styles.content}>
@@ -28,7 +34,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.centerContent} onPress={onContactPress}>
+        <TouchableOpacity
+          style={styles.centerContent}
+          onPress={onContactPress}
+          onLongPress={handleLongPress}
+          delayLongPress={1000}
+        >
           <View style={styles.profilePicture}>
             <Image
               source={require('../assets/profile-photo.png')}
@@ -111,7 +122,6 @@ const styles = StyleSheet.create({
     height: Spacing.profileImageSize,
     width: Spacing.profileImageSize,
   },
-
   profilePicture: {
     alignItems: 'center',
     backgroundColor: Colors.systemBlue,
