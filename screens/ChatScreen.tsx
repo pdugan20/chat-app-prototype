@@ -17,10 +17,10 @@ declare const global: {
 };
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
-import MessageBubble from './MessageBubble';
-import InputBar from './InputBar';
-import NavigationBar from './NavigationBar';
-import TimestampHeader from './TimestampHeader';
+import MessageBubble from '../components/MessageBubble';
+import InputBar from '../components/InputBar';
+import NavigationBar from '../components/NavigationBar';
+import TimestampHeader from '../components/TimestampHeader';
 import { initialMessages } from '../data/messages';
 import { Colors, Typography, Spacing } from '../constants/theme';
 import { RootStackParamList } from '../types/navigation';
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     paddingBottom: 55,
     paddingLeft: Spacing.containerPadding,
     paddingRight: Spacing.inputPadding,
-    paddingTop: 80,
+    paddingTop: 40,
   },
   navigationBarContainer: {
     left: 0,

@@ -54,7 +54,7 @@ const InputBar: React.FC<InputBarProps> = ({
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
-          {!message.trim() && (
+          {!message.trim() ? (
             <View style={styles.micIconContainer}>
               <SymbolView
                 name='mic.fill'
@@ -64,6 +64,20 @@ const InputBar: React.FC<InputBarProps> = ({
                 weight='regular'
               />
             </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={handleSend}
+              activeOpacity={0.7}
+            >
+              <SymbolView
+                name='arrow.up'
+                size={16}
+                type='hierarchical'
+                tintColor={Colors.white}
+                weight='bold'
+              />
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -102,6 +116,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: Spacing.micIconContainerRight,
     width: Spacing.micIconContainerSize,
+  },
+  sendButton: {
+    alignItems: 'center',
+    backgroundColor: Colors.systemBlue,
+    borderRadius: 13,
+    height: 26,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 6,
+    width: 26,
   },
   textInput: {
     color: Colors.black,

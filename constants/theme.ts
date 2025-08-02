@@ -1,34 +1,54 @@
 // Theme constants for iMessage app
-export const Colors = {
-  // Primary Colors
-  systemBlue: '#007AFF',
 
-  // Text Colors
+// Color primitives
+const ColorPrimitives = {
+  // Base colors
   white: '#ffffff',
   black: '#000000',
-  textSecondary: '#8E8E93',
-  textTertiary: '#909093',
-  placeholder: '#c9c9cb',
-  inputIcon: '#909093',
-  micIcon: '#a2a1a3',
-  dividerGray: '#c8c7cc',
+  blue: '#007aff',
+
+  // Gray scale
+  gray100: '#f2f2f7',
+  gray200: '#f2f2f2',
+  gray300: '#e9e9eb',
+  gray400: '#e0e0e0',
+  gray500: '#c9c9cb',
+  gray600: '#c8c7cc',
+  gray700: '#a2a1a3',
+  gray800: '#909093',
+  gray900: '#8e8e93',
+} as const;
+
+export const Colors = {
+  // Primary Colors
+  systemBlue: ColorPrimitives.blue,
+
+  // Text Colors
+  white: ColorPrimitives.white,
+  black: ColorPrimitives.black,
+  textSecondary: ColorPrimitives.gray900,
+  textTertiary: ColorPrimitives.gray800,
+  placeholder: ColorPrimitives.gray500,
+  inputIcon: ColorPrimitives.gray800,
+  micIcon: ColorPrimitives.gray700,
+  dividerGray: ColorPrimitives.gray600,
 
   // Background Colors
-  messageBubbleGray: '#e9e9eb',
-  messageBubbleBlue: '#007AFF',
+  messageBubbleGray: ColorPrimitives.gray300,
+  messageBubbleBlue: ColorPrimitives.blue,
   inputBackground: 'rgba(255, 255, 255, 0.9)',
   blurBackground: 'rgba(255, 255, 255, 0.75)',
-  addButtonBackground: '#E9E9EB',
-  screenBackground: '#ffffff',
-  inboxBackground: '#f2f2f7',
-  chatItemBackground: '#ffffff',
-  groupAvatarBackground: '#f2f2f2',
-  avatarPlaceholder: '#e0e0e0',
+  addButtonBackground: ColorPrimitives.gray300,
+  screenBackground: ColorPrimitives.white,
+  inboxBackground: ColorPrimitives.gray100,
+  chatItemBackground: ColorPrimitives.white,
+  groupAvatarBackground: ColorPrimitives.gray200,
+  avatarPlaceholder: ColorPrimitives.gray400,
 
   // Border Colors
-  border: '#e9e9eb',
-  inputBorder: '#e9e9eb',
-  reactionBorder: '#ffffff',
+  border: ColorPrimitives.gray300,
+  inputBorder: ColorPrimitives.gray300,
+  reactionBorder: ColorPrimitives.white,
 } as const;
 
 export const Typography = {
@@ -80,8 +100,7 @@ export const Spacing = {
   micIconContainerRight: 12,
   reactionContainerHeight: 43,
   reactionContainerWidth: 35,
-  reactionTailHeight: 30,
-  reactionTailWidth: 30,
+  reactionTailSize: 30,
   tailDotLargeSize: 10,
   tailDotSmallSize: 5,
 
@@ -99,10 +118,8 @@ export const Spacing = {
   unreadIndicatorTop: 32.5,
   groupAvatar1Size: 24,
   groupAvatar2Size: 14,
-  groupAvatar1Left: 5,
-  groupAvatar1Top: 5,
-  groupAvatar2Right: 7,
-  groupAvatar2Bottom: 7,
+  groupAvatar1Position: 5,
+  groupAvatar2Position: 7,
   chevronSize: 13,
   nameMaxWidth: 200,
   timeContainerWidth: 110,
@@ -137,6 +154,6 @@ export const Layout = {
   navigationButtonSize: 44,
 
   // Input
-  inputPaddingBottom: 34, // Space for home indicator
-  inputPaddingBottomKeyboard: 8, // When keyboard is visible
+  inputPaddingBottom: 34,
+  inputPaddingBottomKeyboard: 8,
 } as const;

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an iMessage prototype built with React Native and Expo, designed to replicate the iOS iMessage interface. The app is iOS-only and uses TypeScript throughout.
+This is a comprehensive iMessage prototype built with React Native and Expo, featuring both inbox list view and individual chat functionality. The app replicates the authentic iOS Messages experience with pixel-perfect design, smooth animations, and proper state management. Built with TypeScript throughout and follows modern React Native best practices.
 
 ## Development Commands
 
@@ -14,6 +14,15 @@ This is an iMessage prototype built with React Native and Expo, designed to repl
 npm install          # Install dependencies
 npm start           # Start Expo development server
 npm run ios         # Run on iOS simulator
+```
+
+### Code Quality
+
+```bash
+npm run lint        # Run ESLint with modern flat config
+npm run lint:fix    # Auto-fix ESLint issues
+npm run format      # Format code with Prettier
+npm run format:check # Check code formatting
 ```
 
 ### Building

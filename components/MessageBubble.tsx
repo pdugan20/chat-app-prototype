@@ -151,9 +151,9 @@ const styles = StyleSheet.create({
     width: Spacing.reactionContainerWidth,
   },
   reactionTail: {
-    height: Spacing.reactionTailHeight,
+    height: Spacing.reactionTailSize,
     position: 'absolute',
-    width: Spacing.reactionTailWidth,
+    width: Spacing.reactionTailSize,
   },
   reactionText: {
     fontSize: Typography.reactionEmoji,

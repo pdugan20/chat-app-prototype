@@ -12,7 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Colors, Spacing } from '../constants/theme';
-import ChatListItem from './ChatListItem';
+import ChatListItem from '../components/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
 
 type InboxScreenNavigationProp = NativeStackNavigationProp<
@@ -94,18 +94,20 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
     <ChatListItem
       item={item}
       onPress={() => {
-        // Mark as read when navigating to chat
-        setChats(prevChats =>
-          prevChats.map(chat =>
-            chat.id === item.id ? { ...chat, unread: false } : chat
-          )
-        );
-
         navigation.navigate('Chat', {
           contactName: item.name,
           contactAvatar: item.avatar?.toString(),
           chatId: item.id,
         });
+
+        // Delay marking as read until after transition completes
+        setTimeout(() => {
+          setChats(prevChats =>
+            prevChats.map(chat =>
+              chat.id === item.id ? { ...chat, unread: false } : chat
+            )
+          );
+        }, 350); // Match the navigation animation duration
       }}
     />
   );
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.chatItemBackground,
   },
   listStyle: {
-    backgroundColor: Colors.inboxBackground,
+    backgroundColor: Colors.white,
     flex: 1,
   },
   separator: {

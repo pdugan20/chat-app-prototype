@@ -6,8 +6,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SymbolView } from 'expo-symbols';
 import { RootStackParamList } from './types/navigation';
 import { Colors } from './constants/theme';
-import InboxScreen from './components/InboxScreen';
-import ChatScreen from './components/ChatScreen';
+import InboxScreen from './screens/InboxScreen';
+import ChatScreen from './screens/ChatScreen';
 
 declare const global: {
   resetAllChats?: boolean;
