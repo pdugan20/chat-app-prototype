@@ -14,7 +14,9 @@ declare const global: {
   resetAllChats?: boolean;
   pendingChatUpdate?: { id: string; [key: string]: unknown };
   forceInboxRefresh?: boolean;
+  chatMessages?: { [chatId: string]: Message[] };
 };
+declare const clearTimeout: (id: any) => void;
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import MessageBubble from '../components/MessageBubble';
@@ -33,6 +35,7 @@ interface Message {
   hasReaction?: boolean;
   reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
   showDelivered?: boolean;
+  animationValue?: Animated.Value;
 }
 
 type ChatScreenNavigationProp = NativeStackNavigationProp<
@@ -51,11 +54,48 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const { contactName, chatId } = route.params;
   const keyboardHeight = useRef(new Animated.Value(0)).current;
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  // Initialize global chatMessages if it doesn't exist
+  if (!global.chatMessages) {
+    global.chatMessages = {};
+  }
+
+  // Load messages from global store or use initial messages
+  const [messages, setMessages] = useState<Message[]>(() => {
+    return global.chatMessages?.[chatId] || initialMessages;
+  });
 
   const scrollViewRef = useRef<ScrollView>(null);
   const deliveredOpacity = useRef(new Animated.Value(0)).current;
   const deliveredScale = useRef(new Animated.Value(0.7)).current;
+  const deliveredTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  // Save messages to global store whenever they change
+  useEffect(() => {
+    if (global.chatMessages) {
+      global.chatMessages[chatId] = messages;
+    }
+  }, [messages, chatId]);
+
+  // Set delivered opacity to 1 for messages that already have showDelivered (only on mount)
+  useEffect(() => {
+    const hasDeliveredMessages = messages.some(msg => msg.showDelivered);
+    if (hasDeliveredMessages) {
+      deliveredOpacity.setValue(1);
+      deliveredScale.setValue(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cleanup timeout when component unmounts
+  useEffect(() => {
+    return () => {
+      if (deliveredTimeoutRef.current) {
+        clearTimeout(deliveredTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Scroll to bottom when new messages are added
@@ -108,22 +148,26 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       'keyboardWillShow',
       event => {
         setKeyboardVisible(true);
-        Animated.timing(keyboardHeight, {
+        Animated.spring(keyboardHeight, {
           toValue: event.endCoordinates.height,
-          duration: event.duration || 250,
           useNativeDriver: false,
+          velocity: 8,
+          tension: 100,
+          friction: 25,
         }).start();
       }
     );
 
     const keyboardWillHideListener = Keyboard.addListener(
       'keyboardWillHide',
-      event => {
+      _event => {
         setKeyboardVisible(false);
-        Animated.timing(keyboardHeight, {
+        Animated.spring(keyboardHeight, {
           toValue: 0,
-          duration: event.duration || 250,
           useNativeDriver: false,
+          velocity: 8,
+          tension: 100,
+          friction: 25,
         }).start();
       }
     );
@@ -141,6 +185,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       minute: '2-digit',
     });
 
+    const animationValue = new Animated.Value(0);
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
@@ -150,15 +195,25 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         minute: '2-digit',
       }),
       showDelivered: false,
+      animationValue,
     };
     setMessages(prev => [...prev, newMessage]);
+
+    // Animate the message sliding up from behind the input with scale
+    Animated.spring(animationValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      velocity: 3,
+      tension: 100,
+      friction: 10,
+    }).start();
 
     // Store the message to update inbox later
     lastSentMessageRef.current = { text, timestamp: currentTime };
     console.log('Stored in ref:', lastSentMessageRef.current);
 
-    // Show "Delivered" after 1.5s delay with fade-in animation
-    setTimeout(() => {
+    // Show "Delivered" after 2s delay with fade-in animation
+    deliveredTimeoutRef.current = setTimeout(() => {
       setMessages(prev =>
         prev.map(msg =>
           msg.id === newMessage.id ? { ...msg, showDelivered: true } : msg
@@ -181,7 +236,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
           useNativeDriver: true,
         }),
       ]).start();
-    }, 1500);
+    }, 2000);
   };
 
   // Function to check if we should show timestamp between messages
@@ -261,43 +316,73 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
             onLayout={handleScrollViewLayout}
             onContentSizeChange={handleContentSizeChange}
           >
-            {messages.map((message, index) => (
-              <React.Fragment key={message.id}>
-                {shouldShowTimestamp(index) && (
-                  <TimestampHeader timestamp={message.timestamp} />
-                )}
-                {shouldAddGroupSpacing(index) && (
-                  <View style={styles.groupSpacing} />
-                )}
-                <MessageBubble
-                  text={message.text}
-                  isSender={message.isSender}
-                  hasReaction={message.hasReaction && isFirstInGroup(index)}
-                  reactionType={message.reactionType}
-                  isLastInGroup={isLastInGroup(index)}
-                  _isFirstInGroup={isFirstInGroup(index)}
-                />
-                {message.isSender &&
-                  message.showDelivered &&
-                  isLastInGroup(index) && (
-                    <Animated.View
-                      style={[
-                        styles.deliveredContainer,
-                        { opacity: deliveredOpacity },
-                      ]}
-                    >
-                      <Animated.Text
+            {messages.map((message, index) => {
+              const messageAlignSelf = message.isSender
+                ? 'flex-end'
+                : 'flex-start';
+              return (
+                <React.Fragment key={message.id}>
+                  {shouldShowTimestamp(index) && (
+                    <TimestampHeader timestamp={message.timestamp} />
+                  )}
+                  {shouldAddGroupSpacing(index) && (
+                    <View style={styles.groupSpacing} />
+                  )}
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          translateY: message.animationValue
+                            ? message.animationValue.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [50, 0],
+                              })
+                            : 0,
+                        },
+                        {
+                          scale: message.animationValue
+                            ? message.animationValue.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.8, 1],
+                              })
+                            : 1,
+                        },
+                      ],
+                      opacity: message.animationValue || 1,
+                      alignSelf: messageAlignSelf,
+                    }}
+                  >
+                    <MessageBubble
+                      text={message.text}
+                      isSender={message.isSender}
+                      hasReaction={message.hasReaction && isFirstInGroup(index)}
+                      reactionType={message.reactionType}
+                      isLastInGroup={isLastInGroup(index)}
+                      _isFirstInGroup={isFirstInGroup(index)}
+                    />
+                  </Animated.View>
+                  {message.isSender &&
+                    message.showDelivered &&
+                    isLastInGroup(index) && (
+                      <Animated.View
                         style={[
-                          styles.deliveredText,
-                          { transform: [{ scaleX: deliveredScale }] },
+                          styles.deliveredContainer,
+                          { opacity: deliveredOpacity },
                         ]}
                       >
-                        Delivered
-                      </Animated.Text>
-                    </Animated.View>
-                  )}
-              </React.Fragment>
-            ))}
+                        <Animated.Text
+                          style={[
+                            styles.deliveredText,
+                            { transform: [{ scaleX: deliveredScale }] },
+                          ]}
+                        >
+                          Delivered
+                        </Animated.Text>
+                      </Animated.View>
+                    )}
+                </React.Fragment>
+              );
+            })}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>

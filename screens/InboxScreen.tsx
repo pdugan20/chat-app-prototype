@@ -5,6 +5,7 @@ declare const global: {
   resetAllChats?: boolean;
   pendingChatUpdate?: { id: string; [key: string]: unknown };
   forceInboxRefresh?: boolean;
+  chatMessages?: { [chatId: string]: unknown[] };
 };
 declare const setInterval: (callback: () => void, delay: number) => number;
 declare const clearInterval: (id: number) => void;
@@ -36,6 +37,10 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
       console.log('Resetting all chats to original state');
       setChats([...mockChats]); // Reset to original mockChats with original unread states
       global.resetAllChats = false;
+      // Also clear all stored chat messages
+      if (global.chatMessages) {
+        global.chatMessages = {};
+      }
       return;
     }
 

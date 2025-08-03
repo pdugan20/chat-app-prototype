@@ -13,6 +13,7 @@ declare const global: {
   resetAllChats?: boolean;
   pendingChatUpdate?: { id: string; [key: string]: unknown };
   forceInboxRefresh?: boolean;
+  chatMessages?: { [chatId: string]: unknown[] };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +31,10 @@ export default function App() {
             // Clear the global pending update and reset chats
             global.pendingChatUpdate = undefined;
             global.resetAllChats = true;
+            // Also clear all stored chat messages
+            if (global.chatMessages) {
+              global.chatMessages = {};
+            }
             // Force a re-render by triggering focus effect
             setTimeout(() => {
               global.forceInboxRefresh = true;
@@ -78,6 +83,8 @@ export default function App() {
                   <TouchableOpacity
                     style={headerStyles.iconButton}
                     onPress={handleEllipsisPress}
+                    activeOpacity={0.6}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     <SymbolView
                       name='ellipsis.circle'
