@@ -79,27 +79,15 @@ npm run format      # Format code with Prettier
 
 ```
 chat-app/
-├── components/
-│   ├── ChatListItem.tsx     # Inbox conversation rows
-│   ├── MessageBubble.tsx    # Chat message bubbles
-│   ├── InputBar.tsx         # Message input with send button
-│   ├── NavigationBar.tsx    # Chat screen navigation
-│   ├── UserAvatar.tsx       # Single user avatar component
-│   ├── GroupAvatar.tsx      # Group chat avatar component
-│   └── TimestampHeader.tsx  # Message timestamp headers
-├── screens/
-│   ├── InboxScreen.tsx      # Main inbox list view
-│   └── ChatScreen.tsx       # Individual chat interface
-├── constants/
-│   └── theme.ts             # Centralized design system
-├── data/
-│   ├── inbox.ts             # Mock inbox conversation data
-│   └── messages.ts          # Mock message data
-├── types/
-│   └── navigation.ts        # Navigation type definitions
-├── App.tsx                  # Main app with navigation
-├── eslint.config.js         # Modern ESLint configuration
-└── CLAUDE.md                # AI assistant context
+├── components/         # Reusable UI components
+├── screens/            # Main app screens (Inbox, Chat)
+├── hooks/              # Custom React hooks
+├── utils/              # Utility functions and helpers
+├── services/           # External service integrations
+├── constants/          # Theme and design constants
+├── data/               # Mock data for development
+├── types/              # TypeScript type definitions
+└── assets/             # Images and static resources
 ```
 
 ## Architecture Highlights
@@ -107,6 +95,8 @@ chat-app/
 ### Modular Component Design
 
 - **Reusable Components**: Profile photos, chat items, and UI elements are fully modular
+- **Custom Hooks**: Extracted business logic for messages, keyboard handling, and AI responses
+- **Animation Utilities**: Centralized animation constants and helper functions
 - **Theme System**: Centralized colors, typography, and spacing constants
 - **Type Safety**: Comprehensive TypeScript interfaces for all data structures
 
@@ -145,29 +135,18 @@ The app supports AI-powered contextual responses using either Anthropic's Claude
    - Copy the key (starts with `sk-`)
 
 2. **Configure Environment**
+
    ```bash
    # Edit the .env file
-   
+
    # For Anthropic:
-   AI_PROVIDER=anthropic
-   ANTHROPIC_API_KEY=sk-ant-your-key-here
-   AI_MODEL=claude-3-haiku-20240307
-   
+   EXPO_PUBLIC_AI_PROVIDER=anthropic
+   EXPO_PUBLIC_ANTHROPIC_API_KEY=sk-ant-your-key-here
+
    # For OpenAI:
-   AI_PROVIDER=openai
-   OPENAI_API_KEY=sk-your-key-here
-   AI_MODEL=gpt-3.5-turbo
+   EXPO_PUBLIC_AI_PROVIDER=openai
+   EXPO_PUBLIC_OPENAI_API_KEY=sk-your-key-here
    ```
-   
-   **Available Anthropic models:**
-   - `claude-3-haiku-20240307` - Fastest, most affordable
-   - `claude-3-sonnet-20240229` - Balanced performance
-   - `claude-3-opus-20240229` - Most capable
-   
-   **Available OpenAI models:**
-   - `gpt-3.5-turbo` - Fast and affordable
-   - `gpt-4` - Most capable
-   - `gpt-4-turbo-preview` - Latest GPT-4 with longer context
 
 3. **Restart the App**
    ```bash
@@ -181,15 +160,6 @@ The app supports AI-powered contextual responses using either Anthropic's Claude
 - The typing indicator appears while the AI processes
 - A contextual response is generated based on the conversation
 - Falls back to preset responses if API is unavailable
-
-### Privacy Note
-
-- Messages are sent to your chosen AI provider's API for processing
-- Only the last 10 messages are sent for context
-- No conversation history is stored permanently
-- Check your AI provider's privacy policy for data handling details:
-  - Anthropic: https://www.anthropic.com/privacy
-  - OpenAI: https://openai.com/policies/privacy-policy
 
 ## License
 

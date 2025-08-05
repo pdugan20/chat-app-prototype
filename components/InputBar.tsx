@@ -73,10 +73,7 @@ const InputBar: React.FC<InputBarProps> = ({
             </View>
           ) : (
             <TouchableOpacity
-              style={[
-                styles.sendButton,
-                disabled && { opacity: 0.5 }
-              ]}
+              style={[styles.sendButton, disabled && styles.sendButtonDisabled]}
               onPress={handleSend}
               activeOpacity={disabled ? 1 : 0.7}
               disabled={disabled}
@@ -141,6 +138,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 6,
     width: 26,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
   textInput: {
     color: Colors.black,

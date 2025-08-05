@@ -1,3 +1,5 @@
+import { Animated } from 'react-native';
+
 export interface Message {
   id: string;
   text: string;
@@ -6,6 +8,9 @@ export interface Message {
   hasReaction?: boolean;
   reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
   showDelivered?: boolean;
+  animationValue?: Animated.Value;
+  deliveredOpacity?: Animated.Value;
+  deliveredScale?: Animated.Value;
 }
 
 export type ReactionType = 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
