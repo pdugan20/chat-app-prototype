@@ -6,19 +6,30 @@ import { Colors, Typography, Spacing, Layout } from '../constants/theme';
 
 interface NavigationBarProps {
   contactName: string;
+  contactAvatar?: string | number;
+  isGroup?: boolean;
+  groupAvatars?: number[];
   onBackPress?: () => void;
   onContactPress?: () => void;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({
   contactName,
+  contactAvatar,
+  isGroup,
+  groupAvatars,
   onBackPress,
   onContactPress,
 }) => {
   return (
     <BlurView intensity={50} style={styles.container}>
       <View style={styles.content}>
-        <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={onBackPress}
+          activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <SymbolView
             name='chevron.left'
             size={22}
@@ -29,15 +40,43 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.centerContent} onPress={onContactPress}>
-          <View style={styles.profilePicture}>
-            <Image
-              source={require('../assets/profile-photos/Ruth.png')}
-              style={styles.profileImage}
-              resizeMode='cover'
-            />
-          </View>
+          {isGroup && groupAvatars && groupAvatars.length > 0 ? (
+            <View style={styles.groupAvatarContainer}>
+              {groupAvatars.slice(0, 2).map((avatar, index) => (
+                <Image
+                  key={index}
+                  source={avatar}
+                  style={[
+                    styles.groupAvatar,
+                    index === 0
+                      ? styles.groupAvatarFirst
+                      : styles.groupAvatarSecond,
+                  ]}
+                  resizeMode='cover'
+                />
+              ))}
+            </View>
+          ) : (
+            <View style={styles.profilePicture}>
+              <Image
+                source={
+                  contactAvatar
+                    ? typeof contactAvatar === 'string'
+                      ? { uri: contactAvatar }
+                      : contactAvatar
+                    : require('../assets/profile-photos/Ruth.png')
+                }
+                style={styles.profileImage}
+                resizeMode='cover'
+              />
+            </View>
+          )}
           <View style={styles.nameContainer}>
-            <Text style={styles.contactName}>{contactName}</Text>
+            <Text style={styles.contactName}>
+              {isGroup && groupAvatars
+                ? `${groupAvatars.length} People`
+                : contactName.split(' ')[0]}
+            </Text>
             <SymbolView
               name='chevron.down'
               size={7}
@@ -101,6 +140,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: Layout.navigationButtonSize,
     justifyContent: 'space-between',
+  },
+  groupAvatar: {
+    borderColor: Colors.white,
+    borderWidth: 1.5,
+    position: 'absolute',
+  },
+  groupAvatarContainer: {
+    flexDirection: 'row',
+    height: 50,
+    position: 'relative',
+    width: 71,
+  },
+  groupAvatarFirst: {
+    borderRadius: 20,
+    bottom: 10,
+    height: 40,
+    left: 0,
+    width: 40,
+    zIndex: 1,
+  },
+  groupAvatarSecond: {
+    borderRadius: 15,
+    bottom: 0,
+    height: 30,
+    right: 0,
+    width: 30,
+    zIndex: 0,
   },
   nameContainer: {
     alignItems: 'center',

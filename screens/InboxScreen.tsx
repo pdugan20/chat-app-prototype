@@ -103,6 +103,8 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
           contactName: item.name,
           contactAvatar: item.avatar?.toString(),
           chatId: item.id,
+          isGroup: item.isGroup,
+          groupAvatars: item.groupAvatars,
         });
 
         // Delay marking as read until after transition completes

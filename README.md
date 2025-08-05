@@ -14,6 +14,8 @@ This iMessage prototype replicates the authentic iOS Messages app experience, in
 - **Delivered Status**: Animated "Delivered" text with smooth fade-in and scale effects
 - **Timestamp Logic**: Smart timestamp display (15+ minutes apart)
 - **Keyboard Handling**: Proper keyboard avoidance with animated input bar
+- **AI-Powered Responses**: Contextual responses using Anthropic's Claude API
+- **Typing Indicator**: Animated three-dot indicator matching native iMessage style
 
 ### Inbox Interface
 
@@ -50,6 +52,10 @@ cd chat-app-prototype
 
 # Install dependencies
 npm install
+
+# Configure AI (optional - see AI Setup section below)
+cp .env.example .env
+# Edit .env and add your API key
 
 # Start the development server
 npm start
@@ -117,6 +123,73 @@ chat-app/
 - Polling-based updates with focus/blur optimization
 - Proper unread state management with reset functionality
 - Live preview text updates when sending messages
+
+## AI Chat Integration (Optional)
+
+The app supports AI-powered contextual responses using either Anthropic's Claude or OpenAI's GPT models. When enabled, the AI will automatically respond to your messages with natural, conversational replies.
+
+### Setup Instructions
+
+1. **Get an API Key**
+
+   **For Anthropic (Claude):**
+   - Sign up at https://console.anthropic.com/
+   - Navigate to API Keys section
+   - Create a new API key
+   - Copy the key (starts with `sk-ant-`)
+
+   **For OpenAI (GPT):**
+   - Sign up at https://platform.openai.com/
+   - Navigate to API Keys section
+   - Create a new API key
+   - Copy the key (starts with `sk-`)
+
+2. **Configure Environment**
+   ```bash
+   # Edit the .env file
+   
+   # For Anthropic:
+   AI_PROVIDER=anthropic
+   ANTHROPIC_API_KEY=sk-ant-your-key-here
+   AI_MODEL=claude-3-haiku-20240307
+   
+   # For OpenAI:
+   AI_PROVIDER=openai
+   OPENAI_API_KEY=sk-your-key-here
+   AI_MODEL=gpt-3.5-turbo
+   ```
+   
+   **Available Anthropic models:**
+   - `claude-3-haiku-20240307` - Fastest, most affordable
+   - `claude-3-sonnet-20240229` - Balanced performance
+   - `claude-3-opus-20240229` - Most capable
+   
+   **Available OpenAI models:**
+   - `gpt-3.5-turbo` - Fast and affordable
+   - `gpt-4` - Most capable
+   - `gpt-4-turbo-preview` - Latest GPT-4 with longer context
+
+3. **Restart the App**
+   ```bash
+   # Stop the server (Ctrl+C) and restart
+   npm start
+   ```
+
+### How It Works
+
+- Send a message in any chat
+- The typing indicator appears while the AI processes
+- A contextual response is generated based on the conversation
+- Falls back to preset responses if API is unavailable
+
+### Privacy Note
+
+- Messages are sent to your chosen AI provider's API for processing
+- Only the last 10 messages are sent for context
+- No conversation history is stored permanently
+- Check your AI provider's privacy policy for data handling details:
+  - Anthropic: https://www.anthropic.com/privacy
+  - OpenAI: https://openai.com/policies/privacy-policy
 
 ## License
 

@@ -72,3 +72,12 @@ interface Message {
 - iOS-only platform target with new architecture enabled
 - SafeAreaView used for proper iPhone notch/home indicator handling
 - StyleSheet-based styling with iOS design system colors (#0078ff blue, #e9e9eb gray)
+
+### AI Integration
+
+- Supports both Anthropic Claude and OpenAI GPT models
+- Service layer pattern with provider abstraction in `services/ai/`
+- Environment-based configuration using react-native-dotenv
+- Typing indicator shown during AI response generation
+- Contextual responses based on last 10 messages
+- Fallback to preset responses if API unavailable

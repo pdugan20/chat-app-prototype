@@ -11,7 +11,7 @@ export interface ChatItem {
 
 export const mockChats: ChatItem[] = [
   {
-    id: '1',
+    id: '0',
     name: 'Ruth Acosta',
     lastMessage:
       "You're the best! Can't wait for Saturday. This movie better be as scary as everyone says it is!",

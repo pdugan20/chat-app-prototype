@@ -13,5 +13,7 @@ export type RootStackParamList = {
     contactName: string;
     contactAvatar?: string;
     chatId: string;
+    isGroup?: boolean;
+    groupAvatars?: number[];
   };
 };

@@ -7,16 +7,20 @@ import { Colors, Typography, Spacing, Layout } from '../constants/theme';
 interface InputBarProps {
   onSendMessage: (message: string) => void;
   keyboardVisible?: boolean;
+  onHeightChange?: (height: number) => void;
+  disabled?: boolean;
 }
 
 const InputBar: React.FC<InputBarProps> = ({
   onSendMessage,
   keyboardVisible = false,
+  onHeightChange,
+  disabled = false,
 }) => {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {
-    if (message.trim()) {
+    if (message.trim() && !disabled) {
       onSendMessage(message.trim());
       setMessage('');
     }
@@ -29,6 +33,10 @@ const InputBar: React.FC<InputBarProps> = ({
         styles.container,
         keyboardVisible && styles.containerKeyboardVisible,
       ]}
+      onLayout={event => {
+        const { height } = event.nativeEvent.layout;
+        onHeightChange?.(height);
+      }}
     >
       <View style={styles.inputContainer}>
         <TouchableOpacity style={styles.addButton}>
@@ -48,10 +56,9 @@ const InputBar: React.FC<InputBarProps> = ({
             placeholderTextColor={Colors.placeholder}
             value={message}
             onChangeText={setMessage}
-            multiline={false}
+            multiline={true}
             maxLength={1000}
-            returnKeyType='send'
-            onSubmitEditing={handleSend}
+            returnKeyType='default'
             blurOnSubmit={false}
           />
           {!message.trim() ? (
@@ -66,9 +73,13 @@ const InputBar: React.FC<InputBarProps> = ({
             </View>
           ) : (
             <TouchableOpacity
-              style={styles.sendButton}
+              style={[
+                styles.sendButton,
+                disabled && { opacity: 0.5 }
+              ]}
               onPress={handleSend}
-              activeOpacity={0.7}
+              activeOpacity={disabled ? 1 : 0.7}
+              disabled={disabled}
             >
               <SymbolView
                 name='arrow.up'
@@ -105,14 +116,16 @@ const styles = StyleSheet.create({
     paddingBottom: Layout.inputPaddingBottomKeyboard,
   },
   inputContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
     flexDirection: 'row',
     gap: 12,
   },
   micIconContainer: {
     alignItems: 'center',
+    bottom: 10,
     height: Spacing.micIconContainerSize,
     justifyContent: 'center',
+    marginTop: -Spacing.micIconContainerSize / 2,
     position: 'absolute',
     right: Spacing.micIconContainerRight,
     width: Spacing.micIconContainerSize,
@@ -121,8 +134,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.systemBlue,
     borderRadius: 13,
+    bottom: 6,
     height: 26,
     justifyContent: 'center',
+    marginTop: -13,
     position: 'absolute',
     right: 6,
     width: 26,
@@ -134,17 +149,23 @@ const styles = StyleSheet.create({
     fontSize: Typography.input,
     letterSpacing: -0.68,
     lineHeight: Typography.inputLineHeight,
-    textAlignVertical: 'center',
+    maxHeight: 100,
+    minHeight: 20,
+    paddingBottom: 0,
+    paddingRight: 40,
+    paddingTop: 0,
+    textAlignVertical: 'top',
   },
   textInputContainer: {
-    alignItems: 'center',
     backgroundColor: Colors.inputBackground,
     borderColor: Colors.inputBorder,
-    borderRadius: Spacing.inputBorderRadius,
+    borderRadius: 20,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
-    height: Spacing.inputHeight,
+    justifyContent: 'center',
+    maxHeight: 120,
+    minHeight: Spacing.inputHeight,
     paddingHorizontal: Spacing.inputPadding,
     paddingVertical: Spacing.inputPaddingVertical,
     position: 'relative',

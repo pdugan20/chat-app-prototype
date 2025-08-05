@@ -25,6 +25,13 @@ export default [
         setTimeout: 'readonly',
         console: 'readonly',
         require: 'readonly',
+        process: 'readonly',
+        global: 'readonly',
+        clearTimeout: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
       },
     },
     plugins: {
@@ -89,6 +96,8 @@ export default [
       'app.json',
       'package.json',
       'package-lock.json',
+      'babel.config.js',
+      'eslint.config.mjs',
     ],
   },
 ];
