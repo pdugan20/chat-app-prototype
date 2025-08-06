@@ -2,6 +2,9 @@
 // Note: You'll need to get a Developer Token from Apple Developer Portal
 // https://developer.apple.com/documentation/applemusicapi/getting_keys_and_creating_tokens
 
+// Global fetch is available in React Native
+declare const fetch: any;
+
 export interface AppleMusicSong {
   id: string;
   type: 'songs';
@@ -46,17 +49,20 @@ class AppleMusicApiService {
     }
 
     return {
-      'Authorization': `Bearer ${this.developerToken}`,
+      Authorization: `Bearer ${this.developerToken}`,
       'Content-Type': 'application/json',
     };
   }
 
   // Search for songs by query
-  async searchSongs(query: string, limit: number = 5): Promise<AppleMusicSong[]> {
+  async searchSongs(
+    query: string,
+    limit: number = 5
+  ): Promise<AppleMusicSong[]> {
     try {
       const url = `${this.baseUrl}/catalog/${this.storefront}/search?term=${encodeURIComponent(query)}&types=songs&limit=${limit}`;
       console.log('🔍 Apple Music Search Request:', url);
-      
+
       const response = await fetch(url, {
         headers: this.getHeaders(),
       });
@@ -66,14 +72,23 @@ class AppleMusicApiService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('🔍 Apple Music Search Error Response:', errorText);
-        throw new Error(`Apple Music API error: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Apple Music API error: ${response.status} - ${errorText}`
+        );
       }
 
-      const data: { results: { songs?: AppleMusicApiResponse } } = await response.json();
+      const data: { results: { songs?: AppleMusicApiResponse } } =
+        await response.json();
       const firstSong = data.results.songs?.data?.[0];
       if (firstSong) {
-        console.log('🔍 Apple Music Search Results:', JSON.stringify(firstSong, null, 2));
-        console.log('🖼️ Raw artwork object:', JSON.stringify(firstSong.attributes.artwork, null, 2));
+        console.log(
+          '🔍 Apple Music Search Results:',
+          JSON.stringify(firstSong, null, 2)
+        );
+        console.log(
+          '🖼️ Raw artwork object:',
+          JSON.stringify(firstSong.attributes.artwork, null, 2)
+        );
       }
       return data.results.songs?.data || [];
     } catch (error) {
@@ -87,7 +102,7 @@ class AppleMusicApiService {
     try {
       const url = `${this.baseUrl}/catalog/${this.storefront}/songs/${songId}`;
       console.log('🎵 Apple Music API Request:', url);
-      
+
       const response = await fetch(url, {
         headers: this.getHeaders(),
       });
@@ -97,7 +112,9 @@ class AppleMusicApiService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('🎵 Apple Music API Error Response:', errorText);
-        throw new Error(`Apple Music API error: ${response.status} - ${errorText}`);
+        throw new Error(
+          `Apple Music API error: ${response.status} - ${errorText}`
+        );
       }
 
       const data: AppleMusicApiResponse = await response.json();
@@ -114,7 +131,7 @@ class AppleMusicApiService {
     try {
       const idsParam = songIds.join(',');
       const url = `${this.baseUrl}/catalog/${this.storefront}/songs?ids=${idsParam}`;
-      
+
       const response = await fetch(url, {
         headers: this.getHeaders(),
       });
@@ -130,8 +147,6 @@ class AppleMusicApiService {
       throw error;
     }
   }
-
-
 
   // Check if service is configured
   isConfigured(): boolean {
@@ -157,7 +172,7 @@ export const mockAppleMusicData: AppleMusicSong = {
     previews: [
       {
         url: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/a2/5c/7e/a25c7e4b-b245-4c4e-9b9c-0b8c1b8e8b8e/mzaf_123456789.plus.aac.p.m4a',
-      }
+      },
     ],
     durationInMillis: 210000,
     playParams: {

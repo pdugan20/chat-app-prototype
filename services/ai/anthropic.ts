@@ -55,7 +55,7 @@ class AnthropicService {
 
   async generateStructuredResponse(
     messages: ChatMessage[],
-    contactName: string = 'Friend'
+    _contactName: string = 'Friend'
   ): Promise<AIStructuredResponse> {
     if (!this.client) {
       throw new Error('Anthropic API key not configured');
@@ -108,14 +108,19 @@ Now respond to the conversation:`;
         })),
       });
 
-      const content = response.content[0]?.type === 'text' ? response.content[0].text : '';
+      const content =
+        response.content[0]?.type === 'text' ? response.content[0].text : '';
 
       // Parse the structured response
       if (content.startsWith('MUSIC_RESPONSE')) {
         const lines = content.split('\n').filter(line => line.trim());
         const messageContent = lines[1] || "Here's a song recommendation!";
-        const musicQueryLine = lines.find(line => line.startsWith('MUSIC_QUERY:'));
-        const musicQuery = musicQueryLine ? musicQueryLine.replace('MUSIC_QUERY:', '') : 'search:never gonna give you up rick astley';
+        const musicQueryLine = lines.find(line =>
+          line.startsWith('MUSIC_QUERY:')
+        );
+        const musicQuery = musicQueryLine
+          ? musicQueryLine.replace('MUSIC_QUERY:', '')
+          : 'search:never gonna give you up rick astley';
 
         return {
           type: 'music',
@@ -123,7 +128,9 @@ Now respond to the conversation:`;
           musicQuery: musicQuery,
         };
       } else {
-        const messageContent = content.replace('TEXT_RESPONSE\n', '').trim() || "That's interesting!";
+        const messageContent =
+          content.replace('TEXT_RESPONSE\n', '').trim() ||
+          "That's interesting!";
         return {
           type: 'text',
           content: messageContent,

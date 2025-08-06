@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react';
 import { Animated } from 'react-native';
 import { Message, AppleMusicMessage } from '../types/message';
+
+// Global fetch is available in React Native
+declare const fetch: any;
 import aiService from '../services/ai';
 import { appleMusicApi } from '../services/appleMusicApi';
 import { createMessage } from '../utils/messageUtils';
@@ -76,7 +79,10 @@ export const useAIResponse = ({
       );
 
       // Handle different response types
-      if (structuredResponse.type === 'music' && structuredResponse.musicQuery) {
+      if (
+        structuredResponse.type === 'music' &&
+        structuredResponse.musicQuery
+      ) {
         // For music responses, pre-fetch music data then send messages
         const textMessage: Message = {
           ...createMessage(structuredResponse.content, false),
@@ -94,16 +100,30 @@ export const useAIResponse = ({
               // Pre-fetch Apple Music data for the music bubble
               const fetchMusicData = async () => {
                 try {
-                  console.log('🎵 Pre-fetching Apple Music data for:', structuredResponse.musicQuery);
-                  
+                  console.log(
+                    '🎵 Pre-fetching Apple Music data for:',
+                    structuredResponse.musicQuery
+                  );
+
                   let songData = null;
-                  if (appleMusicApi.isConfigured() && structuredResponse.musicQuery) {
+                  if (
+                    appleMusicApi.isConfigured() &&
+                    structuredResponse.musicQuery
+                  ) {
                     if (structuredResponse.musicQuery.startsWith('search:')) {
-                      const searchQuery = structuredResponse.musicQuery.replace('search:', '');
-                      const searchResults = await appleMusicApi.searchSongs(searchQuery, 1);
+                      const searchQuery = structuredResponse.musicQuery.replace(
+                        'search:',
+                        ''
+                      );
+                      const searchResults = await appleMusicApi.searchSongs(
+                        searchQuery,
+                        1
+                      );
                       songData = searchResults[0] || null;
                     } else {
-                      songData = await appleMusicApi.getSong(structuredResponse.musicQuery);
+                      songData = await appleMusicApi.getSong(
+                        structuredResponse.musicQuery
+                      );
                     }
                   }
 
@@ -114,16 +134,22 @@ export const useAIResponse = ({
                       .replace('{w}', '100')
                       .replace('{h}', '100')
                       .replace('{f}', 'bb.jpg');
-                    
+
                     processedArtworkUrl = `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}&w=100&h=100&fit=cover&output=jpg`;
-                    console.log('🖼️ Pre-loading artwork URL:', processedArtworkUrl);
-                    
+                    console.log(
+                      '🖼️ Pre-loading artwork URL:',
+                      processedArtworkUrl
+                    );
+
                     // Preload the image so it's cached when the bubble appears
                     try {
                       await fetch(processedArtworkUrl, { method: 'HEAD' });
                       console.log('🖼️ Image successfully preloaded');
                     } catch (error) {
-                      console.log('🖼️ Image preload failed, but will still try to load normally:', error);
+                      console.log(
+                        '🖼️ Image preload failed, but will still try to load normally:',
+                        error
+                      );
                     }
                   }
 
@@ -132,25 +158,30 @@ export const useAIResponse = ({
                     type: 'appleMusic',
                     songId: structuredResponse.musicQuery,
                     // Add pre-fetched data if available
-                    ...(songData ? {
-                      songTitle: songData.attributes.name,
-                      artistName: songData.attributes.artistName,
-                      albumArtUrl: processedArtworkUrl,
-                      previewUrl: songData.attributes.previews[0]?.url || null,
-                      duration: Math.floor(songData.attributes.durationInMillis / 1000),
-                    } : {})
+                    ...(songData
+                      ? {
+                          songTitle: songData.attributes.name,
+                          artistName: songData.attributes.artistName,
+                          albumArtUrl: processedArtworkUrl,
+                          previewUrl:
+                            songData.attributes.previews[0]?.url || null,
+                          duration: Math.floor(
+                            songData.attributes.durationInMillis / 1000
+                          ),
+                        }
+                      : {}),
                   };
 
                   console.log('🎵 Music data fetched, showing bubble');
-                  
+
                   // Add the music bubble with pre-fetched data
                   onAddMessage(musicMessage);
 
                   // Update inbox preview with song info
-                  const inboxDisplayText = songData 
+                  const inboxDisplayText = songData
                     ? `Song: ${songData.attributes.name} - ${songData.attributes.artistName}`
                     : structuredResponse.content;
-                  
+
                   onUpdateLastSentMessage(
                     inboxDisplayText,
                     new Date().toLocaleTimeString([], {
@@ -159,24 +190,23 @@ export const useAIResponse = ({
                     }),
                     false
                   );
-                  
+
                   // Wait for music bubble to render, then slide chat back up
                   setTimeout(() => {
                     animateChatSlideUp(chatSlideDown).start(() => {
                       scrollToEnd();
                     });
                   }, ANIMATION_DELAYS.MESSAGE_RENDER);
-
                 } catch (error) {
                   console.error('Failed to pre-fetch music data:', error);
-                  
+
                   // Fallback: create music bubble without pre-fetched data
                   const musicMessage: AppleMusicMessage = {
                     ...createMessage('', false),
                     type: 'appleMusic',
                     songId: structuredResponse.musicQuery,
                   };
-                  
+
                   onAddMessage(musicMessage);
 
                   // Update inbox preview for fallback case (no song data)
@@ -188,7 +218,7 @@ export const useAIResponse = ({
                     }),
                     false
                   );
-                  
+
                   setTimeout(() => {
                     animateChatSlideUp(chatSlideDown).start(() => {
                       scrollToEnd();

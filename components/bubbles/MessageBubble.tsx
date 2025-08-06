@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MessageTail from '../MessageTail';
+import Reaction from '../Reaction';
 import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
+import { ReactionType } from '../../utils/reactions';
 
 interface MessageBubbleProps {
   text: string;
   isSender: boolean;
   hasReaction?: boolean;
-  reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
+  reactionType?: ReactionType;
   isLastInGroup?: boolean;
   _isFirstInGroup?: boolean;
 }
@@ -44,68 +46,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </Text>
       </View>
       {hasReaction && (
-        <View
-          style={[
-            styles.reactionContainer,
-            isSender ? styles.senderReaction : styles.recipientReaction,
-          ]}
-        >
-          <View
-            style={[
-              styles.reactionBubble,
-              isSender
-                ? styles.senderReactionBubble
-                : styles.recipientReactionBubble,
-            ]}
-          >
-            <Text style={styles.reactionText}>
-              {reactionType === 'heart'
-                ? '❤️'
-                : reactionType === 'thumbsUp'
-                  ? '👍'
-                  : reactionType === 'haha'
-                    ? '😂'
-                    : '‼️'}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.reactionTail,
-              isSender
-                ? styles.senderReactionTail
-                : styles.recipientReactionTail,
-            ]}
-          >
-            <View
-              style={[
-                styles.tailDot,
-                styles.tailDotLarge,
-                isSender
-                  ? styles.senderTailDotLarge
-                  : styles.recipientTailDotLarge,
-                {
-                  backgroundColor: isSender
-                    ? Colors.messageBubbleGray
-                    : Colors.messageBubbleBlue,
-                },
-              ]}
-            />
-            <View
-              style={[
-                styles.tailDot,
-                styles.tailDotSmall,
-                isSender
-                  ? styles.senderTailDotSmall
-                  : styles.recipientTailDotSmall,
-                {
-                  backgroundColor: isSender
-                    ? Colors.messageBubbleGray
-                    : Colors.messageBubbleBlue,
-                },
-              ]}
-            />
-          </View>
-        </View>
+        <Reaction reactionType={reactionType} isSender={isSender} />
       )}
       {isLastInGroup && (
         <View style={isSender ? styles.senderTail : styles.recipientTail}>
@@ -134,29 +75,6 @@ const styles = StyleSheet.create({
   containerWithReaction: {
     paddingTop: 20,
   },
-  reactionBubble: {
-    alignItems: 'center',
-    borderColor: Colors.reactionBorder,
-    borderRadius: Spacing.reactionBorderRadius,
-    borderWidth: 1,
-    height: Spacing.reactionSize,
-    justifyContent: 'center',
-    width: Spacing.reactionSize,
-  },
-  reactionContainer: {
-    height: Spacing.reactionContainerHeight,
-    position: 'absolute',
-    top: -4,
-    width: Spacing.reactionContainerWidth,
-  },
-  reactionTail: {
-    height: Spacing.reactionTailSize,
-    position: 'absolute',
-    width: Spacing.reactionTailSize,
-  },
-  reactionText: {
-    fontSize: Typography.reactionEmoji,
-  },
   recipientBubble: {
     backgroundColor: Colors.messageBubbleGray,
   },
@@ -164,29 +82,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginRight: Layout.messageMarginSide,
   },
-  recipientReaction: {
-    right: -16,
-  },
-  recipientReactionBubble: {
-    backgroundColor: Colors.messageBubbleBlue,
-  },
-  recipientReactionTail: {
-    bottom: -15,
-    right: -5,
-  },
   recipientTail: {
     bottom: 0.5,
     left: -5.5,
     position: 'absolute',
     zIndex: 10,
-  },
-  recipientTailDotLarge: {
-    left: 13,
-    top: -1,
-  },
-  recipientTailDotSmall: {
-    left: 23,
-    top: 8,
   },
   recipientText: {
     color: Colors.black,
@@ -198,45 +98,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginLeft: Layout.messageMarginSide,
   },
-  senderReaction: {
-    left: -16,
-  },
-  senderReactionBubble: {
-    backgroundColor: Colors.messageBubbleGray,
-  },
-  senderReactionTail: {
-    bottom: -15,
-    left: -5,
-  },
   senderTail: {
     bottom: 0.5,
     position: 'absolute',
     right: -5.5,
     zIndex: 10,
   },
-  senderTailDotLarge: {
-    right: 13,
-    top: -1,
-  },
-  senderTailDotSmall: {
-    right: 23,
-    top: 8,
-  },
   senderText: {
     color: Colors.white,
     opacity: 0.9,
-  },
-  tailDot: {
-    borderRadius: Spacing.tailDotBorderRadius,
-    position: 'absolute',
-  },
-  tailDotLarge: {
-    height: Spacing.tailDotLargeSize,
-    width: Spacing.tailDotLargeSize,
-  },
-  tailDotSmall: {
-    height: Spacing.tailDotSmallSize,
-    width: Spacing.tailDotSmallSize,
   },
   text: {
     fontFamily: Typography.fontFamily,

@@ -63,18 +63,31 @@ class OpenAIService {
   ): Promise<AIStructuredResponse> {
     // For simplicity, use the same mock logic as the mock service
     // In production, you'd implement OpenAI-specific structured response logic
-    const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || '';
-    const musicKeywords = ['song', 'music', 'track', 'artist', 'band', 'album', 'listen', 'playlist', 'recommend'];
-    const containsMusicKeyword = musicKeywords.some(keyword => lastMessage.includes(keyword));
-    
+    const lastMessage =
+      messages[messages.length - 1]?.content.toLowerCase() || '';
+    const musicKeywords = [
+      'song',
+      'music',
+      'track',
+      'artist',
+      'band',
+      'album',
+      'listen',
+      'playlist',
+      'recommend',
+    ];
+    const containsMusicKeyword = musicKeywords.some(keyword =>
+      lastMessage.includes(keyword)
+    );
+
     if (containsMusicKeyword) {
       return {
         type: 'music',
         content: "Here's a song you might like!",
-        musicQuery: 'search:never gonna give you up rick astley'
+        musicQuery: 'search:never gonna give you up rick astley',
       };
     }
-    
+
     // Otherwise, generate a normal text response
     const textResponse = await this.generateResponse(messages, contactName);
     return {
