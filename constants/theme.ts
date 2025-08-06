@@ -6,6 +6,7 @@ const ColorPrimitives = {
   white: '#ffffff',
   black: '#000000',
   blue: '#007aff',
+  red: '#ff002d',
 
   // Gray scale
   gray100: '#f2f2f7',
@@ -22,6 +23,7 @@ const ColorPrimitives = {
 export const Colors = {
   // Primary Colors
   systemBlue: ColorPrimitives.blue,
+  systemRed: ColorPrimitives.red,
 
   // Text Colors
   white: ColorPrimitives.white,

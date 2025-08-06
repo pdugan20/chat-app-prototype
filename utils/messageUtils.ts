@@ -1,4 +1,4 @@
-import { Message } from '../types/message';
+import { Message, TextMessage, AppleMusicMessage } from '../types/message';
 
 /**
  * Check if we should show timestamp between messages
@@ -86,12 +86,12 @@ export const isFirstInGroup = (
 };
 
 /**
- * Create a new message with current timestamp
+ * Create a new text message with current timestamp
  */
-export const createMessage = (
+export const createTextMessage = (
   text: string,
   isSender: boolean = true
-): Message => {
+): TextMessage => {
   return {
     id: Date.now().toString(),
     text,
@@ -101,7 +101,45 @@ export const createMessage = (
       minute: '2-digit',
     }),
     showDelivered: false,
+    type: 'text',
   };
+};
+
+/**
+ * Create a new Apple Music message
+ */
+export const createAppleMusicMessage = (
+  songData: {
+    songId: string;
+    songTitle: string;
+    artistName: string;
+    albumArtUrl: string;
+    duration?: number;
+  },
+  isSender: boolean = true
+): AppleMusicMessage => {
+  return {
+    id: Date.now().toString(),
+    isSender,
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    showDelivered: false,
+    type: 'appleMusic',
+    text: `${songData.songTitle} by ${songData.artistName}`, // fallback text
+    ...songData,
+  };
+};
+
+/**
+ * Create a new message with current timestamp (backward compatibility)
+ */
+export const createMessage = (
+  text: string,
+  isSender: boolean = true
+): Message => {
+  return createTextMessage(text, isSender);
 };
 
 /**

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import { Message } from '../types/message';
-import { createMessage } from '../utils/messageUtils';
+import { createMessage, createAppleMusicMessage } from '../utils/messageUtils';
 import {
   createMessageAnimationValues,
   animateMessageSlideUp,
@@ -50,6 +50,32 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     const animationValues = createMessageAnimationValues();
     const newMessage: Message = {
       ...createMessage(text, isSender),
+      ...animationValues,
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+
+    // Animate message slide up for sender messages
+    if (isSender && animationValues.animationValue) {
+      animateMessageSlideUp(animationValues.animationValue).start();
+    }
+
+    return newMessage;
+  };
+
+  const addAppleMusicMessage = (
+    songData: {
+      songId: string;
+      songTitle: string;
+      artistName: string;
+      albumArtUrl: string;
+      duration?: number;
+    },
+    isSender: boolean = true
+  ) => {
+    const animationValues = createMessageAnimationValues();
+    const newMessage: Message = {
+      ...createAppleMusicMessage(songData, isSender),
       ...animationValues,
     };
 
@@ -136,6 +162,7 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     messages,
     setMessages,
     addMessage,
+    addAppleMusicMessage,
     showDeliveredIndicator,
   };
 };

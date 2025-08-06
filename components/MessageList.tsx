@@ -1,6 +1,6 @@
 import React from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
-import MessageBubble from './MessageBubble';
+import BubbleRenderer from './bubbles/BubbleRenderer';
 import TimestampHeader from './TimestampHeader';
 import { Message } from '../types/message';
 import {
@@ -49,15 +49,13 @@ const MessageList: React.FC<MessageListProps> = ({
                 alignSelf: messageAlignSelf,
               }}
             >
-              <MessageBubble
-                text={message.text}
-                isSender={message.isSender}
+              <BubbleRenderer
+                message={message}
+                isLastInGroup={isLastInGroup(messages, index)}
+                isFirstInGroup={isFirstInGroup(messages, index)}
                 hasReaction={
                   message.hasReaction && isFirstInGroup(messages, index)
                 }
-                reactionType={message.reactionType}
-                isLastInGroup={isLastInGroup(messages, index)}
-                _isFirstInGroup={isFirstInGroup(messages, index)}
               />
             </Animated.View>
             {message.isSender &&

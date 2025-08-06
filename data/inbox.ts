@@ -35,7 +35,8 @@ export const mockChats: ChatItem[] = [
   {
     id: '3',
     name: 'Will Fleming',
-    lastMessage: 'Guess what movie I just saw with Ryan last night',
+    lastMessage:
+      'You: True. And their music lives forever. Three dudes who changed hip-hop forever',
     timestamp: '12:55 PM',
     unread: false,
     avatar: require('../assets/profile-photos/Will.png'),

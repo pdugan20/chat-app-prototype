@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MessageTail from './MessageTail';
-import { Colors, Typography, Spacing, Layout } from '../constants/theme';
+import MessageTail from '../MessageTail';
+import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
 
 interface MessageBubbleProps {
   text: string;
