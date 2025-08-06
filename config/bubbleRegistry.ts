@@ -35,6 +35,7 @@ export const bubbleRegistry: BubbleRegistry = {
       songTitle: message.songTitle,
       artistName: message.artistName,
       albumArtUrl: message.albumArtUrl,
+      previewUrl: message.previewUrl,
       duration: message.duration,
     }),
   },

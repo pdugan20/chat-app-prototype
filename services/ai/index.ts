@@ -6,11 +6,21 @@ export interface AIMessage {
   content: string;
 }
 
+export interface AIStructuredResponse {
+  type: 'text' | 'music';
+  content: string;
+  musicQuery?: string; // For music responses
+}
+
 export interface AIService {
   generateResponse(
     messages: AIMessage[],
     contactName?: string
   ): Promise<string>;
+  generateStructuredResponse(
+    messages: AIMessage[],
+    contactName?: string
+  ): Promise<AIStructuredResponse>;
   isConfigured(): boolean;
 }
 
@@ -54,6 +64,62 @@ class AIServiceManager {
         );
         return responses[Math.floor(Math.random() * responses.length)];
       },
+      async generateStructuredResponse(
+        messages: AIMessage[]
+      ): Promise<AIStructuredResponse> {
+        // Simulate API delay
+        await new Promise(resolve =>
+          setTimeout(resolve, 1000 + Math.random() * 1000)
+        );
+
+        const lastMessage =
+          messages[messages.length - 1]?.content.toLowerCase() || '';
+
+        // Detect music-related requests
+        const musicKeywords = [
+          'song',
+          'music',
+          'track',
+          'artist',
+          'band',
+          'album',
+          'listen',
+          'playlist',
+          'recommend',
+        ];
+        const containsMusicKeyword = musicKeywords.some(keyword =>
+          lastMessage.includes(keyword)
+        );
+
+        if (containsMusicKeyword) {
+          const musicResponses = [
+            "Perfect classic! You're gonna love this one 🎵",
+            'This track is absolutely infectious!',
+            'Great choice - pure nostalgia and fun!',
+            'This one always makes me smile!',
+          ];
+
+          const queries = [
+            'search:never gonna give you up rick astley',
+            'search:sweet child o mine guns n roses',
+            "search:don't stop believin journey",
+            'search:mr brightside the killers',
+          ];
+
+          const randomIndex = Math.floor(Math.random() * musicResponses.length);
+
+          return {
+            type: 'music',
+            content: musicResponses[randomIndex],
+            musicQuery: queries[randomIndex],
+          };
+        }
+
+        return {
+          type: 'text',
+          content: "That's interesting!",
+        };
+      },
       isConfigured(): boolean {
         return true;
       },
@@ -74,6 +140,32 @@ class AIServiceManager {
     } catch (error) {
       console.error('AI service error:', error);
       return this.getFallbackResponse();
+    }
+  }
+
+  async generateStructuredResponse(
+    messages: AIMessage[],
+    contactName?: string
+  ): Promise<AIStructuredResponse> {
+    if (!this.service.isConfigured()) {
+      console.warn('AI service not configured');
+      return {
+        type: 'text',
+        content: this.getFallbackResponse(),
+      };
+    }
+
+    try {
+      return await this.service.generateStructuredResponse(
+        messages,
+        contactName
+      );
+    } catch (error) {
+      console.error('AI structured response error:', error);
+      return {
+        type: 'text',
+        content: this.getFallbackResponse(),
+      };
     }
   }
 

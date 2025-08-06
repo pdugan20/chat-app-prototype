@@ -30,9 +30,10 @@ export interface AppleMusicMessage extends BaseMessage {
   type: 'appleMusic';
   text: string; // fallback text
   songId: string;
-  songTitle: string;
-  artistName: string;
-  albumArtUrl: string;
+  songTitle?: string;
+  artistName?: string;
+  albumArtUrl?: string;
+  previewUrl?: string;
   duration?: number;
 }
 

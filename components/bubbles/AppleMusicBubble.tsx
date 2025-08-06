@@ -4,19 +4,25 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Animated,
 } from 'react-native';
+import { Image } from 'expo-image';
 import Svg, { Circle } from 'react-native-svg';
 import { SymbolView } from 'expo-symbols';
+import { Audio } from 'expo-av';
 import MessageTail from '../MessageTail';
 import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
+import {
+  appleMusicApi,
+  mockAppleMusicData,
+} from '../../services/appleMusicApi';
 
 interface AppleMusicBubbleProps {
   songId: string;
-  songTitle: string;
-  artistName: string;
-  albumArtUrl: string;
+  songTitle?: string;
+  artistName?: string;
+  albumArtUrl?: string;
+  previewUrl?: string;
   duration?: number; // in seconds
   isSender: boolean;
   hasReaction?: boolean;
@@ -27,44 +33,231 @@ interface AppleMusicBubbleProps {
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
-  songId: _songId,
-  songTitle,
-  artistName,
-  albumArtUrl,
-  duration = 180, // default 3 minutes
+  songId,
+  songTitle: propSongTitle,
+  artistName: propArtistName,
+  albumArtUrl: propAlbumArtUrl,
+  previewUrl: propPreviewUrl,
+  duration: propDuration,
   isSender,
   hasReaction = false,
   reactionType = 'heart',
   isLastInGroup = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [songData, setSongData] = useState<{
+    title: string;
+    artist: string;
+    albumArt: string | number | null; // string for URI, number for local require(), null for placeholder
+    previewUrl: string | null;
+    duration: number;
+  } | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageOpacity = useRef(new Animated.Value(0)).current;
+
   const progress = useRef(new Animated.Value(0)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
+  // Load song data on mount
   useEffect(() => {
-    if (isPlaying) {
+    const loadSongData = async () => {
+      // If we have all props, use them directly
+      if (propSongTitle && propArtistName && propAlbumArtUrl) {
+        console.log('🎵 AppleMusicBubble using pre-fetched props:');
+        console.log('🎵 Title:', propSongTitle);
+        console.log('🎵 Artist:', propArtistName);
+        console.log('🖼️ Album Art URL from props:', propAlbumArtUrl);
+        console.log('🎵 Preview URL from props:', propPreviewUrl);
+
+        setSongData({
+          title: propSongTitle,
+          artist: propArtistName,
+          albumArt: propAlbumArtUrl, // This should be the pre-processed weserv URL
+          previewUrl: propPreviewUrl || null, // Use provided preview URL
+          duration: propDuration || 30,
+        });
+
+        // If we have a pre-fetched artwork URL, assume it's already loaded and show immediately
+        if (propAlbumArtUrl) {
+          setImageLoaded(true);
+          imageOpacity.setValue(1); // Start fully visible since it should be preloaded
+        } else {
+          setImageLoaded(false);
+          imageOpacity.setValue(0);
+        }
+        return;
+      } else {
+        // Reset image state when loading new song from API
+        setImageLoaded(false);
+        imageOpacity.setValue(0);
+      }
+
+      // Otherwise, try to fetch from Apple Music API
+      setIsLoading(true);
+      try {
+        if (appleMusicApi.isConfigured()) {
+          let song;
+
+          // Check if songId is a search query
+          if (songId.startsWith('search:')) {
+            const searchQuery = songId.replace('search:', '');
+            const searchResults = await appleMusicApi.searchSongs(
+              searchQuery,
+              1
+            );
+            song = searchResults[0] || null;
+          } else {
+            // Direct song ID lookup
+            song = await appleMusicApi.getSong(songId);
+          }
+
+          if (song) {
+            let artworkUrl = null;
+            if (song.attributes.artwork?.url) {
+              artworkUrl = song.attributes.artwork.url
+                .replace('{w}', '100')
+                .replace('{h}', '100')
+                .replace('{f}', 'bb.jpg');
+
+              console.log('🖼️ Processed artwork URL:', artworkUrl);
+            }
+
+            setSongData({
+              title: song.attributes.name,
+              artist: song.attributes.artistName,
+              albumArt: artworkUrl,
+              previewUrl: song.attributes.previews[0]?.url || null,
+              duration: song.attributes.durationInMillis / 1000,
+            });
+          }
+        } else {
+          // Use mock data for development (no local asset for testing)
+          const mockSong = mockAppleMusicData;
+          setSongData({
+            title: mockSong.attributes.name,
+            artist: mockSong.attributes.artistName,
+            albumArt: null, // No local asset for testing
+            previewUrl: mockSong.attributes.previews[0]?.url || null,
+            duration: mockSong.attributes.durationInMillis / 1000,
+          });
+        }
+      } catch (error) {
+        console.error('Error loading song data:', error);
+        // Fallback to props or default values
+        setSongData({
+          title: propSongTitle || 'Unknown Song',
+          artist: propArtistName || 'Unknown Artist',
+          albumArt: propAlbumArtUrl || '',
+          previewUrl: null,
+          duration: propDuration || 30,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSongData();
+  }, [
+    songId,
+    propSongTitle,
+    propArtistName,
+    propAlbumArtUrl,
+    propPreviewUrl,
+    propDuration,
+  ]);
+
+  // Handle audio playback
+  useEffect(() => {
+    if (isPlaying && songData?.previewUrl) {
+      const playAudio = async () => {
+        try {
+          // Set audio mode for playback
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            staysActiveInBackground: false,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            playThroughEarpieceAndroid: false,
+          });
+
+          // Create and play sound
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: songData.previewUrl },
+            { shouldPlay: true, isLooping: false }
+          );
+
+          soundRef.current = sound;
+
+          // Start progress animation (30 seconds for preview)
+          const previewDuration = 30000; // 30 seconds
+          animationRef.current = Animated.timing(progress, {
+            toValue: 1,
+            duration: previewDuration,
+            useNativeDriver: true,
+          });
+
+          animationRef.current.start(({ finished }) => {
+            if (finished) {
+              setIsPlaying(false);
+              progress.setValue(0);
+            }
+          });
+
+          // Listen for playback status
+          sound.setOnPlaybackStatusUpdate(status => {
+            if ('didJustFinish' in status && status.didJustFinish) {
+              setIsPlaying(false);
+              progress.setValue(0);
+            }
+          });
+        } catch (error) {
+          console.error('Error playing audio:', error);
+          setIsPlaying(false);
+          progress.setValue(0);
+        }
+      };
+
+      playAudio();
+    } else if (!isPlaying) {
+      // Stop audio and animation
+      soundRef.current?.stopAsync();
+      soundRef.current?.unloadAsync();
+      soundRef.current = null;
+      animationRef.current?.stop();
+    }
+
+    return () => {
+      soundRef.current?.stopAsync();
+      soundRef.current?.unloadAsync();
+      animationRef.current?.stop();
+    };
+  }, [isPlaying, songData?.previewUrl, progress]);
+
+  const handlePlayPause = () => {
+    if (isLoading) return;
+
+    // Only allow play if we have a preview URL or if we're just showing the animation
+    if (!isPlaying && songData?.previewUrl === null) {
+      // No preview available, just show animation
+      const animationDuration = 30000; // 30 seconds
       animationRef.current = Animated.timing(progress, {
         toValue: 1,
-        duration: duration * 1000,
+        duration: animationDuration,
         useNativeDriver: true,
       });
+
       animationRef.current.start(({ finished }) => {
         if (finished) {
           setIsPlaying(false);
           progress.setValue(0);
         }
       });
+      setIsPlaying(true);
     } else {
-      animationRef.current?.stop();
+      setIsPlaying(!isPlaying);
     }
-
-    return () => {
-      animationRef.current?.stop();
-    };
-  }, [isPlaying, duration, progress]);
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
   };
 
   const circumference = 2 * Math.PI * 13; // radius is 13 (30px diameter - 2px stroke)
@@ -88,7 +281,70 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         ]}
       >
         <View style={styles.content}>
-          <Image source={{ uri: albumArtUrl }} style={styles.albumArt} />
+          <View style={styles.albumArtContainer}>
+            {songData?.albumArt ? (
+              <>
+                <Animated.View
+                  style={[styles.albumArt, { opacity: imageOpacity }]}
+                >
+                  <Image
+                    source={songData.albumArt} // Use the URL as-is since it might already be processed
+                    style={styles.albumArtImage}
+                    contentFit='cover'
+                    onError={error => {
+                      console.log(
+                        '🖼️ Weserv proxied album art failed to load. Error:',
+                        error
+                      );
+                      setImageLoaded(false);
+                      imageOpacity.setValue(0);
+                      setSongData(prev =>
+                        prev ? { ...prev, albumArt: null } : null
+                      );
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        '🖼️ Weserv proxied album art loaded successfully!'
+                      );
+                      if (!imageLoaded) {
+                        setImageLoaded(true);
+                        Animated.timing(imageOpacity, {
+                          toValue: 1,
+                          duration: 300,
+                          useNativeDriver: true,
+                        }).start();
+                      }
+                    }}
+                  />
+                </Animated.View>
+                {!imageLoaded && (
+                  <View
+                    style={[
+                      styles.albumArt,
+                      styles.albumArtPlaceholder,
+                      styles.loadingPlaceholder,
+                    ]}
+                  >
+                    <SymbolView
+                      name='music.note'
+                      size={24}
+                      type='hierarchical'
+                      tintColor={Colors.textSecondary}
+                    />
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={[styles.albumArt, styles.albumArtPlaceholder]}>
+                <SymbolView
+                  name='music.note'
+                  size={24}
+                  type='hierarchical'
+                  tintColor={Colors.textSecondary}
+                />
+              </View>
+            )}
+          </View>
 
           <View style={styles.songInfo}>
             <Text
@@ -98,7 +354,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
               ]}
               numberOfLines={1}
             >
-              {songTitle}
+              {isLoading ? 'Loading...' : songData?.title || 'Unknown Song'}
             </Text>
             <Text
               style={[
@@ -107,7 +363,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
               ]}
               numberOfLines={1}
             >
-              {artistName}
+              {isLoading ? 'Loading...' : songData?.artist || 'Unknown Artist'}
             </Text>
             <View style={styles.appleMusicRow}>
               <SymbolView
@@ -131,7 +387,8 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
           <TouchableOpacity
             style={styles.playButton}
             onPress={handlePlayPause}
-            activeOpacity={0.7}
+            activeOpacity={isLoading ? 1 : 0.7}
+            disabled={isLoading}
           >
             <View style={styles.playButtonInner}>
               <Svg width='30' height='30' viewBox='0 0 30 30'>
@@ -158,7 +415,13 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
                 />
               </Svg>
               <SymbolView
-                name={isPlaying ? 'pause.fill' : 'play.fill'}
+                name={
+                  isLoading
+                    ? 'ellipsis'
+                    : isPlaying
+                      ? 'pause.fill'
+                      : 'play.fill'
+                }
                 size={13}
                 type='hierarchical'
                 tintColor={Colors.systemRed}
@@ -217,6 +480,23 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     marginRight: 11,
+  },
+  albumArtContainer: {
+    position: 'relative',
+  },
+  albumArtImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 4,
+  },
+  loadingPlaceholder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  albumArtPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appleIcon: {
     marginRight: 2,

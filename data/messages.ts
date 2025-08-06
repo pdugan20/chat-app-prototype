@@ -229,12 +229,7 @@ export const conversation2: Message[] = [
     isSender: false,
     timestamp: '11:44 AM',
     type: 'appleMusic',
-    songId: 'apple-music-1440833098',
-    songTitle: 'Intergalactic',
-    artistName: 'Beastie Boys',
-    albumArtUrl:
-      'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ae/0d/05/ae0d0535-8dbb-4b33-beb0-707623351119/16UMGIM15973.rgb.jpg/600x600bb.jpg',
-    duration: 60,
+    songId: 'search:intergalactic beastie boys', // Use search to find the correct ID
   } as AppleMusicMessage,
   {
     id: '14',

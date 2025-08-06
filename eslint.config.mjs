@@ -73,11 +73,32 @@ export default [
     },
   },
   {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        require: 'readonly',
+        process: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+      },
+    },
+    rules: {
+      'no-undef': 'off',
+      'no-unused-vars': 'warn',
+    },
+  },
+  {
     ignores: [
       'node_modules/',
       '.expo/',
       'dist/',
       'web-build/',
+      'scripts/',
       '*.orig.*',
       '*.jks',
       '*.p8',
