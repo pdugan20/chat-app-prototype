@@ -35,6 +35,13 @@ export interface AppleMusicMessage extends BaseMessage {
   albumArtUrl?: string;
   previewUrl?: string;
   duration?: number;
+  colors?: {
+    bgColor?: string;
+    textColor1?: string;
+    textColor2?: string;
+    textColor3?: string;
+    textColor4?: string;
+  };
 }
 
 export interface ImageMessage extends BaseMessage {

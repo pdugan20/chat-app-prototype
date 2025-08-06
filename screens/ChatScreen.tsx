@@ -119,9 +119,13 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     if (inputBarHeight > 0) {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+      // Delay scroll to allow keyboard animation to settle
+      const delay = keyboardVisible ? 0 : 200;
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, delay);
     }
-  }, [inputBarHeight]);
+  }, [inputBarHeight, keyboardVisible]);
 
   // Navigation handling
   useEffect(() => {
@@ -215,7 +219,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
             onLayout={handleScrollViewLayout}
             onContentSizeChange={handleContentSizeChange}
             keyboardShouldPersistTaps='handled'
-            onScrollBeginDrag={Keyboard.dismiss}
           >
             <MessageList
               messages={messages}

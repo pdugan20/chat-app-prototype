@@ -14,6 +14,7 @@ interface CircularPlayButtonProps {
   isSender?: boolean;
   size?: number;
   disabled?: boolean;
+  hasEverBeenPlayed?: boolean;
 }
 
 const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
@@ -24,6 +25,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
   isSender = false,
   size = 30,
   disabled = false,
+  hasEverBeenPlayed = false,
 }) => {
   const radius = (size - 4) / 2; // Account for 2px stroke width
   const circumference = 2 * Math.PI * radius;
@@ -35,6 +37,9 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
 
   const iconSize = Math.floor(size * 0.43); // Scale icon relative to button size
 
+  // Determine visual state based on play status
+  const isInitialState = !hasEverBeenPlayed;
+
   return (
     <TouchableOpacity
       style={[styles.playButton, { width: size, height: size }]}
@@ -44,35 +49,41 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
     >
       <View style={[styles.playButtonInner, { width: size, height: size }]}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* Background circle */}
+          {/* Background circle - filled red when never played */}
           <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             stroke={
-              isSender ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.2)'
+              isInitialState
+                ? Colors.systemRed
+                : isSender
+                  ? 'rgba(255, 255, 255, 0.5)'
+                  : 'rgba(0, 0, 0, 0.2)'
             }
             strokeWidth='2'
-            fill='none'
+            fill={isInitialState ? Colors.systemRed : 'none'}
           />
-          {/* Progress circle */}
-          <AnimatedCircle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={Colors.systemRed}
-            strokeWidth='2'
-            fill='none'
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            transform={`rotate(-90 ${size / 2} ${size / 2})`}
-          />
+          {/* Progress circle - only show after first play */}
+          {!isInitialState && (
+            <AnimatedCircle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke={Colors.systemRed}
+              strokeWidth='2'
+              fill='none'
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            />
+          )}
         </Svg>
         <SymbolView
           name={isLoading ? 'ellipsis' : isPlaying ? 'pause.fill' : 'play.fill'}
           size={iconSize}
           type='hierarchical'
-          tintColor={Colors.systemRed}
+          tintColor={isInitialState ? Colors.white : Colors.systemRed}
           style={styles.playIcon}
         />
       </View>

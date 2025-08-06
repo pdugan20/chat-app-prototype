@@ -25,9 +25,9 @@ export const SPRING_CONFIG = {
     friction: 10,
   },
   KEYBOARD: {
-    velocity: 8,
-    tension: 100,
-    friction: 25,
+    velocity: 12,
+    tension: 150,
+    friction: 20,
   },
 } as const;
 

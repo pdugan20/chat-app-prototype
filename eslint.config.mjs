@@ -119,6 +119,7 @@ export default [
       'package-lock.json',
       'babel.config.js',
       'eslint.config.mjs',
+      '.rnstorybook/storybook.requires.ts',
     ],
   },
 ];

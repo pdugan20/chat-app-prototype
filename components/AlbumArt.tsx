@@ -10,6 +10,7 @@ interface AlbumArtProps {
   onLoad?: () => void;
   onError?: (error: any) => void;
   borderRadius?: number;
+  isSender?: boolean;
 }
 
 const AlbumArt: React.FC<AlbumArtProps> = ({
@@ -18,27 +19,35 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
   onLoad,
   onError,
   borderRadius = 4,
+  isSender = false,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageOpacity = useRef(new Animated.Value(0)).current;
   const loadStartTime = useRef<number>(0);
+  const previousUrl = useRef<string | null>(null);
 
-  // Reset loading state only when URL changes (not on every render)
+  // Reset loading state only when URL actually changes
   useEffect(() => {
-    if (url) {
-      // Don't reset if we're just re-mounting with the same URL
-      // The image might be cached and load instantly
-      setImageLoaded(false);
-      loadStartTime.current = Date.now();
-    } else {
-      setImageLoaded(false);
-      imageOpacity.setValue(0);
+    // Only reset if URL has actually changed
+    if (url !== previousUrl.current) {
+      previousUrl.current = url;
+
+      if (url) {
+        // URL changed to a new value
+        setImageLoaded(false);
+        imageOpacity.setValue(0);
+        loadStartTime.current = Date.now();
+      } else {
+        // URL changed to null
+        setImageLoaded(false);
+        imageOpacity.setValue(0);
+      }
     }
   }, [url, imageOpacity]);
 
   const handleImageLoad = () => {
     const loadTime = Date.now() - loadStartTime.current;
-    const isInstantLoad = loadTime < 100; // If it loads in under 100ms, it's likely cached
+    const isInstantLoad = loadTime < 50; // If it loads in under 50ms, it's likely cached
 
     console.log(
       `🖼️ Album art loaded in ${loadTime}ms (${isInstantLoad ? 'cached' : 'network'})`
@@ -48,13 +57,13 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
       setImageLoaded(true);
 
       if (isInstantLoad) {
-        // Image was cached, show instantly
+        // Image was cached, show instantly without animation
         imageOpacity.setValue(1);
       } else {
         // Image loaded from network, fade in smoothly
         Animated.timing(imageOpacity, {
           toValue: 1,
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }).start();
       }
@@ -81,6 +90,9 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
     borderRadius,
   };
 
+  // Dynamic icon color based on bubble background
+  const iconColor = isSender ? Colors.white : Colors.textSecondary;
+
   return (
     <View style={[styles.container, containerStyle]}>
       {url ? (
@@ -93,6 +105,7 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
               style={imageStyle}
               contentFit='cover'
               cachePolicy='memory-disk'
+              priority='high'
               onError={handleImageError}
               onLoad={handleImageLoad}
             />
@@ -103,7 +116,7 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
                 name='music.note'
                 size={Math.floor(size * 0.48)} // Scale icon relative to container
                 type='hierarchical'
-                tintColor={Colors.textSecondary}
+                tintColor={iconColor}
               />
             </View>
           )}
@@ -114,7 +127,7 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
             name='music.note'
             size={Math.floor(size * 0.48)}
             type='hierarchical'
-            tintColor={Colors.textSecondary}
+            tintColor={iconColor}
           />
         </View>
       )}
@@ -122,9 +135,11 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
   );
 };
 
+const PLACEHOLDER_BACKGROUND = 'rgba(0, 0, 0, 0.05)';
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.messageBubbleGray,
+    backgroundColor: PLACEHOLDER_BACKGROUND,
     position: 'relative',
   },
   imageContainer: {
@@ -136,7 +151,7 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     alignItems: 'center',
-    backgroundColor: Colors.messageBubbleGray,
+    backgroundColor: PLACEHOLDER_BACKGROUND,
     justifyContent: 'center',
   },
 });

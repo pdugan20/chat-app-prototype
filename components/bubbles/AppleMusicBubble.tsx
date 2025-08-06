@@ -21,6 +21,15 @@ interface AppleMusicBubbleProps {
   hasReaction?: boolean;
   reactionType?: ReactionType;
   isLastInGroup?: boolean;
+  colors?: {
+    bgColor?: string;
+    textColor1?: string;
+    textColor2?: string;
+    textColor3?: string;
+    textColor4?: string;
+  };
+  onPlay?: () => void;
+  onPause?: () => void;
 }
 
 const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
@@ -34,6 +43,9 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
   hasReaction = false,
   reactionType = 'heart',
   isLastInGroup = false,
+  colors: propColors,
+  onPlay,
+  onPause,
 }) => {
   // Use custom hooks for data fetching and audio playback
   const { songData, isLoading } = useSongData({
@@ -45,10 +57,19 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
     propDuration,
   });
 
-  const { isPlaying, progress, handlePlayPause } = useAudioPlayer({
-    previewUrl: songData?.previewUrl || null,
-    duration: songData?.duration || 30,
-  });
+  const { isPlaying, progress, handlePlayPause, hasEverBeenPlayed } =
+    useAudioPlayer({
+      previewUrl: songData?.previewUrl || null,
+      duration: songData?.duration || 30,
+    });
+
+  // Combine colors from props or songData for future use
+  const artworkColors = propColors || songData?.colors;
+
+  // Log colors for debugging (you can remove this later)
+  if (artworkColors && Object.keys(artworkColors).length > 0) {
+    console.log('🎨 Apple Music artwork colors:', artworkColors);
+  }
 
   return (
     <View
@@ -74,6 +95,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
               }
               size={50}
               borderRadius={4}
+              isSender={isSender}
               onError={() => {
                 // Note: In a more complex setup, you might want to expose
                 // an error handler from the useSongData hook
@@ -104,7 +126,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
             <View style={styles.appleMusicRow}>
               <SymbolView
                 name='applelogo'
-                size={11}
+                size={12}
                 type='hierarchical'
                 tintColor={isSender ? Colors.white : Colors.black}
                 style={styles.appleIcon}
@@ -127,11 +149,18 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
             onPress={() => {
               if (!isLoading) {
                 handlePlayPause();
+                // Call action callbacks for Storybook
+                if (isPlaying) {
+                  onPause?.();
+                } else {
+                  onPlay?.();
+                }
               }
             }}
             isSender={isSender}
             size={30}
             disabled={isLoading}
+            hasEverBeenPlayed={hasEverBeenPlayed}
           />
         </View>
       </View>
@@ -155,15 +184,15 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
 
 const styles = StyleSheet.create({
   albumArt: {
-    marginRight: 11,
+    marginRight: 8,
   },
   appleIcon: {
-    marginRight: 2,
+    marginRight: 1,
   },
   appleMusicRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 4,
+    gap: 2,
   },
   artistName: {
     fontFamily: Typography.fontFamily,
@@ -175,8 +204,8 @@ const styles = StyleSheet.create({
   },
   bubble: {
     borderRadius: Spacing.messageBorderRadius,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 11,
+    paddingVertical: 9,
   },
   container: {
     marginVertical: 0.5,
@@ -234,7 +263,7 @@ const styles = StyleSheet.create({
   },
   songInfo: {
     justifyContent: 'space-between',
-    marginRight: 11,
+    marginRight: 9,
     maxWidth: 140,
     minHeight: 44,
     paddingHorizontal: 4,

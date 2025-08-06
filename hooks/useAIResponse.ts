@@ -1,9 +1,7 @@
 import { useState, useRef } from 'react';
-import { Animated } from 'react-native';
+import { Animated, Image } from 'react-native';
 import { Message, AppleMusicMessage } from '../types/message';
 
-// Global fetch is available in React Native
-declare const fetch: any;
 import aiService from '../services/ai';
 import { appleMusicApi } from '../services/appleMusicApi';
 import { createMessage } from '../utils/messageUtils';
@@ -127,29 +125,23 @@ export const useAIResponse = ({
                     }
                   }
 
-                  // Create music message with pre-fetched data
-                  let processedArtworkUrl = null;
+                  // Create music message with direct Apple Music artwork URL (same as Storybook)
+                  let artworkUrl = null;
                   if (songData && songData.attributes.artwork?.url) {
-                    const originalUrl = songData.attributes.artwork.url
+                    artworkUrl = songData.attributes.artwork.url
                       .replace('{w}', '100')
                       .replace('{h}', '100')
                       .replace('{f}', 'bb.jpg');
+                    console.log('🖼️ Using artwork URL:', artworkUrl);
 
-                    processedArtworkUrl = `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}&w=100&h=100&fit=cover&output=jpg`;
-                    console.log(
-                      '🖼️ Pre-loading artwork URL:',
-                      processedArtworkUrl
-                    );
-
-                    // Preload the image so it's cached when the bubble appears
+                    // Preload the image to prevent layout jump
                     try {
-                      await fetch(processedArtworkUrl, { method: 'HEAD' });
-                      console.log('🖼️ Image successfully preloaded');
+                      console.log('🖼️ Preloading album art...');
+                      await Image.prefetch(artworkUrl);
+                      console.log('🖼️ Album art preloaded successfully');
                     } catch (error) {
-                      console.log(
-                        '🖼️ Image preload failed, but will still try to load normally:',
-                        error
-                      );
+                      console.log('🖼️ Failed to preload album art:', error);
+                      // Continue anyway
                     }
                   }
 
@@ -162,7 +154,7 @@ export const useAIResponse = ({
                       ? {
                           songTitle: songData.attributes.name,
                           artistName: songData.attributes.artistName,
-                          albumArtUrl: processedArtworkUrl,
+                          albumArtUrl: artworkUrl,
                           previewUrl:
                             songData.attributes.previews[0]?.url || null,
                           duration: Math.floor(

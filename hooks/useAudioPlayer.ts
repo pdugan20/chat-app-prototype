@@ -15,6 +15,7 @@ interface UseAudioPlayerReturn {
   isPlaying: boolean;
   progress: Animated.Value;
   handlePlayPause: () => void;
+  hasEverBeenPlayed: boolean;
 }
 
 export const useAudioPlayer = ({
@@ -22,6 +23,7 @@ export const useAudioPlayer = ({
   duration = 30,
 }: UseAudioPlayerProps): UseAudioPlayerReturn => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasEverBeenPlayed, setHasEverBeenPlayed] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
   const playerRef = useRef<AudioPlayer | null>(null);
@@ -61,6 +63,8 @@ export const useAudioPlayer = ({
             if (finished) {
               setIsPlaying(false);
               progress.setValue(0);
+              // Reset to unplayed state when song completes
+              setHasEverBeenPlayed(false);
               // Reset audio position for replay
               playerRef.current?.seekTo(0);
             }
@@ -85,6 +89,11 @@ export const useAudioPlayer = ({
   }, [isPlaying, previewUrl, progress]);
 
   const handlePlayPause = () => {
+    // Mark as ever been played when user first interacts
+    if (!hasEverBeenPlayed) {
+      setHasEverBeenPlayed(true);
+    }
+
     if (!isPlaying && previewUrl === null) {
       // No preview available, just show animation
       const animationDuration = duration * 1000; // Convert to milliseconds
@@ -98,6 +107,8 @@ export const useAudioPlayer = ({
         if (finished) {
           setIsPlaying(false);
           progress.setValue(0);
+          // Reset to unplayed state when animation completes (for no preview case)
+          setHasEverBeenPlayed(false);
         }
       });
       setIsPlaying(true);
@@ -110,5 +121,6 @@ export const useAudioPlayer = ({
     isPlaying,
     progress,
     handlePlayPause,
+    hasEverBeenPlayed,
   };
 };

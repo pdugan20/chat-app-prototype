@@ -16,6 +16,11 @@ export interface AppleMusicSong {
       url: string;
       width: number;
       height: number;
+      bgColor?: string;
+      textColor1?: string;
+      textColor2?: string;
+      textColor3?: string;
+      textColor4?: string;
     };
     previews: Array<{
       url: string;
@@ -168,6 +173,11 @@ export const mockAppleMusicData: AppleMusicSong = {
       url: '../assets/album-art/hello-nasty.jpg',
       width: 600,
       height: 600,
+      bgColor: 'f4f4f4',
+      textColor1: '000000',
+      textColor2: '333333',
+      textColor3: '666666',
+      textColor4: '999999',
     },
     previews: [
       {

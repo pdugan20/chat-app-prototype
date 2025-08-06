@@ -1,8 +1,14 @@
 import { registerRootComponent } from 'expo';
 
-import App from './App';
+// Check if we should load Storybook via environment variable
+const enableStorybook = process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === 'true';
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App);
+if (enableStorybook) {
+  // Load Storybook
+  const StorybookUI = require('./.rnstorybook').default;
+  registerRootComponent(StorybookUI);
+} else {
+  // Load the main app
+  const App = require('./App').default;
+  registerRootComponent(App);
+}

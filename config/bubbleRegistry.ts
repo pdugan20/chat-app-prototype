@@ -37,6 +37,7 @@ export const bubbleRegistry: BubbleRegistry = {
       albumArtUrl: message.albumArtUrl,
       previewUrl: message.previewUrl,
       duration: message.duration,
+      colors: message.colors,
     }),
   },
   // Future bubble types can be added here
