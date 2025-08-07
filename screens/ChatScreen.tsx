@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
-  ScrollView,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
   Animated,
+  FlatList,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -71,7 +71,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const [isSending, setIsSending] = useState(false);
 
   // Refs
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<FlatList>(null);
   const deliveredOpacity = useRef(new Animated.Value(0)).current;
   const deliveredScale = useRef(new Animated.Value(0.7)).current;
   const lastSentMessageRef = useRef<{
@@ -97,35 +97,96 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       lastSentMessageRef.current = { text, timestamp, isUserMessage };
     },
     scrollToEnd: () => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToOffset({
+          offset: 999999,
+          animated: true,
+        });
+      }
     },
   });
 
-  // Set delivered opacity for existing messages on mount
+  // Set delivered indicator on last sender message when chat loads
+  const hasSetInitialDelivered = useRef(false);
   useEffect(() => {
-    const hasDeliveredMessages = messages.some(msg => msg.showDelivered);
-    if (hasDeliveredMessages) {
+    if (hasSetInitialDelivered.current) return;
+    
+    // Find the last sender message
+    const lastSenderMessageIndex = messages
+      .map((msg, index) => ({ msg, index }))
+      .reverse()
+      .find(({ msg }) => msg.isSender)?.index;
+
+    if (lastSenderMessageIndex !== undefined) {
+      setMessages(prev =>
+        prev.map((msg, index) => {
+          if (index === lastSenderMessageIndex) {
+            return {
+              ...msg,
+              showDelivered: true,
+              deliveredOpacity: deliveredOpacity,
+              deliveredScale: deliveredScale,
+            };
+          } else if (msg.showDelivered) {
+            // Remove delivered from other messages
+            return {
+              ...msg,
+              showDelivered: false,
+            };
+          }
+          return msg;
+        })
+      );
+
+      // Set opacity immediately for existing delivered message
       deliveredOpacity.setValue(1);
       deliveredScale.setValue(1);
+      hasSetInitialDelivered.current = true;
     }
-  }, [messages, deliveredOpacity, deliveredScale]);
+  }, [deliveredOpacity, deliveredScale, messages, setMessages]); // Only run once on mount
 
-  // Auto-scroll effects
+  // Auto-scroll for new messages with smooth animation
+  const previousLength = useRef(messages.length);
   useEffect(() => {
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  }, [messages]);
-
-  useEffect(() => {
-    if (inputBarHeight > 0) {
-      // Delay scroll to allow keyboard animation to settle
-      const delay = keyboardVisible ? 0 : 200;
+    if (messages.length > previousLength.current) {
+      // Only scroll if messages increased (new message added)
       setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, delay);
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToOffset({
+            offset: 999999,
+            animated: true,
+          });
+        }
+      }, 100);
     }
-  }, [inputBarHeight, keyboardVisible]);
+    previousLength.current = messages.length;
+  }, [messages.length]);
+
+  // Auto-scroll when typing indicator appears
+  useEffect(() => {
+    if (showTypingIndicator) {
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToOffset({
+            offset: 999999,
+            animated: true,
+          });
+        }
+      }, 100);
+    }
+  }, [showTypingIndicator]);
+
+  // useEffect(() => {
+  //   if (inputBarHeight > 0) {
+  //     // Delay scroll to allow keyboard animation to settle
+  //     const delay = keyboardVisible ? 0 : 200;
+  //     setTimeout(() => {
+  //       if (scrollViewRef.current) {
+  //         scrollViewRef.current.scrollToEnd({ animated: true });
+  //       }
+  //     }, delay);
+  //   }
+  // }, [inputBarHeight, keyboardVisible]);
 
   // Navigation handling
   useEffect(() => {
@@ -159,11 +220,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Handlers
   const handleScrollViewLayout = () => {
-    scrollViewRef.current?.scrollToEnd({ animated: false });
+    // Force scroll to absolute bottom with large offset
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToOffset({
+          offset: 999999,
+          animated: false,
+        });
+      }
+    }, 100);
   };
 
   const handleContentSizeChange = () => {
-    scrollViewRef.current?.scrollToEnd({ animated: false });
+    // Don't auto-scroll on content size change to avoid conflicts
   };
 
   const handleSendMessage = (text: string) => {
@@ -203,35 +272,35 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={0}
         >
-          <Animated.ScrollView
-            ref={scrollViewRef}
+          <Animated.View
             style={[
               styles.messagesContainer,
               {
                 transform: getChatSlideTransform(chatSlideDown),
               },
             ]}
-            contentContainerStyle={[
-              styles.messagesContent,
-              { paddingBottom: calculateScrollViewPadding() },
-            ]}
-            showsVerticalScrollIndicator={false}
-            onLayout={handleScrollViewLayout}
-            onContentSizeChange={handleContentSizeChange}
-            keyboardShouldPersistTaps='handled'
           >
             <MessageList
               messages={messages}
               deliveredOpacity={deliveredOpacity}
               deliveredScale={deliveredScale}
+              scrollViewRef={scrollViewRef}
+              style={styles.messagesList}
+              contentContainerStyle={[
+                styles.messagesContent,
+                { paddingBottom: calculateScrollViewPadding() },
+              ]}
+              onLayout={handleScrollViewLayout}
+              onContentSizeChange={handleContentSizeChange}
+              ListFooterComponent={
+                <TypingSection
+                  showTypingIndicator={showTypingIndicator}
+                  typingIndicatorOpacity={typingIndicatorOpacity}
+                  messages={messages}
+                />
+              }
             />
-
-            <TypingSection
-              showTypingIndicator={showTypingIndicator}
-              typingIndicatorOpacity={typingIndicatorOpacity}
-              messages={messages}
-            />
-          </Animated.ScrollView>
+          </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
 
@@ -291,6 +360,10 @@ const styles = StyleSheet.create({
     paddingLeft: Spacing.containerPadding,
     paddingRight: Spacing.inputPadding,
     paddingTop: 40,
+  },
+  messagesList: {
+    backgroundColor: Colors.screenBackground,
+    flex: 1,
   },
   navigationBarContainer: {
     left: 0,

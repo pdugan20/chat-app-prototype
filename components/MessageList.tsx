@@ -1,5 +1,5 @@
-import React from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Animated, StyleSheet, View, FlatList } from 'react-native';
 import BubbleRenderer from './bubbles/BubbleRenderer';
 import TimestampHeader from './TimestampHeader';
 import { Message } from '../types/message';
@@ -15,79 +15,195 @@ import {
 } from '../utils/messageAnimations';
 import { Colors, Typography, Spacing } from '../constants/theme';
 
+// Types for flattened data structure
+type MessageItem = {
+  type: 'message';
+  message: Message;
+  messageIndex: number;
+};
+
+type TimestampItem = {
+  type: 'timestamp';
+  timestamp: string;
+  id: string;
+};
+
+type SpacingItem = {
+  type: 'spacing';
+  id: string;
+};
+
+type DeliveredItem = {
+  type: 'delivered';
+  message: Message;
+  id: string;
+};
+
+type FlatListItem = MessageItem | TimestampItem | SpacingItem | DeliveredItem;
+
 interface MessageListProps {
   messages: Message[];
   deliveredOpacity: Animated.Value;
   deliveredScale: Animated.Value;
+  style?: any;
+  contentContainerStyle?: any;
+  onLayout?: () => void;
+  onContentSizeChange?: () => void;
+  scrollViewRef?: React.RefObject<FlatList | null>;
+  ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
   messages,
   deliveredOpacity,
   deliveredScale,
+  style,
+  contentContainerStyle,
+  onLayout,
+  onContentSizeChange,
+  scrollViewRef,
+  ListFooterComponent,
 }) => {
-  return (
-    <>
-      {messages.map((message, index) => {
+  // Create flattened data structure for FlatList
+  const flatListData = useMemo((): FlatListItem[] => {
+    const items: FlatListItem[] = [];
+
+    messages.forEach((message, index) => {
+      // Add timestamp header if needed
+      if (shouldShowTimestamp(messages, index)) {
+        items.push({
+          type: 'timestamp',
+          timestamp: message.timestamp,
+          id: `timestamp-${message.id}`,
+        });
+      }
+
+      // Add group spacing if needed
+      if (shouldAddGroupSpacing(messages, index)) {
+        items.push({
+          type: 'spacing',
+          id: `spacing-${message.id}`,
+        });
+      }
+
+      // Add the message
+      items.push({
+        type: 'message',
+        message,
+        messageIndex: index,
+      });
+
+      // Add delivered indicator if needed
+      if (
+        message.isSender &&
+        message.showDelivered &&
+        isLastInGroup(messages, index)
+      ) {
+        items.push({
+          type: 'delivered',
+          message,
+          id: `delivered-${message.id}`,
+        });
+      }
+    });
+
+    return items;
+  }, [messages]);
+
+  const renderItem = ({ item }: { item: FlatListItem }) => {
+    switch (item.type) {
+      case 'timestamp':
+        return <TimestampHeader timestamp={item.timestamp} />;
+
+      case 'spacing':
+        return <View style={styles.groupSpacing} />;
+
+      case 'message': {
+        const { message, messageIndex } = item;
         const messageAlignSelf = message.isSender ? 'flex-end' : 'flex-start';
 
         return (
-          <React.Fragment key={message.id}>
-            {shouldShowTimestamp(messages, index) && (
-              <TimestampHeader timestamp={message.timestamp} />
-            )}
-            {shouldAddGroupSpacing(messages, index) && (
-              <View style={styles.groupSpacing} />
-            )}
-            <Animated.View
-              style={{
-                opacity: message.animationValue || 1,
-                transform: getMessageSlideTransform(
-                  message.animationValue,
-                  message.isSender
-                ),
-                alignSelf: messageAlignSelf,
-              }}
-            >
-              <BubbleRenderer
-                message={message}
-                isLastInGroup={isLastInGroup(messages, index)}
-                isFirstInGroup={isFirstInGroup(messages, index)}
-                hasReaction={
-                  !!message.hasReaction && isFirstInGroup(messages, index)
-                }
-              />
-            </Animated.View>
-            {message.isSender &&
-              message.showDelivered &&
-              isLastInGroup(messages, index) && (
-                <Animated.View
-                  style={[
-                    styles.deliveredContainer,
-                    {
-                      opacity: message.deliveredOpacity || deliveredOpacity,
-                    },
-                  ]}
-                >
-                  <Animated.Text
-                    style={[
-                      styles.deliveredText,
-                      {
-                        transform: getDeliveredScaleTransform(
-                          message.deliveredScale,
-                          deliveredScale
-                        ),
-                      },
-                    ]}
-                  >
-                    Delivered
-                  </Animated.Text>
-                </Animated.View>
-              )}
-          </React.Fragment>
+          <Animated.View
+            style={{
+              opacity: message.animationValue || 1,
+              transform: getMessageSlideTransform(
+                message.animationValue,
+                message.isSender
+              ),
+              alignSelf: messageAlignSelf,
+            }}
+          >
+            <BubbleRenderer
+              message={message}
+              isLastInGroup={isLastInGroup(messages, messageIndex)}
+              isFirstInGroup={isFirstInGroup(messages, messageIndex)}
+              hasReaction={
+                !!message.hasReaction && isFirstInGroup(messages, messageIndex)
+              }
+            />
+          </Animated.View>
         );
-      })}
-    </>
+      }
+
+      case 'delivered': {
+        const { message } = item;
+        return (
+          <Animated.View
+            style={[
+              styles.deliveredContainer,
+              {
+                opacity: message.deliveredOpacity || deliveredOpacity,
+              },
+            ]}
+          >
+            <Animated.Text
+              style={[
+                styles.deliveredText,
+                {
+                  transform: getDeliveredScaleTransform(
+                    message.deliveredScale,
+                    deliveredScale
+                  ),
+                },
+              ]}
+            >
+              Delivered
+            </Animated.Text>
+          </Animated.View>
+        );
+      }
+
+      default:
+        return null;
+    }
+  };
+
+  const keyExtractor = (item: FlatListItem) => {
+    switch (item.type) {
+      case 'message':
+        return item.message.id;
+      default:
+        return item.id;
+    }
+  };
+
+  return (
+    <FlatList
+      ref={scrollViewRef}
+      data={flatListData}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      style={style}
+      contentContainerStyle={contentContainerStyle}
+      showsVerticalScrollIndicator={false}
+      onLayout={onLayout}
+      onContentSizeChange={onContentSizeChange}
+      removeClippedSubviews={false}
+      maxToRenderPerBatch={20}
+      windowSize={10}
+      keyboardShouldPersistTaps='handled'
+      ListFooterComponent={ListFooterComponent}
+    />
   );
 };
 

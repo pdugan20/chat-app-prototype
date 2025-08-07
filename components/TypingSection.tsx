@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Animated, View, StyleSheet } from 'react-native';
 import TypingIndicator from './TypingIndicator';
 import { Message } from '../types/message';
@@ -15,6 +15,27 @@ const TypingSection: React.FC<TypingSectionProps> = ({
   typingIndicatorOpacity,
   messages,
 }) => {
+  const slideTransform = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (showTypingIndicator) {
+      // Slide in from below
+      slideTransform.setValue(20);
+      Animated.timing(slideTransform, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Slide down when disappearing
+      Animated.timing(slideTransform, {
+        toValue: 20,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showTypingIndicator, slideTransform]);
+
   if (!showTypingIndicator) return null;
 
   return (
@@ -23,9 +44,13 @@ const TypingSection: React.FC<TypingSectionProps> = ({
         <View style={styles.groupSpacing} />
       )}
       <Animated.View
-        style={{
-          opacity: typingIndicatorOpacity,
-        }}
+        style={[
+          styles.typingContainer,
+          {
+            opacity: typingIndicatorOpacity,
+            transform: [{ translateY: slideTransform }],
+          },
+        ]}
       >
         <TypingIndicator
           isVisible={showTypingIndicator}
@@ -41,6 +66,9 @@ const TypingSection: React.FC<TypingSectionProps> = ({
 const styles = StyleSheet.create({
   groupSpacing: {
     height: Spacing.groupSpacing,
+  },
+  typingContainer: {
+    marginBottom: 0, // Space above input field
   },
 });
 
