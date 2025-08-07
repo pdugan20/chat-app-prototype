@@ -10,6 +10,7 @@ import InboxScreen from './screens/InboxScreen';
 import ChatScreen from './screens/ChatScreen';
 import { musicPreloader } from './utils/musicPreloader';
 import { allConversations } from './data/messages';
+import { ChatUpdateProvider } from './contexts/ChatUpdateContext';
 
 declare const global: {
   resetAllChats?: boolean;
@@ -95,7 +96,8 @@ export default function App() {
   return (
     <>
       <StatusBar style='dark' />
-      <NavigationContainer>
+      <ChatUpdateProvider>
+        <NavigationContainer>
         <Stack.Navigator
           initialRouteName='Inbox'
           screenOptions={{
@@ -194,6 +196,7 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
+      </ChatUpdateProvider>
     </>
   );
 }

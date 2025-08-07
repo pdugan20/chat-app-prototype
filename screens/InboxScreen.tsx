@@ -16,6 +16,7 @@ import { Colors, Spacing } from '../constants/theme';
 import aiService from '../services/ai';
 import ChatListItem from '../components/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
+import { useChatUpdates } from '../contexts/ChatUpdateContext';
 
 type InboxScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -28,8 +29,29 @@ interface InboxScreenProps {
 
 const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   const [chats, setChats] = useState<ChatItem[]>(mockChats);
+  const { chatUpdates } = useChatUpdates();
 
   const flatListRef = useRef<FlatList>(null);
+
+  // Immediately apply context updates whenever chatUpdates changes
+  useEffect(() => {
+    if (Object.keys(chatUpdates).length > 0) {
+      setChats(prevChats => {
+        return prevChats.map(chat => {
+          const contextUpdate = chatUpdates[chat.id];
+          if (contextUpdate) {
+            return { 
+              ...chat, 
+              lastMessage: contextUpdate.lastMessage,
+              timestamp: contextUpdate.timestamp,
+              unread: contextUpdate.unread 
+            };
+          }
+          return chat;
+        });
+      });
+    }
+  }, [chatUpdates]);
 
   // Function to check and apply updates
   const checkForUpdates = React.useCallback(() => {
@@ -46,6 +68,8 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
       aiService.resetMentionedSongs();
       return;
     }
+
+    // Context updates are now handled by useEffect above
 
     // Check for pending chat updates from global state
     const pendingUpdate = global.pendingChatUpdate;

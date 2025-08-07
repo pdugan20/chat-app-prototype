@@ -21,6 +21,7 @@ import { useKeyboard } from '../hooks/useKeyboard';
 import { useMessages } from '../hooks/useMessages';
 import { useAIResponse } from '../hooks/useAIResponse';
 import { getChatSlideTransform } from '../utils/messageAnimations';
+import { useChatUpdates } from '../contexts/ChatUpdateContext';
 
 // Global type declarations
 interface GlobalState {
@@ -50,6 +51,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Hooks
   const { keyboardVisible, keyboardHeight } = useKeyboard();
+  const { updateChat } = useChatUpdates();
 
   // Find initial messages
   const initialMessages = (() => {
@@ -92,6 +94,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     },
     onUpdateLastSentMessage: (text, timestamp, isUserMessage) => {
       lastSentMessageRef.current = { text, timestamp, isUserMessage };
+      // Update context for AI responses too
+      if (!isUserMessage) {
+        updateChat(chatId, {
+          id: chatId,
+          lastMessage: text,
+          timestamp: timestamp,
+          unread: false,
+        });
+      }
     },
     scrollToEnd: () => {
       if (scrollViewRef.current) {
@@ -193,7 +204,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Navigation handling
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', () => {
+    const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', () => {
       if (lastSentMessageRef.current) {
         global.pendingChatUpdate = {
           id: chatId,
@@ -207,7 +218,26 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       }
     });
 
-    return unsubscribe;
+    // Also listen for transition start to handle swipe back earlier
+    const unsubscribeTransitionStart = navigation.addListener('transitionStart', (e) => {
+      // Only update on backwards transition (going back to inbox)
+      if (e.data?.closing && lastSentMessageRef.current) {
+        global.pendingChatUpdate = {
+          id: chatId,
+          lastMessage: lastSentMessageRef.current.isUserMessage
+            ? `You: ${lastSentMessageRef.current.text}`
+            : lastSentMessageRef.current.text,
+          timestamp: lastSentMessageRef.current.timestamp,
+          unread: false,
+        };
+        lastSentMessageRef.current = null;
+      }
+    });
+
+    return () => {
+      unsubscribeBeforeRemove();
+      unsubscribeTransitionStart();
+    };
   }, [navigation, chatId]);
 
   // Handlers
@@ -246,6 +276,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       timestamp: currentTime,
       isUserMessage: true,
     };
+
+    // Update chat preview immediately via context
+    updateChat(chatId, {
+      id: chatId,
+      lastMessage: `You: ${text}`,
+      timestamp: currentTime,
+      unread: false,
+    });
 
     // Show delivered indicator
     showDeliveredIndicator(newMessage.id, () => {
