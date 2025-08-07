@@ -35,6 +35,11 @@ export interface AppleMusicMessage extends BaseMessage {
   albumArtUrl?: string;
   previewUrl?: string;
   duration?: number;
+  appleMusicId?: string; // Apple Music song ID for deep linking
+  playParams?: {
+    id: string;
+    kind: string;
+  };
   colors?: {
     bgColor?: string;
     textColor1?: string;

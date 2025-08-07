@@ -22,6 +22,10 @@ export interface AIService {
     contactName?: string
   ): Promise<AIStructuredResponse>;
   isConfigured(): boolean;
+  // Song tracking methods (optional for non-anthropic services)
+  addMentionedSong?(songQuery: string): void;
+  getMentionedSongs?(): string[];
+  resetMentionedSongs?(): void;
 }
 
 class AIServiceManager {
@@ -184,6 +188,26 @@ class AIServiceManager {
 
   getCurrentProvider(): string {
     return process.env.EXPO_PUBLIC_AI_PROVIDER || 'anthropic';
+  }
+
+  // Song tracking methods - pass through to underlying service
+  addMentionedSong(songQuery: string): void {
+    if (this.service.addMentionedSong) {
+      this.service.addMentionedSong(songQuery);
+    }
+  }
+
+  getMentionedSongs(): string[] {
+    if (this.service.getMentionedSongs) {
+      return this.service.getMentionedSongs();
+    }
+    return [];
+  }
+
+  resetMentionedSongs(): void {
+    if (this.service.resetMentionedSongs) {
+      this.service.resetMentionedSongs();
+    }
   }
 }
 

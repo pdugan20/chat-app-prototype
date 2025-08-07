@@ -53,6 +53,14 @@ const meta: Meta<AppleMusicBubbleStoryArgs> = {
       control: 'select',
       options: ['heart', 'thumbsUp', 'haha', 'doubleExclamation'],
     },
+    useDynamicColors: {
+      control: 'boolean',
+      defaultValue: false,
+      description: 'Use dynamic colors from Apple Music API',
+    },
+    colors: {
+      table: { disable: true }, // Hide from controls, will use actual API colors
+    },
     darkMode: {
       control: 'boolean',
       defaultValue: false,
@@ -74,6 +82,7 @@ export const HelloNasty: Story = {
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
+    useDynamicColors: false,
     reactionType: 'thumbsUp',
     onPlay: fn(),
     onPause: fn(),
@@ -107,6 +116,7 @@ export const WeezerBlueAlbum: Story = {
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
+    useDynamicColors: false,
     reactionType: 'thumbsUp',
     onPlay: fn(),
     onPause: fn(),
@@ -134,6 +144,7 @@ export const WithReaction: Story = {
     hasReaction: true,
     isLastInGroup: true,
     darkMode: false,
+    useDynamicColors: false,
     reactionType: 'thumbsUp',
     onPlay: fn(),
     onPause: fn(),
@@ -163,6 +174,7 @@ export const LoadingState: Story = {
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
+    useDynamicColors: false,
     reactionType: 'thumbsUp',
     onPlay: fn(),
     onPause: fn(),
@@ -192,6 +204,7 @@ export const WithHeartReaction: Story = {
     reactionType: 'heart',
     isLastInGroup: false,
     darkMode: false,
+    useDynamicColors: false,
     onPlay: fn(),
     onPause: fn(),
   },
@@ -218,6 +231,7 @@ export const GroupMessage: Story = {
     hasReaction: false,
     isLastInGroup: false,
     darkMode: false,
+    useDynamicColors: false,
     reactionType: 'thumbsUp',
     onPlay: fn(),
     onPause: fn(),
@@ -231,6 +245,11 @@ Shows the bubble as part of a message group:
 - Used when multiple messages from same sender are grouped together
 - Creates cleaner visual flow for consecutive messages
 - Tail only appears on the final message in a group
+
+**Dynamic Colors Toggle:**
+- Use the controls panel to toggle useDynamicColors
+- When enabled, uses dynamic colors extracted from album artwork by the Apple Music API
+- Colors automatically adapt to match each song's album art
     `,
   },
 };

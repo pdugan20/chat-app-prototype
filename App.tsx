@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TouchableOpacity, Text, View, Alert, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
@@ -8,6 +8,8 @@ import { RootStackParamList } from './types/navigation';
 import { Colors } from './constants/theme';
 import InboxScreen from './screens/InboxScreen';
 import ChatScreen from './screens/ChatScreen';
+import { musicPreloader } from './utils/musicPreloader';
+import { allConversations } from './data/messages';
 
 declare const global: {
   resetAllChats?: boolean;
@@ -19,6 +21,45 @@ declare const global: {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  // Preload music data for all conversations on app startup
+  useEffect(() => {
+    const preloadAllMusic = async () => {
+      console.log('🎵 Starting app-wide music preloading...');
+
+      try {
+        const preloadPromises = allConversations.map(async conversation => {
+          console.log(
+            `🎵 Preloading music for conversation: ${conversation.name}`
+          );
+          const preloadedMessages =
+            await musicPreloader.preloadConversationMusic(
+              conversation.messages
+            );
+
+          // Update the conversation data in place if music was preloaded
+          if (preloadedMessages !== conversation.messages) {
+            conversation.messages = preloadedMessages;
+            console.log(
+              `🎵 Updated ${conversation.name} with preloaded music data`
+            );
+          }
+        });
+
+        await Promise.all(preloadPromises);
+
+        const stats = musicPreloader.getCacheStats();
+        console.log(
+          `🎵 App-wide music preloading completed! Cached ${stats.size} songs:`,
+          stats.songIds
+        );
+      } catch (error) {
+        console.error('🎵 App-wide music preloading failed:', error);
+      }
+    };
+
+    preloadAllMusic();
+  }, []);
+
   const handleEllipsisPress = () => {
     Alert.alert(
       'Reset prototype?',
@@ -35,6 +76,8 @@ export default function App() {
             if (global.chatMessages) {
               global.chatMessages = {};
             }
+            // Clear music preloader cache
+            musicPreloader.clearCache();
             // Force a re-render by triggering focus effect
             setTimeout(() => {
               global.forceInboxRefresh = true;

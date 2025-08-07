@@ -52,6 +52,17 @@ export const animateMessageSlideUp = (animationValue: Animated.Value) => {
 };
 
 /**
+ * Animate music bubble sliding up with timing (no spring)
+ */
+export const animateMusicBubbleSlideUp = (animationValue: Animated.Value) => {
+  return Animated.timing(animationValue, {
+    toValue: 1,
+    duration: 300,
+    useNativeDriver: true,
+  });
+};
+
+/**
  * Animate delivered indicator fade in with scale
  */
 export const animateDeliveredFadeIn = (
@@ -168,6 +179,24 @@ export const getMessageSlideTransform = (
       translateY: animationValue.interpolate({
         inputRange: [0, 1],
         outputRange: [20, 0],
+      }),
+    },
+  ];
+};
+
+/**
+ * Get transform styles for music bubble slide animation (larger offset)
+ */
+export const getMusicBubbleSlideTransform = (
+  animationValue: Animated.Value | undefined
+) => {
+  if (!animationValue) return [];
+
+  return [
+    {
+      translateY: animationValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [120, 0], // Start 120px below (behind input bar)
       }),
     },
   ];

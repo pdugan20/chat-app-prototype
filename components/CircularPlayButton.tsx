@@ -15,6 +15,7 @@ interface CircularPlayButtonProps {
   size?: number;
   disabled?: boolean;
   hasEverBeenPlayed?: boolean;
+  backgroundStrokeColor?: string; // Custom color for background circle stroke (playing/paused state)
 }
 
 const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
@@ -26,6 +27,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
   size = 30,
   disabled = false,
   hasEverBeenPlayed = false,
+  backgroundStrokeColor,
 }) => {
   const radius = (size - 4) / 2; // Account for 2px stroke width
   const circumference = 2 * Math.PI * radius;
@@ -57,9 +59,8 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
             stroke={
               isInitialState
                 ? Colors.systemRed
-                : isSender
-                  ? 'rgba(255, 255, 255, 0.5)'
-                  : 'rgba(0, 0, 0, 0.2)'
+                : backgroundStrokeColor ||
+                  (isSender ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.2)')
             }
             strokeWidth='2'
             fill={isInitialState ? Colors.systemRed : 'none'}

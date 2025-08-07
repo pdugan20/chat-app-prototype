@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Colors, Spacing } from '../constants/theme';
+import aiService from '../services/ai';
 import ChatListItem from '../components/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
 
@@ -41,6 +42,8 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
       if (global.chatMessages) {
         global.chatMessages = {};
       }
+      // Reset mentioned songs
+      aiService.resetMentionedSongs();
       return;
     }
 

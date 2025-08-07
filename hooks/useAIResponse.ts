@@ -5,10 +5,13 @@ import { Message, AppleMusicMessage } from '../types/message';
 import aiService from '../services/ai';
 import { appleMusicApi } from '../services/appleMusicApi';
 import { createMessage } from '../utils/messageUtils';
+import { musicPreloader } from '../utils/musicPreloader';
 import {
   animateTypingIndicatorIn,
   createCrossfadeAnimation,
   animateChatSlideUp,
+  createMessageAnimationValues,
+  animateMessageSlideUp,
   ANIMATION_DELAYS,
 } from '../utils/messageAnimations';
 
@@ -82,8 +85,10 @@ export const useAIResponse = ({
         structuredResponse.musicQuery
       ) {
         // For music responses, pre-fetch music data then send messages
+        const textAnimationValues = createMessageAnimationValues();
         const textMessage: Message = {
           ...createMessage(structuredResponse.content, false),
+          ...textAnimationValues,
         };
 
         // Start crossfade animation for first message (text)
@@ -94,6 +99,18 @@ export const useAIResponse = ({
               // Remove typing indicator and add text message
               setShowTypingIndicator(false);
               onAddMessage(textMessage);
+
+              // Start text message animation
+              if (textAnimationValues.animationValue) {
+                animateMessageSlideUp(
+                  textAnimationValues.animationValue
+                ).start();
+              }
+
+              // Slide chat back up immediately after text message appears
+              setTimeout(() => {
+                animateChatSlideUp(chatSlideDown).start();
+              }, ANIMATION_DELAYS.MESSAGE_RENDER);
 
               // Pre-fetch Apple Music data for the music bubble
               const fetchMusicData = async () => {
@@ -145,29 +162,55 @@ export const useAIResponse = ({
                     }
                   }
 
+                  // Extract dynamic colors if available
+                  let colors;
+                  if (songData?.attributes.artwork?.bgColor) {
+                    colors = {
+                      bgColor: songData.attributes.artwork.bgColor,
+                      textColor1: songData.attributes.artwork.textColor1,
+                      textColor2: songData.attributes.artwork.textColor2,
+                      textColor3: songData.attributes.artwork.textColor3,
+                      textColor4: songData.attributes.artwork.textColor4,
+                    };
+                    console.log(
+                      `🎨 Including dynamic colors in AI music message for ${songData.attributes.name}`
+                    );
+                  }
+
+                  const musicAnimationValues = createMessageAnimationValues();
+                  // Set animation value to 1 immediately so bubble is visible
+                  musicAnimationValues.animationValue?.setValue(1);
+
                   const musicMessage: AppleMusicMessage = {
                     ...createMessage('', false), // Empty text for music bubble
                     type: 'appleMusic',
-                    songId: structuredResponse.musicQuery,
+                    songId: structuredResponse.musicQuery || '',
+                    ...musicAnimationValues,
                     // Add pre-fetched data if available
                     ...(songData
                       ? {
                           songTitle: songData.attributes.name,
                           artistName: songData.attributes.artistName,
-                          albumArtUrl: artworkUrl,
+                          albumArtUrl: artworkUrl || undefined,
                           previewUrl:
-                            songData.attributes.previews[0]?.url || null,
+                            songData.attributes.previews[0]?.url || undefined,
                           duration: Math.floor(
                             songData.attributes.durationInMillis / 1000
                           ),
+                          appleMusicId: songData.id, // Add Apple Music song ID for deep linking
+                          playParams: songData.attributes.playParams, // Add play parameters
+                          colors, // Include dynamic colors
                         }
                       : {}),
                   };
 
-                  console.log('🎵 Music data fetched, showing bubble');
-
-                  // Add the music bubble with pre-fetched data
+                  // Add music bubble to chat flow
                   onAddMessage(musicMessage);
+
+                  // Animate the entire chat upward to reveal the music bubble
+                  setTimeout(() => {
+                    scrollToEnd();
+                  }, 50);
 
                   // Update inbox preview with song info
                   const inboxDisplayText = songData
@@ -183,23 +226,45 @@ export const useAIResponse = ({
                     false
                   );
 
-                  // Wait for music bubble to render, then slide chat back up
-                  setTimeout(() => {
-                    animateChatSlideUp(chatSlideDown).start(() => {
-                      scrollToEnd();
-                    });
-                  }, ANIMATION_DELAYS.MESSAGE_RENDER);
+                  // Reset chat slide position
+                  animateChatSlideUp(chatSlideDown).start();
                 } catch (error) {
                   console.error('Failed to pre-fetch music data:', error);
 
-                  // Fallback: create music bubble without pre-fetched data
+                  // Fallback: check if we have preloaded data from app startup
+                  const preloadedData = musicPreloader.getPreloadedData(
+                    structuredResponse.musicQuery || ''
+                  );
+
+                  const fallbackMusicAnimationValues =
+                    createMessageAnimationValues();
+                  // Set animation value to 1 immediately so bubble is visible
+                  fallbackMusicAnimationValues.animationValue?.setValue(1);
+
                   const musicMessage: AppleMusicMessage = {
                     ...createMessage('', false),
                     type: 'appleMusic',
-                    songId: structuredResponse.musicQuery,
+                    songId: structuredResponse.musicQuery || '',
+                    ...fallbackMusicAnimationValues,
+                    ...(preloadedData
+                      ? {
+                          songTitle: preloadedData.songTitle,
+                          artistName: preloadedData.artistName,
+                          albumArtUrl: preloadedData.albumArtUrl,
+                          previewUrl: preloadedData.previewUrl || undefined,
+                          duration: preloadedData.duration,
+                          colors: preloadedData.colors,
+                        }
+                      : {}),
                   };
 
+                  // Add fallback music bubble to chat flow
                   onAddMessage(musicMessage);
+
+                  // Animate the entire chat upward to reveal the music bubble
+                  setTimeout(() => {
+                    scrollToEnd();
+                  }, 50);
 
                   // Update inbox preview for fallback case (no song data)
                   onUpdateLastSentMessage(
@@ -211,25 +276,24 @@ export const useAIResponse = ({
                     false
                   );
 
-                  setTimeout(() => {
-                    animateChatSlideUp(chatSlideDown).start(() => {
-                      scrollToEnd();
-                    });
-                  }, ANIMATION_DELAYS.MESSAGE_RENDER);
+                  // Reset chat slide position
+                  animateChatSlideUp(chatSlideDown).start();
                 }
               };
 
               // Wait for text message to render, then fetch music data
               setTimeout(() => {
                 fetchMusicData();
-              }, ANIMATION_DELAYS.MESSAGE_RENDER * 0.5);
+              }, 1000); // 1.5s pause between text and music bubble
             }, ANIMATION_DELAYS.CHAT_SLIDE_PAUSE);
           }
         );
       } else {
         // Create regular text message
+        const aiAnimationValues = createMessageAnimationValues();
         const aiMessage: Message = {
           ...createMessage(structuredResponse.content, false),
+          ...aiAnimationValues,
         };
 
         // Start crossfade animation
@@ -240,6 +304,11 @@ export const useAIResponse = ({
               // Remove typing indicator and add message simultaneously
               setShowTypingIndicator(false);
               onAddMessage(aiMessage);
+
+              // Start AI message animation
+              if (aiAnimationValues.animationValue) {
+                animateMessageSlideUp(aiAnimationValues.animationValue).start();
+              }
 
               // Update inbox preview for text messages
               onUpdateLastSentMessage(

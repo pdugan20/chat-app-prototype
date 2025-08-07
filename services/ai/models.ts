@@ -1,18 +1,18 @@
 export const AI_MODELS = {
   anthropic: {
-    default: 'claude-3-haiku-20240307',
+    default: 'claude-3-5-sonnet-20241022',
     models: {
-      'claude-3-haiku-20240307': {
-        name: 'Claude 3 Haiku',
+      'claude-3-5-haiku-20241022': {
+        name: 'Claude 3.5 Haiku',
         description: 'Fastest, most affordable',
       },
-      'claude-3-sonnet-20240229': {
-        name: 'Claude 3 Sonnet',
-        description: 'Balanced performance',
+      'claude-3-5-sonnet-20241022': {
+        name: 'Claude 3.5 Sonnet',
+        description: 'Best balance of speed and capability',
       },
       'claude-3-opus-20240229': {
         name: 'Claude 3 Opus',
-        description: 'Most capable',
+        description: 'Most capable for complex tasks',
       },
     },
   },

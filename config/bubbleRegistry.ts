@@ -37,7 +37,10 @@ export const bubbleRegistry: BubbleRegistry = {
       albumArtUrl: message.albumArtUrl,
       previewUrl: message.previewUrl,
       duration: message.duration,
+      appleMusicId: message.appleMusicId,
+      playParams: message.playParams,
       colors: message.colors,
+      useDynamicColors: true,
     }),
   },
   // Future bubble types can be added here

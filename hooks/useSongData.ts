@@ -11,6 +11,11 @@ export interface SongData {
   albumArt: string | null;
   previewUrl: string | null;
   duration: number;
+  id?: string; // Apple Music song ID for deep linking
+  playParams?: {
+    id: string;
+    kind: string;
+  };
   colors?: {
     bgColor?: string;
     textColor1?: string;
@@ -79,6 +84,8 @@ export const useSongData = ({
           albumArt: propAlbumArtUrl || cached.data.albumArt,
           previewUrl: propPreviewUrl || cached.data.previewUrl,
           duration: propDuration || cached.data.duration,
+          id: cached.data.id, // Preserve Apple Music ID
+          playParams: cached.data.playParams, // Preserve play parameters
           colors: cached.data.colors,
         };
         setSongData(mergedData);
@@ -121,6 +128,8 @@ export const useSongData = ({
               albumArt: artworkUrl,
               previewUrl: song.attributes.previews[0]?.url || null,
               duration: song.attributes.durationInMillis / 1000,
+              id: song.id, // Preserve Apple Music song ID
+              playParams: song.attributes.playParams, // Preserve play parameters
               colors: {
                 bgColor: song.attributes.artwork?.bgColor,
                 textColor1: song.attributes.artwork?.textColor1,
@@ -149,6 +158,8 @@ export const useSongData = ({
           albumArt: propAlbumArtUrl || apiData?.albumArt || null,
           previewUrl: propPreviewUrl || apiData?.previewUrl || null,
           duration: propDuration || apiData?.duration || 30,
+          id: apiData?.id, // Keep Apple Music ID for deep linking
+          playParams: apiData?.playParams, // Keep play parameters
           colors: apiData?.colors,
         };
 
@@ -190,6 +201,8 @@ export const useSongData = ({
         albumArt: propAlbumArtUrl || songData.albumArt,
         previewUrl: propPreviewUrl || songData.previewUrl,
         duration: propDuration || songData.duration,
+        id: songData.id, // Preserve Apple Music ID
+        playParams: songData.playParams, // Preserve play parameters
         colors: songData.colors,
       };
       setSongData(updatedData);

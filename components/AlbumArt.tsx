@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Colors } from '../constants/theme';
 
 interface AlbumArtProps {
   url: string | null;
@@ -11,6 +9,8 @@ interface AlbumArtProps {
   onError?: (error: any) => void;
   borderRadius?: number;
   isSender?: boolean;
+  isPreloaded?: boolean; // Skip animation for preloaded images
+  placeholderBackgroundColor?: string; // Custom background color for placeholder
 }
 
 const AlbumArt: React.FC<AlbumArtProps> = ({
@@ -19,7 +19,8 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
   onLoad,
   onError,
   borderRadius = 4,
-  isSender = false,
+  isPreloaded = false,
+  placeholderBackgroundColor,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageOpacity = useRef(new Animated.Value(0)).current;
@@ -50,15 +51,16 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
     const isInstantLoad = loadTime < 50; // If it loads in under 50ms, it's likely cached
 
     console.log(
-      `🖼️ Album art loaded in ${loadTime}ms (${isInstantLoad ? 'cached' : 'network'})`
+      `🖼️ Album art loaded in ${loadTime}ms (${isInstantLoad || isPreloaded ? 'cached/preloaded' : 'network'})`
     );
 
     if (!imageLoaded) {
       setImageLoaded(true);
 
-      if (isInstantLoad) {
-        // Image was cached, show instantly without animation
+      if (isInstantLoad || isPreloaded) {
+        // Image was cached/preloaded, show instantly without animation
         imageOpacity.setValue(1);
+        console.log('🖼️ Showing album art instantly (preloaded/cached)');
       } else {
         // Image loaded from network, fade in smoothly
         Animated.timing(imageOpacity, {
@@ -90,11 +92,13 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
     borderRadius,
   };
 
-  // Dynamic icon color based on bubble background
-  const iconColor = isSender ? Colors.white : Colors.textSecondary;
+  // Use custom background color or default
+  const backgroundStyle = {
+    backgroundColor: placeholderBackgroundColor || PLACEHOLDER_BACKGROUND,
+  };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[styles.container, containerStyle, backgroundStyle]}>
       {url ? (
         <>
           <Animated.View
@@ -111,25 +115,13 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
             />
           </Animated.View>
           {!imageLoaded && (
-            <View style={[styles.placeholder, containerStyle]}>
-              <SymbolView
-                name='music.note'
-                size={Math.floor(size * 0.48)} // Scale icon relative to container
-                type='hierarchical'
-                tintColor={iconColor}
-              />
-            </View>
+            <View
+              style={[styles.placeholder, containerStyle, backgroundStyle]}
+            />
           )}
         </>
       ) : (
-        <View style={[styles.placeholder, containerStyle]}>
-          <SymbolView
-            name='music.note'
-            size={Math.floor(size * 0.48)}
-            type='hierarchical'
-            tintColor={iconColor}
-          />
-        </View>
+        <View style={[styles.placeholder, containerStyle, backgroundStyle]} />
       )}
     </View>
   );
@@ -139,7 +131,6 @@ const PLACEHOLDER_BACKGROUND = 'rgba(0, 0, 0, 0.05)';
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: PLACEHOLDER_BACKGROUND,
     position: 'relative',
   },
   imageContainer: {
@@ -149,11 +140,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
   },
-  placeholder: {
-    alignItems: 'center',
-    backgroundColor: PLACEHOLDER_BACKGROUND,
-    justifyContent: 'center',
-  },
+  placeholder: {},
 });
 
 export default AlbumArt;

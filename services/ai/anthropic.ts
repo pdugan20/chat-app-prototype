@@ -9,6 +9,9 @@ interface ChatMessage {
   content: string;
 }
 
+// Track mentioned songs to prevent repetition
+let mentionedSongs = new Set<string>();
+
 class AnthropicService {
   private client: Anthropic | null = null;
 
@@ -62,20 +65,34 @@ class AnthropicService {
     }
 
     try {
+      // Build list of mentioned songs to avoid repetition
+      const mentionedSongsList = this.getMentionedSongs();
+      const mentionedSongsContext =
+        mentionedSongsList.length > 0
+          ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${mentionedSongsList.join('\n- ')}\n\nAlways suggest different songs/artists that haven't been mentioned.`
+          : '';
+
       const musicDetectionPrompt = `You are ${contactName}, having a casual text conversation with a friend. 
-Keep responses natural, conversational, and brief like real text messages.
+Keep responses natural, conversational, and brief like real text messages.${mentionedSongsContext}
 
 CRITICAL RULES:
-1. DEFAULT to TEXT_RESPONSE for normal conversation
-2. Use MUSIC_RESPONSE when user asks about music content:
+1. Use MUSIC_RESPONSE whenever the conversation involves actual songs or artists that could be shared
+2. Use MUSIC_RESPONSE for ANY of these scenarios:
    - "play a song" / "play some music" 
    - "recommend a song/artist/album"
    - "what should I listen to?"
    - "send me a song"
-   - "what's your favorite song by [artist]?"
+   - "what's your favorite [artist] song?"
    - "do you know another song by [artist]?"
    - "any other songs you like?"
-   - asking about specific songs/artists they want to hear
+   - "what song should I play next?"
+   - mentioning liking/loving a specific song
+   - asking about or discussing specific songs/artists
+   - when YOU mention a specific song name in your response
+   - when conversation is about music preferences
+   - when sharing music recommendations or favorites
+
+3. DEFAULT to TEXT_RESPONSE only for non-music conversation (weather, plans, feelings, etc.)
 
 Response formats:
 TEXT_RESPONSE
@@ -123,6 +140,16 @@ MUSIC_RESPONSE
 Classic 90s vibes!
 MUSIC_QUERY:search:fight for your right beastie boys
 
+User: "I love that new Olivia Rodrigo song"
+MUSIC_RESPONSE
+Yes! It's so good
+MUSIC_QUERY:search:vampire olivia rodrigo
+
+User: "What do you think of Dua Lipa?"
+MUSIC_RESPONSE
+She's amazing! Love this track
+MUSIC_QUERY:search:levitating dua lipa
+
 Remember: You're just ${contactName} texting casually. Most messages are just normal conversation - NOT about music.`;
 
       const response = await this.client.messages.create({
@@ -161,6 +188,9 @@ Remember: You're just ${contactName} texting casually. Most messages are just no
           ? musicQueryLine.replace('MUSIC_QUERY:', '').trim()
           : 'search:never gonna give you up rick astley';
 
+        // Track this song to prevent repetition
+        this.addMentionedSong(musicQuery);
+
         return {
           type: 'music',
           content: messageContent,
@@ -191,6 +221,22 @@ Remember: You're just ${contactName} texting casually. Most messages are just no
 
   isConfigured(): boolean {
     return !!this.client;
+  }
+
+  // Add song to mentioned list
+  addMentionedSong(songQuery: string): void {
+    mentionedSongs.add(songQuery.toLowerCase().trim());
+  }
+
+  // Get list of mentioned songs for prompt context
+  getMentionedSongs(): string[] {
+    return Array.from(mentionedSongs);
+  }
+
+  // Reset mentioned songs (for chat reset)
+  resetMentionedSongs(): void {
+    mentionedSongs.clear();
+    console.log('🎵 Cleared mentioned songs list');
   }
 }
 

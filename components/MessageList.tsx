@@ -54,7 +54,7 @@ const MessageList: React.FC<MessageListProps> = ({
                 isLastInGroup={isLastInGroup(messages, index)}
                 isFirstInGroup={isFirstInGroup(messages, index)}
                 hasReaction={
-                  message.hasReaction && isFirstInGroup(messages, index)
+                  !!message.hasReaction && isFirstInGroup(messages, index)
                 }
               />
             </Animated.View>
