@@ -3,8 +3,6 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
   Animated,
   FlatList,
@@ -67,7 +65,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // State
   const [aiEnabled] = useState(true);
-  const [inputBarHeight, setInputBarHeight] = useState(0);
   const [isSending, setIsSending] = useState(false);
 
   // Refs
@@ -110,7 +107,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const hasSetInitialDelivered = useRef(false);
   useEffect(() => {
     if (hasSetInitialDelivered.current) return;
-    
+
     // Find the last sender message
     const lastSenderMessageIndex = messages
       .map((msg, index) => ({ msg, index }))
@@ -118,14 +115,18 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       .find(({ msg }) => msg.isSender)?.index;
 
     if (lastSenderMessageIndex !== undefined) {
+      // Create individual animation values for initial delivered indicator
+      const initialDeliveredOpacity = new Animated.Value(1);
+      const initialDeliveredScale = new Animated.Value(1);
+
       setMessages(prev =>
         prev.map((msg, index) => {
           if (index === lastSenderMessageIndex) {
             return {
               ...msg,
               showDelivered: true,
-              deliveredOpacity: deliveredOpacity,
-              deliveredScale: deliveredScale,
+              deliveredOpacity: initialDeliveredOpacity,
+              deliveredScale: initialDeliveredScale,
             };
           } else if (msg.showDelivered) {
             // Remove delivered from other messages
@@ -138,9 +139,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         })
       );
 
-      // Set opacity immediately for existing delivered message
-      deliveredOpacity.setValue(1);
-      deliveredScale.setValue(1);
+      // Set initial values for immediate visibility (no animation needed for existing delivered)
+      initialDeliveredOpacity.setValue(1);
+      initialDeliveredScale.setValue(1);
       hasSetInitialDelivered.current = true;
     }
   }, [deliveredOpacity, deliveredScale, messages, setMessages]); // Only run once on mount
@@ -176,17 +177,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }
   }, [showTypingIndicator]);
 
-  // useEffect(() => {
-  //   if (inputBarHeight > 0) {
-  //     // Delay scroll to allow keyboard animation to settle
-  //     const delay = keyboardVisible ? 0 : 200;
-  //     setTimeout(() => {
-  //       if (scrollViewRef.current) {
-  //         scrollViewRef.current.scrollToEnd({ animated: true });
-  //       }
-  //     }, delay);
-  //   }
-  // }, [inputBarHeight, keyboardVisible]);
+  // Scroll to bottom when keyboard appears
+  useEffect(() => {
+    if (keyboardVisible) {
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToOffset({
+            offset: 999999,
+            animated: false, // Use false for immediate scroll
+          });
+        }
+      }, 50); // Reduced delay to sync better with keyboard
+    }
+  }, [keyboardVisible]);
 
   // Navigation handling
   useEffect(() => {
@@ -206,17 +209,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
     return unsubscribe;
   }, [navigation, chatId]);
-
-  // Calculate ScrollView padding
-  const calculateScrollViewPadding = () => {
-    const DEFAULT_PADDING = 48;
-    const MIN_PADDING = 10;
-
-    if (inputBarHeight === 0) return DEFAULT_PADDING;
-
-    const adjustment = keyboardVisible ? 2 : -32;
-    return Math.max(MIN_PADDING, inputBarHeight + adjustment);
-  };
 
   // Handlers
   const handleScrollViewLayout = () => {
@@ -267,41 +259,35 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   return (
     <View style={styles.fullContainer}>
       <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={0}
+        <Animated.View
+          style={[
+            styles.messagesContainer,
+            {
+              transform: getChatSlideTransform(chatSlideDown),
+            },
+          ]}
         >
-          <Animated.View
-            style={[
-              styles.messagesContainer,
-              {
-                transform: getChatSlideTransform(chatSlideDown),
-              },
+          <MessageList
+            messages={messages}
+            deliveredOpacity={deliveredOpacity}
+            deliveredScale={deliveredScale}
+            scrollViewRef={scrollViewRef}
+            style={styles.messagesList}
+            contentContainerStyle={[
+              styles.messagesContent,
+              keyboardVisible && styles.messagesContentKeyboardVisible,
             ]}
-          >
-            <MessageList
-              messages={messages}
-              deliveredOpacity={deliveredOpacity}
-              deliveredScale={deliveredScale}
-              scrollViewRef={scrollViewRef}
-              style={styles.messagesList}
-              contentContainerStyle={[
-                styles.messagesContent,
-                { paddingBottom: calculateScrollViewPadding() },
-              ]}
-              onLayout={handleScrollViewLayout}
-              onContentSizeChange={handleContentSizeChange}
-              ListFooterComponent={
-                <TypingSection
-                  showTypingIndicator={showTypingIndicator}
-                  typingIndicatorOpacity={typingIndicatorOpacity}
-                  messages={messages}
-                />
-              }
-            />
-          </Animated.View>
-        </KeyboardAvoidingView>
+            onLayout={handleScrollViewLayout}
+            onContentSizeChange={handleContentSizeChange}
+            ListFooterComponent={
+              <TypingSection
+                showTypingIndicator={showTypingIndicator}
+                typingIndicatorOpacity={typingIndicatorOpacity}
+                messages={messages}
+              />
+            }
+          />
+        </Animated.View>
       </SafeAreaView>
 
       <Animated.View
@@ -310,7 +296,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         <InputBar
           onSendMessage={handleSendMessage}
           keyboardVisible={keyboardVisible}
-          onHeightChange={setInputBarHeight}
           disabled={isSending}
         />
       </Animated.View>
@@ -347,19 +332,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
   },
-  keyboardAvoidingView: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
   messagesContainer: {
     backgroundColor: Colors.screenBackground,
     flex: 1,
   },
   messagesContent: {
-    paddingBottom: 48,
+    paddingBottom: 48, // Account for input bar height
     paddingLeft: Spacing.containerPadding,
     paddingRight: Spacing.inputPadding,
     paddingTop: 40,
+  },
+  messagesContentKeyboardVisible: {
+    paddingBottom: 55, // Extra space for delivered indicator when keyboard is visible
   },
   messagesList: {
     backgroundColor: Colors.screenBackground,

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Keyboard, Animated } from 'react-native';
-import { animateKeyboard } from '../utils/messageAnimations';
+import { Keyboard, Animated, Platform, Easing } from 'react-native';
 
 interface UseKeyboardReturn {
   keyboardHeight: Animated.Value;
@@ -12,25 +11,40 @@ export const useKeyboard = (): UseKeyboardReturn => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const keyboardWillShowListener = Keyboard.addListener(
-      'keyboardWillShow',
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    
+    const keyboardShowListener = Keyboard.addListener(
+      showEvent,
       event => {
         setKeyboardVisible(true);
-        animateKeyboard(keyboardHeight, event.endCoordinates.height).start();
+        Animated.spring(keyboardHeight, {
+          toValue: event.endCoordinates.height,
+          useNativeDriver: false,
+          velocity: 12,
+          tension: 150,
+          friction: 20,
+        }).start();
       }
     );
 
-    const keyboardWillHideListener = Keyboard.addListener(
-      'keyboardWillHide',
-      _event => {
+    const keyboardHideListener = Keyboard.addListener(
+      hideEvent,
+      event => {
         setKeyboardVisible(false);
-        animateKeyboard(keyboardHeight, 0).start();
+        Animated.spring(keyboardHeight, {
+          toValue: 0,
+          useNativeDriver: false,
+          velocity: 12,
+          tension: 150,
+          friction: 20,
+        }).start();
       }
     );
 
     return () => {
-      keyboardWillShowListener.remove();
-      keyboardWillHideListener.remove();
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
     };
   }, [keyboardHeight]);
 

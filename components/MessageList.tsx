@@ -36,6 +36,7 @@ type SpacingItem = {
 type DeliveredItem = {
   type: 'delivered';
   message: Message;
+  messageIndex: number;
   id: string;
 };
 
@@ -94,14 +95,12 @@ const MessageList: React.FC<MessageListProps> = ({
       });
 
       // Add delivered indicator if needed
-      if (
-        message.isSender &&
-        message.showDelivered &&
-        isLastInGroup(messages, index)
-      ) {
+      // Allow delivered to show even if not last in group during transition
+      if (message.isSender && message.showDelivered) {
         items.push({
           type: 'delivered',
           message,
+          messageIndex: index,
           id: `delivered-${message.id}`,
         });
       }
@@ -146,11 +145,13 @@ const MessageList: React.FC<MessageListProps> = ({
       }
 
       case 'delivered': {
-        const { message } = item;
+        const { message, messageIndex } = item;
+        const isLastInGroupDelivered = isLastInGroup(messages, messageIndex);
         return (
           <Animated.View
             style={[
               styles.deliveredContainer,
+              !isLastInGroupDelivered && styles.deliveredNotLastInGroup,
               {
                 opacity: message.deliveredOpacity || deliveredOpacity,
               },
@@ -202,6 +203,13 @@ const MessageList: React.FC<MessageListProps> = ({
       maxToRenderPerBatch={20}
       windowSize={10}
       keyboardShouldPersistTaps='handled'
+      keyboardDismissMode='on-drag'
+      automaticallyAdjustKeyboardInsets={true}
+      automaticallyAdjustContentInsets={false}
+      maintainVisibleContentPosition={{
+        minIndexForVisible: 0,
+        autoscrollToTopThreshold: 10,
+      }}
       ListFooterComponent={ListFooterComponent}
     />
   );
@@ -213,6 +221,9 @@ const styles = StyleSheet.create({
     marginLeft: '25%',
     marginRight: 0,
     marginTop: 2,
+  },
+  deliveredNotLastInGroup: {
+    marginBottom: 4,
   },
   deliveredText: {
     color: Colors.textSecondary,

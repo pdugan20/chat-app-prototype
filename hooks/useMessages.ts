@@ -101,22 +101,18 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
         const newDeliveredOpacity = new Animated.Value(0);
         const newDeliveredScale = new Animated.Value(0.7);
 
-        // Find and fade out old delivered message
+        // Find old delivered message and store its animation reference
         const oldDeliveredMessage = messages.find(
           msg => msg.showDelivered && msg.id !== messageId
         );
+        const oldDeliveredOpacity = oldDeliveredMessage?.deliveredOpacity;
+        const oldDeliveredScale = oldDeliveredMessage?.deliveredScale;
+        const oldMessageId = oldDeliveredMessage?.id;
 
-        if (oldDeliveredMessage?.deliveredOpacity) {
-          animateDeliveredFadeOut(oldDeliveredMessage.deliveredOpacity).start();
-        }
-
-        // Immediately swap in layout: remove old, add new (no double space)
+        // First, add the new delivered indicator
         setMessages(prev =>
           prev.map(msg => {
-            if (msg.showDelivered && msg.id !== messageId) {
-              // Remove old message from layout immediately
-              return { ...msg, showDelivered: false };
-            } else if (msg.id === messageId) {
+            if (msg.id === messageId) {
               // Add new message with fresh animation values
               return {
                 ...msg,
@@ -129,10 +125,48 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
           })
         );
 
-        // Animate the new delivered indicator in
-        animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
-          () => onComplete?.()
-        );
+        // After new delivered indicator animates in, fade out the old one
+        setTimeout(() => {
+          // Start fade out animation for old delivered indicator using stored reference
+          if (oldDeliveredOpacity && oldDeliveredScale) {
+            animateDeliveredFadeOut(
+              oldDeliveredOpacity,
+              oldDeliveredScale
+            ).start(
+              // Remove from layout only after animation completes
+              () => {
+                if (oldMessageId) {
+                  setMessages(prev =>
+                    prev.map(msg => {
+                      if (msg.id === oldMessageId && msg.showDelivered) {
+                        // Remove old message from layout after animation completes
+                        return { ...msg, showDelivered: false };
+                      }
+                      return msg;
+                    })
+                  );
+                }
+              }
+            );
+          } else if (oldMessageId) {
+            // Fallback: remove immediately if no animation values
+            setMessages(prev =>
+              prev.map(msg => {
+                if (msg.id === oldMessageId && msg.showDelivered) {
+                  return { ...msg, showDelivered: false };
+                }
+                return msg;
+              })
+            );
+          }
+        }, 200); // Wait for new delivered indicator to animate in
+
+        // Animate the new delivered indicator in with slight delay to ensure layout is complete
+        setTimeout(() => {
+          animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
+            () => onComplete?.()
+          );
+        }, 50);
       } else {
         // No existing delivered message, show new one directly
         const newDeliveredOpacity = new Animated.Value(0);
@@ -151,9 +185,12 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
           )
         );
 
-        animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
-          () => onComplete?.()
-        );
+        // Animate in with slight delay to ensure layout is complete
+        setTimeout(() => {
+          animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
+            () => onComplete?.()
+          );
+        }, 50);
       }
     }, ANIMATION_DELAYS.DELIVERED_SHOW);
   };

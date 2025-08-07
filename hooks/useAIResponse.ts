@@ -178,8 +178,6 @@ export const useAIResponse = ({
                   }
 
                   const musicAnimationValues = createMessageAnimationValues();
-                  // Set animation value to 1 immediately so bubble is visible
-                  musicAnimationValues.animationValue?.setValue(1);
 
                   const musicMessage: AppleMusicMessage = {
                     ...createMessage('', false), // Empty text for music bubble
@@ -207,10 +205,19 @@ export const useAIResponse = ({
                   // Add music bubble to chat flow
                   onAddMessage(musicMessage);
 
+                  // Start music bubble animation
+                  setTimeout(() => {
+                    if (musicAnimationValues.animationValue) {
+                      animateMessageSlideUp(
+                        musicAnimationValues.animationValue
+                      ).start();
+                    }
+                  }, 50);
+
                   // Animate the entire chat upward to reveal the music bubble
                   setTimeout(() => {
                     scrollToEnd();
-                  }, 50);
+                  }, 100);
 
                   // Update inbox preview with song info
                   const inboxDisplayText = songData
@@ -238,8 +245,6 @@ export const useAIResponse = ({
 
                   const fallbackMusicAnimationValues =
                     createMessageAnimationValues();
-                  // Set animation value to 1 immediately so bubble is visible
-                  fallbackMusicAnimationValues.animationValue?.setValue(1);
 
                   const musicMessage: AppleMusicMessage = {
                     ...createMessage('', false),
@@ -261,10 +266,19 @@ export const useAIResponse = ({
                   // Add fallback music bubble to chat flow
                   onAddMessage(musicMessage);
 
+                  // Start fallback music bubble animation
+                  setTimeout(() => {
+                    if (fallbackMusicAnimationValues.animationValue) {
+                      animateMessageSlideUp(
+                        fallbackMusicAnimationValues.animationValue
+                      ).start();
+                    }
+                  }, 50);
+
                   // Animate the entire chat upward to reveal the music bubble
                   setTimeout(() => {
                     scrollToEnd();
-                  }, 50);
+                  }, 100);
 
                   // Update inbox preview for fallback case (no song data)
                   onUpdateLastSentMessage(

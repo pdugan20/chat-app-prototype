@@ -86,12 +86,22 @@ export const animateDeliveredFadeIn = (
 /**
  * Animate delivered indicator fade out
  */
-export const animateDeliveredFadeOut = (opacity: Animated.Value) => {
-  return Animated.timing(opacity, {
-    toValue: 0,
-    duration: ANIMATION_DURATIONS.DELIVERED_FADE,
-    useNativeDriver: true,
-  });
+export const animateDeliveredFadeOut = (
+  opacity: Animated.Value,
+  scale: Animated.Value
+) => {
+  return Animated.parallel([
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: ANIMATION_DURATIONS.DELIVERED_FADE,
+      useNativeDriver: true,
+    }),
+    Animated.timing(scale, {
+      toValue: 0.7,
+      duration: ANIMATION_DURATIONS.DELIVERED_FADE,
+      useNativeDriver: true,
+    }),
+  ]);
 };
 
 /**
