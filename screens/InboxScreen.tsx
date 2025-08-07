@@ -17,6 +17,7 @@ import aiService from '../services/ai';
 import ChatListItem from '../components/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
 import { useChatUpdates } from '../contexts/ChatUpdateContext';
+import { resetEmitter } from '../utils/resetEmitter';
 
 type InboxScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -29,17 +30,62 @@ interface InboxScreenProps {
 
 const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   const [chats, setChats] = useState<ChatItem[]>(mockChats);
-  const { chatUpdates } = useChatUpdates();
+  const { chatUpdates, clearUpdate, resetAllUpdates } = useChatUpdates();
+  const isResetting = useRef(false);
+  const [forceOriginalData, setForceOriginalData] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
 
   const flatListRef = useRef<FlatList>(null);
 
+  // Listen for reset events from the header button
+  useEffect(() => {
+    const handleReset = () => {
+      isResetting.current = true;
+      
+      // Force original data mode
+      setForceOriginalData(true);
+      
+      // Force complete reset with fresh mock data
+      const freshMockChats = JSON.parse(JSON.stringify(mockChats));
+      setChats(freshMockChats);
+      
+      // Force complete re-render with new key
+      setResetKey(prev => prev + 1);
+      
+      global.resetAllChats = false;
+      if (global.chatMessages) {
+        global.chatMessages = {};
+      }
+      aiService.resetMentionedSongs();
+      
+      // Reset all context updates completely
+      resetAllUpdates();
+      
+      // Keep resetting flags true for longer to prevent any context interference
+      setTimeout(() => {
+        isResetting.current = false;
+        setForceOriginalData(false);
+      }, 2000);
+    };
+
+    const subscription = resetEmitter.addListener(handleReset);
+    
+    return () => subscription.remove();
+  }, [resetAllUpdates]);
+
   // Immediately apply context updates whenever chatUpdates changes
   useEffect(() => {
+    if (isResetting.current || forceOriginalData) return; // Skip updates during reset or when forcing original data
+    
     if (Object.keys(chatUpdates).length > 0) {
       setChats(prevChats => {
-        return prevChats.map(chat => {
+        let hasChanges = false;
+        const updatedChats = prevChats.map(chat => {
           const contextUpdate = chatUpdates[chat.id];
-          if (contextUpdate) {
+          if (contextUpdate && 
+              (chat.lastMessage !== contextUpdate.lastMessage || 
+               chat.timestamp !== contextUpdate.timestamp)) {
+            hasChanges = true;
             return { 
               ...chat, 
               lastMessage: contextUpdate.lastMessage,
@@ -49,78 +95,47 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
           }
           return chat;
         });
+        return hasChanges ? updatedChats : prevChats;
       });
     }
   }, [chatUpdates]);
 
-  // Function to check and apply updates
-  const checkForUpdates = React.useCallback(() => {
-    // Check for reset all chats flag
-    if (global.resetAllChats) {
-      console.log('Resetting all chats to original state');
-      setChats([...mockChats]); // Reset to original mockChats with original unread states
-      global.resetAllChats = false;
-      // Also clear all stored chat messages
-      if (global.chatMessages) {
-        global.chatMessages = {};
-      }
-      // Reset mentioned songs
-      aiService.resetMentionedSongs();
-      return;
-    }
-
-    // Context updates are now handled by useEffect above
-
-    // Check for pending chat updates from global state
+  // Legacy update function - now only used for global state cleanup if needed
+  const handleGlobalStateCleanup = React.useCallback(() => {
+    // Check for pending chat updates from global state (fallback)
     const pendingUpdate = global.pendingChatUpdate;
     if (pendingUpdate) {
-      console.log('Applying update to chat:', pendingUpdate.id);
+      console.log('Applying fallback update to chat:', pendingUpdate.id);
       setChats(prevChats =>
         prevChats.map(chat =>
           chat.id === pendingUpdate.id ? { ...chat, ...pendingUpdate } : chat
         )
       );
-      // Clear the global state to prevent repeated updates
       global.pendingChatUpdate = undefined;
     }
 
     // Check for force refresh flag
     if (global.forceInboxRefresh) {
       global.forceInboxRefresh = false;
-      // Just force a re-render by updating state
       setChats(prevChats => [...prevChats]);
     }
   }, []);
 
-  // Poll for updates every 500ms, but only when screen is focused
-  const [isFocused, setIsFocused] = useState(false);
+  // Remove unused focus tracking that was causing re-renders
 
-  useEffect(() => {
-    const unsubscribeFocus = navigation.addListener('focus', () =>
-      setIsFocused(true)
-    );
-    const unsubscribeBlur = navigation.addListener('blur', () =>
-      setIsFocused(false)
-    );
+  // Disabled polling since we now use context for immediate updates
+  // useEffect(() => {
+  //   if (!isFocused) return;
+  //   const interval = setInterval(checkForUpdates, 500);
+  //   return () => clearInterval(interval);
+  // }, [checkForUpdates, isFocused]);
 
-    return () => {
-      unsubscribeFocus();
-      unsubscribeBlur();
-    };
-  }, [navigation]);
-
-  useEffect(() => {
-    if (!isFocused) return;
-
-    const interval = setInterval(checkForUpdates, 500);
-    return () => clearInterval(interval);
-  }, [checkForUpdates, isFocused]);
-
-  // Handle when returning from chat screen - now just triggers the check
+  // Handle cleanup when returning from chat screen
   useFocusEffect(
     React.useCallback(() => {
-      checkForUpdates();
-    }, [checkForUpdates])
+      // One-time cleanup of any pending global state
+      handleGlobalStateCleanup();
+    }, [handleGlobalStateCleanup])
   );
   const renderChatItem = ({ item }: { item: ChatItem }) => (
     <ChatListItem
@@ -148,6 +163,7 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
 
   return (
     <FlatList
+      key={resetKey} // Force complete re-render on reset
       ref={flatListRef}
       data={chats}
       renderItem={renderChatItem}

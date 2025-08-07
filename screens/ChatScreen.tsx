@@ -114,6 +114,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     },
   });
 
+  // Immediately scroll to bottom when component mounts
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToOffset({
+        offset: 999999,
+        animated: false,
+      });
+    }
+  }, []);
+
   // Set delivered indicator on last sender message when chat loads
   const hasSetInitialDelivered = useRef(false);
   useEffect(() => {
@@ -204,35 +214,41 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Navigation handling
   useEffect(() => {
-    const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', () => {
-      if (lastSentMessageRef.current) {
-        global.pendingChatUpdate = {
-          id: chatId,
-          lastMessage: lastSentMessageRef.current.isUserMessage
-            ? `You: ${lastSentMessageRef.current.text}`
-            : lastSentMessageRef.current.text,
-          timestamp: lastSentMessageRef.current.timestamp,
-          unread: false,
-        };
-        lastSentMessageRef.current = null;
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      () => {
+        if (lastSentMessageRef.current) {
+          global.pendingChatUpdate = {
+            id: chatId,
+            lastMessage: lastSentMessageRef.current.isUserMessage
+              ? `You: ${lastSentMessageRef.current.text}`
+              : lastSentMessageRef.current.text,
+            timestamp: lastSentMessageRef.current.timestamp,
+            unread: false,
+          };
+          lastSentMessageRef.current = null;
+        }
       }
-    });
+    );
 
     // Also listen for transition start to handle swipe back earlier
-    const unsubscribeTransitionStart = navigation.addListener('transitionStart', (e) => {
-      // Only update on backwards transition (going back to inbox)
-      if (e.data?.closing && lastSentMessageRef.current) {
-        global.pendingChatUpdate = {
-          id: chatId,
-          lastMessage: lastSentMessageRef.current.isUserMessage
-            ? `You: ${lastSentMessageRef.current.text}`
-            : lastSentMessageRef.current.text,
-          timestamp: lastSentMessageRef.current.timestamp,
-          unread: false,
-        };
-        lastSentMessageRef.current = null;
+    const unsubscribeTransitionStart = navigation.addListener(
+      'transitionStart',
+      e => {
+        // Only update on backwards transition (going back to inbox)
+        if (e.data?.closing && lastSentMessageRef.current) {
+          global.pendingChatUpdate = {
+            id: chatId,
+            lastMessage: lastSentMessageRef.current.isUserMessage
+              ? `You: ${lastSentMessageRef.current.text}`
+              : lastSentMessageRef.current.text,
+            timestamp: lastSentMessageRef.current.timestamp,
+            unread: false,
+          };
+          lastSentMessageRef.current = null;
+        }
       }
-    });
+    );
 
     return () => {
       unsubscribeBeforeRemove();
@@ -242,15 +258,13 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Handlers
   const handleScrollViewLayout = () => {
-    // Force scroll to absolute bottom with large offset
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToOffset({
-          offset: 999999,
-          animated: false,
-        });
-      }
-    }, 100);
+    // Ensure scroll to bottom on layout (no delay needed since initial scroll is handled in useEffect)
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToOffset({
+        offset: 999999,
+        animated: false,
+      });
+    }
   };
 
   const handleContentSizeChange = () => {
@@ -258,7 +272,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   };
 
   const handleSendMessage = (text: string) => {
-    if (isSending) return;
+    if (isSending || !text.trim()) return;
 
     setIsSending(true);
 

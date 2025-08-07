@@ -11,6 +11,7 @@ import ChatScreen from './screens/ChatScreen';
 import { musicPreloader } from './utils/musicPreloader';
 import { allConversations } from './data/messages';
 import { ChatUpdateProvider } from './contexts/ChatUpdateContext';
+import { resetEmitter } from './utils/resetEmitter';
 
 declare const global: {
   resetAllChats?: boolean;
@@ -79,11 +80,8 @@ export default function App() {
             }
             // Clear music preloader cache
             musicPreloader.clearCache();
-            // Force a re-render by triggering focus effect
-            setTimeout(() => {
-              global.forceInboxRefresh = true;
-            }, 100);
-            console.log('Reset all chats triggered');
+            // Emit reset event instead of using global flag
+            resetEmitter.emit();
           },
         },
         {

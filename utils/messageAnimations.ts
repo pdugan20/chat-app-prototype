@@ -3,7 +3,7 @@ import { Animated } from 'react-native';
 // Animation constants
 export const ANIMATION_DURATIONS = {
   MESSAGE_FADE: 300,
-  DELIVERED_FADE: 300,
+  DELIVERED_FADE: 300, // Back to normal timing
   TYPING_INDICATOR: 300,
   CHAT_SLIDE: 300,
   CHAT_SLIDE_FAST: 150,
@@ -234,5 +234,5 @@ export const getDeliveredScaleTransform = (
   fallbackScale: Animated.Value
 ) => {
   const scaleValue = scale || fallbackScale;
-  return [{ scaleX: scaleValue }];
+  return [{ scale: scaleValue }]; // Changed from scaleX to scale for uniform scaling
 };

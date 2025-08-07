@@ -11,6 +11,7 @@ interface ChatUpdateContextType {
   chatUpdates: { [chatId: string]: ChatUpdate };
   updateChat: (chatId: string, update: ChatUpdate) => void;
   clearUpdate: (chatId: string) => void;
+  resetAllUpdates: () => void;
 }
 
 const ChatUpdateContext = createContext<ChatUpdateContextType | undefined>(undefined);
@@ -44,8 +45,12 @@ export const ChatUpdateProvider: React.FC<ChatUpdateProviderProps> = ({ children
     });
   };
 
+  const resetAllUpdates = () => {
+    setChatUpdates({});
+  };
+
   return (
-    <ChatUpdateContext.Provider value={{ chatUpdates, updateChat, clearUpdate }}>
+    <ChatUpdateContext.Provider value={{ chatUpdates, updateChat, clearUpdate, resetAllUpdates }}>
       {children}
     </ChatUpdateContext.Provider>
   );

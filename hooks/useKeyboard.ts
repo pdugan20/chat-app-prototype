@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Keyboard, Animated, Platform, Easing } from 'react-native';
+import { Keyboard, Animated, Platform } from 'react-native';
 
 interface UseKeyboardReturn {
   keyboardHeight: Animated.Value;

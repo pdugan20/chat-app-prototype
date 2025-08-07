@@ -108,12 +108,12 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
         const oldDeliveredOpacity = oldDeliveredMessage?.deliveredOpacity;
         const oldDeliveredScale = oldDeliveredMessage?.deliveredScale;
         const oldMessageId = oldDeliveredMessage?.id;
+        
 
         // First, add the new delivered indicator
         setMessages(prev =>
           prev.map(msg => {
             if (msg.id === messageId) {
-              // Add new message with fresh animation values
               return {
                 ...msg,
                 showDelivered: true,
@@ -125,72 +125,58 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
           })
         );
 
-        // After new delivered indicator animates in, fade out the old one
+        // Start both animations at the exact same time
         setTimeout(() => {
-          // Start fade out animation for old delivered indicator using stored reference
+          // Start old delivered fade-out
           if (oldDeliveredOpacity && oldDeliveredScale) {
-            animateDeliveredFadeOut(
-              oldDeliveredOpacity,
-              oldDeliveredScale
-            ).start(
-              // Remove from layout only after animation completes
-              () => {
-                if (oldMessageId) {
-                  setMessages(prev =>
-                    prev.map(msg => {
-                      if (msg.id === oldMessageId && msg.showDelivered) {
-                        // Remove old message from layout after animation completes
-                        return { ...msg, showDelivered: false };
-                      }
-                      return msg;
-                    })
-                  );
-                }
-              }
-            );
-          } else if (oldMessageId) {
-            // Fallback: remove immediately if no animation values
-            setMessages(prev =>
-              prev.map(msg => {
-                if (msg.id === oldMessageId && msg.showDelivered) {
-                  return { ...msg, showDelivered: false };
-                }
-                return msg;
-              })
-            );
+            animateDeliveredFadeOut(oldDeliveredOpacity, oldDeliveredScale).start();
           }
-        }, 200); // Wait for new delivered indicator to animate in
 
-        // Animate the new delivered indicator in with slight delay to ensure layout is complete
-        setTimeout(() => {
-          animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
-            () => onComplete?.()
-          );
-        }, 50);
+          // Start new delivered fade-in simultaneously  
+          animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(() => {
+            onComplete?.();
+          });
+
+          // Remove old delivered from DOM at exactly 150ms (halfway through animations)
+          setTimeout(() => {
+            if (oldMessageId) {
+              setMessages(prev =>
+                prev.map(msg => {
+                  if (msg.id === oldMessageId && msg.showDelivered) {
+                    return { ...msg, showDelivered: false };
+                  }
+                  return msg;
+                })
+              );
+            }
+          }, 150); // Remove halfway through the 300ms animations
+        }, 200);
       } else {
-        // No existing delivered message, show new one directly
+        // No existing delivered message, use same animation approach
         const newDeliveredOpacity = new Animated.Value(0);
         const newDeliveredScale = new Animated.Value(0.7);
 
+        // Add the new delivered indicator
         setMessages(prev =>
-          prev.map(msg =>
-            msg.id === messageId
-              ? {
-                  ...msg,
-                  showDelivered: true,
-                  deliveredOpacity: newDeliveredOpacity,
-                  deliveredScale: newDeliveredScale,
-                }
-              : msg
-          )
+          prev.map(msg => {
+            if (msg.id === messageId) {
+              return {
+                ...msg,
+                showDelivered: true,
+                deliveredOpacity: newDeliveredOpacity,
+                deliveredScale: newDeliveredScale,
+              };
+            }
+            return msg;
+          })
         );
 
-        // Animate in with slight delay to ensure layout is complete
+        // Animate in the new delivered indicator
         setTimeout(() => {
           animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(
             () => onComplete?.()
           );
-        }, 50);
+        }, 200);
       }
     }, ANIMATION_DELAYS.DELIVERED_SHOW);
   };
