@@ -205,19 +205,15 @@ export const useAIResponse = ({
                   // Add music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start music bubble animation
-                  setTimeout(() => {
-                    if (musicAnimationValues.animationValue) {
-                      animateMessageSlideUp(
-                        musicAnimationValues.animationValue
-                      ).start();
-                    }
-                  }, 50);
-
-                  // Animate the entire chat upward to reveal the music bubble
-                  setTimeout(() => {
-                    scrollToEnd();
-                  }, 100);
+                  // Start both animations simultaneously for music bubble
+                  if (musicAnimationValues.animationValue) {
+                    Animated.parallel([
+                      animateMessageSlideUp(musicAnimationValues.animationValue),
+                      animateChatSlideUp(chatSlideDown)
+                    ]).start(() => {
+                      scrollToEnd();
+                    });
+                  }
 
                   // Update inbox preview with song info
                   const inboxDisplayText = songData
@@ -232,9 +228,6 @@ export const useAIResponse = ({
                     }),
                     false
                   );
-
-                  // Reset chat slide position
-                  animateChatSlideUp(chatSlideDown).start();
                 } catch (error) {
                   console.error('Failed to pre-fetch music data:', error);
 
@@ -319,9 +312,15 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(aiMessage);
 
-              // Start AI message animation
+              // Start both animations simultaneously
               if (aiAnimationValues.animationValue) {
-                animateMessageSlideUp(aiAnimationValues.animationValue).start();
+                // Combine message slide-up and chat slide-up into parallel animation
+                Animated.parallel([
+                  animateMessageSlideUp(aiAnimationValues.animationValue),
+                  animateChatSlideUp(chatSlideDown)
+                ]).start(() => {
+                  scrollToEnd();
+                });
               }
 
               // Update inbox preview for text messages
@@ -333,13 +332,6 @@ export const useAIResponse = ({
                 }),
                 false
               );
-
-              // Wait for message to render, then slide chat back up
-              setTimeout(() => {
-                animateChatSlideUp(chatSlideDown).start(() => {
-                  scrollToEnd();
-                });
-              }, ANIMATION_DELAYS.MESSAGE_RENDER);
             }, ANIMATION_DELAYS.CHAT_SLIDE_PAUSE);
           }
         );
