@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   containerKeyboardVisible: {
-    paddingBottom: Layout.inputPaddingBottomKeyboard,
+    paddingBottom: Layout.inputPaddingBottomKeyboard + 2,
   },
   inputContainer: {
     alignItems: 'flex-end',

@@ -52,6 +52,7 @@ interface MessageListProps {
   onContentSizeChange?: () => void;
   scrollViewRef?: React.RefObject<FlatList | null>;
   ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
+  disableKeyboardHandling?: boolean;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -64,6 +65,7 @@ const MessageList: React.FC<MessageListProps> = ({
   onContentSizeChange,
   scrollViewRef,
   ListFooterComponent,
+  disableKeyboardHandling = false,
 }) => {
   // Create flattened data structure for FlatList
   const flatListData = useMemo((): FlatListItem[] => {
@@ -203,7 +205,7 @@ const MessageList: React.FC<MessageListProps> = ({
       maxToRenderPerBatch={20}
       windowSize={10}
       keyboardShouldPersistTaps='handled'
-      keyboardDismissMode='on-drag'
+      keyboardDismissMode='interactive'
       automaticallyAdjustKeyboardInsets={true}
       automaticallyAdjustContentInsets={false}
       maintainVisibleContentPosition={{

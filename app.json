@@ -20,6 +20,12 @@
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
         "UIViewControllerBasedStatusBarAppearance": false,
+        "LSApplicationQueriesSchemes": [
+          "music",
+          "itmss",
+          "itms-apps",
+          "https"
+        ],
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {
             "images.weserv.nl": {
