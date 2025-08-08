@@ -114,15 +114,27 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     },
   });
 
-  // Immediately scroll to bottom when component mounts
+  // Scroll to bottom when component mounts and when screen comes into focus
   useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToOffset({
-        offset: 999999,
-        animated: false,
-      });
-    }
-  }, []);
+    const scrollToBottom = () => {
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToOffset({
+            offset: 999999,
+            animated: false,
+          });
+        }
+      }, 100); // Small delay to ensure content is rendered
+    };
+
+    // Scroll on mount
+    scrollToBottom();
+
+    // Also scroll when screen comes into focus (when navigating back)
+    const unsubscribeFocus = navigation.addListener('focus', scrollToBottom);
+
+    return unsubscribeFocus;
+  }, [navigation]);
 
   // Set delivered indicator on last sender message when chat loads
   const hasSetInitialDelivered = useRef(false);
@@ -258,13 +270,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Handlers
   const handleScrollViewLayout = () => {
-    // Ensure scroll to bottom on layout (no delay needed since initial scroll is handled in useEffect)
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToOffset({
-        offset: 999999,
-        animated: false,
-      });
-    }
+    // Ensure scroll to bottom on layout with a small delay to ensure content is fully rendered
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToOffset({
+          offset: 999999,
+          animated: false,
+        });
+      }
+    }, 50);
   };
 
   const handleContentSizeChange = () => {
