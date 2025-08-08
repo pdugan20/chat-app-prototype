@@ -98,7 +98,7 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
 
       if (hasExistingDelivered) {
         // Let old animate out completely, then add new and animate in
-        
+
         // Find old delivered message and store its animation reference
         const oldDeliveredMessage = messages.find(
           msg => msg.showDelivered && msg.id !== messageId
@@ -110,7 +110,10 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
         // Start old delivered fade-out first
         setTimeout(() => {
           if (oldDeliveredOpacity && oldDeliveredScale) {
-            animateDeliveredFadeOut(oldDeliveredOpacity, oldDeliveredScale).start(() => {
+            animateDeliveredFadeOut(
+              oldDeliveredOpacity,
+              oldDeliveredScale
+            ).start(() => {
               // Remove old delivered after animation completes
               if (oldMessageId) {
                 setMessages(prev =>
@@ -141,7 +144,10 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
                 );
 
                 // Animate in the new delivered indicator immediately
-                animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(() => {
+                animateDeliveredFadeIn(
+                  newDeliveredOpacity,
+                  newDeliveredScale
+                ).start(() => {
                   onComplete?.();
                 });
               }

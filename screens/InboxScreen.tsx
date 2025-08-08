@@ -7,8 +7,6 @@ declare const global: {
   forceInboxRefresh?: boolean;
   chatMessages?: { [chatId: string]: unknown[] };
 };
-declare const setInterval: (callback: () => void, delay: number) => number;
-declare const clearInterval: (id: number) => void;
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -30,7 +28,7 @@ interface InboxScreenProps {
 
 const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   const [chats, setChats] = useState<ChatItem[]>(mockChats);
-  const { chatUpdates, clearUpdate, resetAllUpdates } = useChatUpdates();
+  const { chatUpdates, resetAllUpdates } = useChatUpdates();
   const isResetting = useRef(false);
   const [forceOriginalData, setForceOriginalData] = useState(false);
   const [resetKey, setResetKey] = useState(0);
@@ -41,26 +39,26 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   useEffect(() => {
     const handleReset = () => {
       isResetting.current = true;
-      
+
       // Force original data mode
       setForceOriginalData(true);
-      
+
       // Force complete reset with fresh mock data
       const freshMockChats = JSON.parse(JSON.stringify(mockChats));
       setChats(freshMockChats);
-      
+
       // Force complete re-render with new key
       setResetKey(prev => prev + 1);
-      
+
       global.resetAllChats = false;
       if (global.chatMessages) {
         global.chatMessages = {};
       }
       aiService.resetMentionedSongs();
-      
+
       // Reset all context updates completely
       resetAllUpdates();
-      
+
       // Keep resetting flags true for longer to prevent any context interference
       setTimeout(() => {
         isResetting.current = false;
@@ -69,28 +67,30 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
     };
 
     const subscription = resetEmitter.addListener(handleReset);
-    
+
     return () => subscription.remove();
-  }, [resetAllUpdates]);
+  }, [resetAllUpdates, forceOriginalData]);
 
   // Immediately apply context updates whenever chatUpdates changes
   useEffect(() => {
     if (isResetting.current || forceOriginalData) return; // Skip updates during reset or when forcing original data
-    
+
     if (Object.keys(chatUpdates).length > 0) {
       setChats(prevChats => {
         let hasChanges = false;
         const updatedChats = prevChats.map(chat => {
           const contextUpdate = chatUpdates[chat.id];
-          if (contextUpdate && 
-              (chat.lastMessage !== contextUpdate.lastMessage || 
-               chat.timestamp !== contextUpdate.timestamp)) {
+          if (
+            contextUpdate &&
+            (chat.lastMessage !== contextUpdate.lastMessage ||
+              chat.timestamp !== contextUpdate.timestamp)
+          ) {
             hasChanges = true;
-            return { 
-              ...chat, 
+            return {
+              ...chat,
               lastMessage: contextUpdate.lastMessage,
               timestamp: contextUpdate.timestamp,
-              unread: contextUpdate.unread 
+              unread: contextUpdate.unread,
             };
           }
           return chat;
@@ -98,7 +98,7 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
         return hasChanges ? updatedChats : prevChats;
       });
     }
-  }, [chatUpdates]);
+  }, [chatUpdates, forceOriginalData]);
 
   // Legacy update function - now only used for global state cleanup if needed
   const handleGlobalStateCleanup = React.useCallback(() => {

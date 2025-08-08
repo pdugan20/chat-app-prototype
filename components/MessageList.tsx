@@ -65,7 +65,6 @@ const MessageList: React.FC<MessageListProps> = ({
   onContentSizeChange,
   scrollViewRef,
   ListFooterComponent,
-  disableKeyboardHandling = false,
 }) => {
   // Create flattened data structure for FlatList
   const flatListData = useMemo((): FlatListItem[] => {
@@ -126,7 +125,6 @@ const MessageList: React.FC<MessageListProps> = ({
         return (
           <Animated.View
             style={{
-              opacity: 1,
               transform: getMessageSlideTransform(
                 message.animationValue,
                 message.isSender

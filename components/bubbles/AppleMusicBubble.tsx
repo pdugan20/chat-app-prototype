@@ -156,12 +156,15 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
 
       if (appleMusicUrl) {
         console.log('🎵 Opening Apple Music:', appleMusicUrl);
-        
+
         // Try multiple URL schemes for better compatibility
         const urlSchemes = [
           appleMusicUrl, // HTTPS URL (works in browser/web view)
           appleMusicUrl.replace('https://', 'music://'), // Apple Music app deep link
-          appleMusicUrl.replace('https://music.apple.com', 'itmss://music.apple.com'), // iTunes Store scheme
+          appleMusicUrl.replace(
+            'https://music.apple.com',
+            'itmss://music.apple.com'
+          ), // iTunes Store scheme
         ];
 
         let opened = false;
@@ -180,8 +183,12 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         }
 
         if (!opened) {
-          console.log('🎵 Could not open Apple Music. This is common in simulators.');
-          console.log('🎵 Try testing on a real device or ensure Safari can open the URL.');
+          console.log(
+            '🎵 Could not open Apple Music. This is common in simulators.'
+          );
+          console.log(
+            '🎵 Try testing on a real device or ensure Safari can open the URL.'
+          );
           // In simulator, just log the URL that would be opened
           console.log('🎵 Would open:', appleMusicUrl);
         }

@@ -11,36 +11,32 @@ export const useKeyboard = (): UseKeyboardReturn => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    
-    const keyboardShowListener = Keyboard.addListener(
-      showEvent,
-      event => {
-        setKeyboardVisible(true);
-        Animated.spring(keyboardHeight, {
-          toValue: event.endCoordinates.height,
-          useNativeDriver: false,
-          velocity: 12,
-          tension: 150,
-          friction: 20,
-        }).start();
-      }
-    );
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const keyboardHideListener = Keyboard.addListener(
-      hideEvent,
-      event => {
-        setKeyboardVisible(false);
-        Animated.spring(keyboardHeight, {
-          toValue: 0,
-          useNativeDriver: false,
-          velocity: 12,
-          tension: 150,
-          friction: 20,
-        }).start();
-      }
-    );
+    const keyboardShowListener = Keyboard.addListener(showEvent, event => {
+      setKeyboardVisible(true);
+      Animated.spring(keyboardHeight, {
+        toValue: event.endCoordinates.height,
+        useNativeDriver: false,
+        velocity: 12,
+        tension: 150,
+        friction: 20,
+      }).start();
+    });
+
+    const keyboardHideListener = Keyboard.addListener(hideEvent, () => {
+      setKeyboardVisible(false);
+      Animated.spring(keyboardHeight, {
+        toValue: 0,
+        useNativeDriver: false,
+        velocity: 12,
+        tension: 150,
+        friction: 20,
+      }).start();
+    });
 
     return () => {
       keyboardShowListener.remove();

@@ -274,7 +274,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const [shouldScrollOnContentChange, setShouldScrollOnContentChange] = useState(false);
+  const [shouldScrollOnContentChange, setShouldScrollOnContentChange] =
+    useState(false);
 
   const handleContentSizeChange = () => {
     // Only scroll if we're expecting it (after focus event)

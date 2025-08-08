@@ -208,8 +208,10 @@ export const useAIResponse = ({
                   // Start both animations simultaneously for music bubble
                   if (musicAnimationValues.animationValue) {
                     Animated.parallel([
-                      animateMessageSlideUp(musicAnimationValues.animationValue),
-                      animateChatSlideUp(chatSlideDown)
+                      animateMessageSlideUp(
+                        musicAnimationValues.animationValue
+                      ),
+                      animateChatSlideUp(chatSlideDown),
                     ]).start(() => {
                       scrollToEnd();
                     });
@@ -317,7 +319,7 @@ export const useAIResponse = ({
                 // Combine message slide-up and chat slide-up into parallel animation
                 Animated.parallel([
                   animateMessageSlideUp(aiAnimationValues.animationValue),
-                  animateChatSlideUp(chatSlideDown)
+                  animateChatSlideUp(chatSlideDown),
                 ]).start(() => {
                   scrollToEnd();
                 });

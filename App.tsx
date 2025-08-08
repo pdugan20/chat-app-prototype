@@ -96,104 +96,104 @@ export default function App() {
       <StatusBar style='dark' />
       <ChatUpdateProvider>
         <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName='Inbox'
-          screenOptions={{
-            presentation: 'card',
-            animation: 'default',
-            animationDuration: 350,
-          }}
-        >
-          <Stack.Screen
-            name='Inbox'
-            component={InboxScreen}
-            options={{
-              headerLargeTitle: true,
-              headerLargeTitleShadowVisible: false,
-              headerBlurEffect: 'light',
-              headerSearchBarOptions: {
-                placeholder: 'Search',
-                placement: 'stacked',
-                hideWhenScrolling: true,
-              },
-              headerLeft: () => (
-                <TouchableOpacity style={headerStyles.editButton}>
-                  <Text style={headerStyles.editText}>Edit</Text>
-                </TouchableOpacity>
-              ),
-              headerRight: () => (
-                <View style={headerStyles.rightButtonContainer}>
-                  <TouchableOpacity
-                    style={headerStyles.iconButton}
-                    onPress={handleEllipsisPress}
-                    activeOpacity={0.6}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <SymbolView
-                      name='ellipsis.circle'
-                      size={24}
-                      type='monochrome'
-                      tintColor={Colors.systemBlue}
-                      weight='regular'
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={headerStyles.composeButton}>
-                    <SymbolView
-                      name='square.and.pencil'
-                      size={24}
-                      type='monochrome'
-                      tintColor={Colors.systemBlue}
-                      weight='regular'
-                    />
-                  </TouchableOpacity>
-                </View>
-              ),
-              title: 'Messages',
+          <Stack.Navigator
+            initialRouteName='Inbox'
+            screenOptions={{
+              presentation: 'card',
+              animation: 'default',
+              animationDuration: 350,
             }}
-          />
-          <Stack.Screen
-            name='Chat'
-            component={ChatScreen}
-            options={{
-              headerShown: true,
-              headerTransparent: true,
-              headerTitle: '',
-              headerBackTitle: '',
-              headerStyle: {
-                backgroundColor: 'transparent',
-              },
-              headerLeft: () => (
-                <TouchableOpacity style={headerStyles.hiddenEditButton}>
-                  <Text style={headerStyles.hiddenEditText}>Edit</Text>
-                </TouchableOpacity>
-              ),
-              headerRight: () => (
-                <View style={headerStyles.hiddenRightButtonContainer}>
-                  <TouchableOpacity style={headerStyles.iconButton}>
-                    <SymbolView
-                      name='ellipsis.circle'
-                      size={24}
-                      type='monochrome'
-                      tintColor={Colors.systemBlue}
-                      weight='regular'
-                    />
+          >
+            <Stack.Screen
+              name='Inbox'
+              component={InboxScreen}
+              options={{
+                headerLargeTitle: true,
+                headerLargeTitleShadowVisible: false,
+                headerBlurEffect: 'light',
+                headerSearchBarOptions: {
+                  placeholder: 'Search',
+                  placement: 'stacked',
+                  hideWhenScrolling: true,
+                },
+                headerLeft: () => (
+                  <TouchableOpacity style={headerStyles.editButton}>
+                    <Text style={headerStyles.editText}>Edit</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={headerStyles.hiddenComposeButton}>
-                    <SymbolView
-                      name='square.and.pencil'
-                      size={24}
-                      type='monochrome'
-                      tintColor={Colors.systemBlue}
-                      weight='regular'
-                    />
+                ),
+                headerRight: () => (
+                  <View style={headerStyles.rightButtonContainer}>
+                    <TouchableOpacity
+                      style={headerStyles.iconButton}
+                      onPress={handleEllipsisPress}
+                      activeOpacity={0.6}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <SymbolView
+                        name='ellipsis.circle'
+                        size={24}
+                        type='monochrome'
+                        tintColor={Colors.systemBlue}
+                        weight='regular'
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={headerStyles.composeButton}>
+                      <SymbolView
+                        name='square.and.pencil'
+                        size={24}
+                        type='monochrome'
+                        tintColor={Colors.systemBlue}
+                        weight='regular'
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ),
+                title: 'Messages',
+              }}
+            />
+            <Stack.Screen
+              name='Chat'
+              component={ChatScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerTitle: '',
+                headerBackTitle: '',
+                headerStyle: {
+                  backgroundColor: 'transparent',
+                },
+                headerLeft: () => (
+                  <TouchableOpacity style={headerStyles.hiddenEditButton}>
+                    <Text style={headerStyles.hiddenEditText}>Edit</Text>
                   </TouchableOpacity>
-                </View>
-              ),
-              animationTypeForReplace: 'push',
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+                ),
+                headerRight: () => (
+                  <View style={headerStyles.hiddenRightButtonContainer}>
+                    <TouchableOpacity style={headerStyles.iconButton}>
+                      <SymbolView
+                        name='ellipsis.circle'
+                        size={24}
+                        type='monochrome'
+                        tintColor={Colors.systemBlue}
+                        weight='regular'
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={headerStyles.hiddenComposeButton}>
+                      <SymbolView
+                        name='square.and.pencil'
+                        size={24}
+                        type='monochrome'
+                        tintColor={Colors.systemBlue}
+                        weight='regular'
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ),
+                animationTypeForReplace: 'push',
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
       </ChatUpdateProvider>
     </>
   );

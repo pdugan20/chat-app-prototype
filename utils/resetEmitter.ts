@@ -6,5 +6,5 @@ export const resetEmitter = {
   },
   addListener: (callback: () => void) => {
     return DeviceEventEmitter.addListener('resetAllChats', callback);
-  }
+  },
 };

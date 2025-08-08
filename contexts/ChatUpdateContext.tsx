@@ -14,7 +14,9 @@ interface ChatUpdateContextType {
   resetAllUpdates: () => void;
 }
 
-const ChatUpdateContext = createContext<ChatUpdateContextType | undefined>(undefined);
+const ChatUpdateContext = createContext<ChatUpdateContextType | undefined>(
+  undefined
+);
 
 export const useChatUpdates = () => {
   const context = useContext(ChatUpdateContext);
@@ -28,8 +30,12 @@ interface ChatUpdateProviderProps {
   children: ReactNode;
 }
 
-export const ChatUpdateProvider: React.FC<ChatUpdateProviderProps> = ({ children }) => {
-  const [chatUpdates, setChatUpdates] = useState<{ [chatId: string]: ChatUpdate }>({});
+export const ChatUpdateProvider: React.FC<ChatUpdateProviderProps> = ({
+  children,
+}) => {
+  const [chatUpdates, setChatUpdates] = useState<{
+    [chatId: string]: ChatUpdate;
+  }>({});
 
   const updateChat = (chatId: string, update: ChatUpdate) => {
     setChatUpdates(prev => ({
@@ -40,7 +46,8 @@ export const ChatUpdateProvider: React.FC<ChatUpdateProviderProps> = ({ children
 
   const clearUpdate = (chatId: string) => {
     setChatUpdates(prev => {
-      const { [chatId]: removed, ...rest } = prev;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [chatId]: _, ...rest } = prev;
       return rest;
     });
   };
@@ -50,7 +57,9 @@ export const ChatUpdateProvider: React.FC<ChatUpdateProviderProps> = ({ children
   };
 
   return (
-    <ChatUpdateContext.Provider value={{ chatUpdates, updateChat, clearUpdate, resetAllUpdates }}>
+    <ChatUpdateContext.Provider
+      value={{ chatUpdates, updateChat, clearUpdate, resetAllUpdates }}
+    >
       {children}
     </ChatUpdateContext.Provider>
   );
