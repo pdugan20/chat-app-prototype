@@ -20,9 +20,9 @@ export const ANIMATION_DELAYS = {
 
 export const SPRING_CONFIG = {
   MESSAGE_SLIDE: {
-    velocity: 3,
-    tension: 100,
-    friction: 10,
+    velocity: 2,
+    tension: 120,
+    friction: 8,
   },
   KEYBOARD: {
     velocity: 12,

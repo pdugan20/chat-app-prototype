@@ -205,17 +205,15 @@ export const useAIResponse = ({
                   // Add music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start both animations simultaneously for music bubble
+                  // Start music bubble animation immediately like user messages
                   if (musicAnimationValues.animationValue) {
-                    Animated.parallel([
-                      animateMessageSlideUp(
-                        musicAnimationValues.animationValue
-                      ),
-                      animateChatSlideUp(chatSlideDown),
-                    ]).start(() => {
-                      scrollToEnd();
-                    });
+                    animateMessageSlideUp(
+                      musicAnimationValues.animationValue
+                    ).start();
                   }
+                  
+                  // Scroll to end immediately
+                  scrollToEnd();
 
                   // Update inbox preview with song info
                   const inboxDisplayText = songData
@@ -314,16 +312,15 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(aiMessage);
 
-              // Start both animations simultaneously
+              // Start AI message animation immediately like user messages
               if (aiAnimationValues.animationValue) {
-                // Combine message slide-up and chat slide-up into parallel animation
-                Animated.parallel([
-                  animateMessageSlideUp(aiAnimationValues.animationValue),
-                  animateChatSlideUp(chatSlideDown),
-                ]).start(() => {
-                  scrollToEnd();
-                });
+                animateMessageSlideUp(aiAnimationValues.animationValue).start();
               }
+              
+              // Reset chat position immediately
+              animateChatSlideUp(chatSlideDown).start(() => {
+                scrollToEnd();
+              });
 
               // Update inbox preview for text messages
               onUpdateLastSentMessage(
