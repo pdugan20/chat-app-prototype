@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import { Message } from '../types/message';
 import { createMessage, createAppleMusicMessage } from '../utils/messageUtils';
@@ -9,33 +9,43 @@ import {
   animateDeliveredFadeOut,
   ANIMATION_DELAYS,
 } from '../utils/messageAnimations';
-
-interface GlobalState {
-  chatMessages?: { [chatId: string]: Message[] };
-}
-
-declare let global: GlobalState;
+import { useChatStore } from '../stores';
 
 export const useMessages = (chatId: string, initialMessages: Message[]) => {
-  // Initialize global chatMessages if it doesn't exist
-  if (!global.chatMessages) {
-    global.chatMessages = {};
-  }
-
-  const [messages, setMessages] = useState<Message[]>(() => {
-    return global.chatMessages?.[chatId] || initialMessages;
-  });
+  const store = useChatStore();
+  const {
+    setChatMessages,
+    addMessage: addMessageToStore,
+    updateMessage: updateMessageInStore,
+    getMessages,
+    chatMessages // Get the reactive state directly
+  } = store;
 
   const deliveredTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
 
-  // Save messages to global store whenever they change
+  // Initialize messages if not already in store - run immediately and reactively
+  const currentMessages = chatMessages[chatId] || [];
+  
   useEffect(() => {
-    if (global.chatMessages) {
-      global.chatMessages[chatId] = messages;
+    // Get current messages fresh from store inside the effect
+    const currentMessagesInStore = getMessages(chatId);
+    
+    console.log('useMessages: Effect running for chatId:', chatId);
+    console.log('useMessages: initialMessages length:', initialMessages.length);
+    console.log('useMessages: Current messages in store:', currentMessagesInStore.length);
+    
+    // Simple rule: if store is empty and we have initial messages, initialize
+    const shouldInitialize = currentMessagesInStore.length === 0 && initialMessages.length > 0;
+    
+    console.log('useMessages: Should initialize?', shouldInitialize);
+    
+    if (shouldInitialize) {
+      console.log('useMessages: Initializing messages for chatId:', chatId, 'with', initialMessages.length, 'messages');
+      setChatMessages(chatId, initialMessages);
     }
-  }, [messages, chatId]);
+  }, [chatId, getMessages, setChatMessages]); // Include getMessages for freshness
 
   // Cleanup timeout when component unmounts
   useEffect(() => {
@@ -53,7 +63,7 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
       ...animationValues,
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    addMessageToStore(chatId, newMessage);
 
     // Animate message slide up for sender messages
     if (isSender && animationValues.animationValue) {
@@ -79,7 +89,7 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
       ...animationValues,
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    addMessageToStore(chatId, newMessage);
 
     // Animate message slide up for sender messages
     if (isSender && animationValues.animationValue) {
@@ -94,13 +104,14 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     onComplete?: () => void
   ) => {
     deliveredTimeoutRef.current = setTimeout(() => {
-      const hasExistingDelivered = messages.some(msg => msg.showDelivered);
+      const currentMessages = getMessages(chatId);
+      const hasExistingDelivered = currentMessages.some(
+        msg => msg.showDelivered
+      );
 
       if (hasExistingDelivered) {
-        // Let old animate out completely, then add new and animate in
-
         // Find old delivered message and store its animation reference
-        const oldDeliveredMessage = messages.find(
+        const oldDeliveredMessage = currentMessages.find(
           msg => msg.showDelivered && msg.id !== messageId
         );
         const oldDeliveredOpacity = oldDeliveredMessage?.deliveredOpacity;
@@ -116,32 +127,19 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
             ).start(() => {
               // Remove old delivered after animation completes
               if (oldMessageId) {
-                setMessages(prev =>
-                  prev.map(msg => {
-                    if (msg.id === oldMessageId) {
-                      return { ...msg, showDelivered: false };
-                    }
-                    return msg;
-                  })
-                );
+                updateMessageInStore(chatId, oldMessageId, {
+                  showDelivered: false,
+                });
 
                 // Add new delivered and animate in immediately after old is removed
                 const newDeliveredOpacity = new Animated.Value(0);
                 const newDeliveredScale = new Animated.Value(0.7);
 
-                setMessages(prev =>
-                  prev.map(msg => {
-                    if (msg.id === messageId) {
-                      return {
-                        ...msg,
-                        showDelivered: true,
-                        deliveredOpacity: newDeliveredOpacity,
-                        deliveredScale: newDeliveredScale,
-                      };
-                    }
-                    return msg;
-                  })
-                );
+                updateMessageInStore(chatId, messageId, {
+                  showDelivered: true,
+                  deliveredOpacity: newDeliveredOpacity,
+                  deliveredScale: newDeliveredScale,
+                });
 
                 // Animate in the new delivered indicator immediately
                 animateDeliveredFadeIn(
@@ -160,19 +158,11 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
         const newDeliveredScale = new Animated.Value(0.7);
 
         // Add the new delivered indicator
-        setMessages(prev =>
-          prev.map(msg => {
-            if (msg.id === messageId) {
-              return {
-                ...msg,
-                showDelivered: true,
-                deliveredOpacity: newDeliveredOpacity,
-                deliveredScale: newDeliveredScale,
-              };
-            }
-            return msg;
-          })
-        );
+        updateMessageInStore(chatId, messageId, {
+          showDelivered: true,
+          deliveredOpacity: newDeliveredOpacity,
+          deliveredScale: newDeliveredScale,
+        });
 
         // Animate in the new delivered indicator
         setTimeout(() => {
@@ -184,9 +174,11 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     }, ANIMATION_DELAYS.DELIVERED_SHOW);
   };
 
+  console.log('useMessages: Returning messages for chatId:', chatId, 'count:', currentMessages.length);
+
   return {
-    messages,
-    setMessages,
+    messages: currentMessages,
+    setMessages: (messages: Message[]) => setChatMessages(chatId, messages),
     addMessage,
     addAppleMusicMessage,
     showDeliveredIndicator,

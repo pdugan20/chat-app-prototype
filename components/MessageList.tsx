@@ -70,6 +70,10 @@ const MessageList: React.FC<MessageListProps> = ({
   const flatListData = useMemo((): FlatListItem[] => {
     const items: FlatListItem[] = [];
 
+    if (!messages || !Array.isArray(messages)) {
+      return items;
+    }
+
     messages.forEach((message, index) => {
       // Add timestamp header if needed
       if (shouldShowTimestamp(messages, index)) {

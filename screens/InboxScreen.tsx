@@ -1,12 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-
-declare const global: {
-  resetAllChats?: boolean;
-  pendingChatUpdate?: { id: string; [key: string]: unknown };
-  forceInboxRefresh?: boolean;
-  chatMessages?: { [chatId: string]: unknown[] };
-};
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
@@ -16,6 +9,7 @@ import ChatListItem from '../components/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
 import { useChatUpdates } from '../contexts/ChatUpdateContext';
 import { resetEmitter } from '../utils/resetEmitter';
+import { useAppStore, useChatStore } from '../stores';
 
 type InboxScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -28,6 +22,14 @@ interface InboxScreenProps {
 
 const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   const [chats, setChats] = useState<ChatItem[]>(mockChats);
+  const {
+    pendingChatUpdate,
+    forceInboxRefresh,
+    setResetAllChats,
+    setPendingChatUpdate,
+    setForceInboxRefresh,
+  } = useAppStore();
+  const { clearAllChats } = useChatStore();
   const { chatUpdates, resetAllUpdates } = useChatUpdates();
   const isResetting = useRef(false);
   const [forceOriginalData, setForceOriginalData] = useState(false);
@@ -50,10 +52,8 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
       // Force complete re-render with new key
       setResetKey(prev => prev + 1);
 
-      global.resetAllChats = false;
-      if (global.chatMessages) {
-        global.chatMessages = {};
-      }
+      setResetAllChats(false);
+      clearAllChats();
       aiService.resetMentionedSongs();
 
       // Reset all context updates completely
@@ -69,7 +69,7 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
     const subscription = resetEmitter.addListener(handleReset);
 
     return () => subscription.remove();
-  }, [resetAllUpdates, forceOriginalData]);
+  }, [resetAllUpdates, forceOriginalData, clearAllChats, setResetAllChats]);
 
   // Immediately apply context updates whenever chatUpdates changes
   useEffect(() => {
@@ -100,26 +100,31 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
     }
   }, [chatUpdates, forceOriginalData]);
 
-  // Legacy update function - now only used for global state cleanup if needed
-  const handleGlobalStateCleanup = React.useCallback(() => {
-    // Check for pending chat updates from global state (fallback)
-    const pendingUpdate = global.pendingChatUpdate;
-    if (pendingUpdate) {
-      console.log('Applying fallback update to chat:', pendingUpdate.id);
+  // Handle pending chat updates from app store
+  const handlePendingUpdates = React.useCallback(() => {
+    if (pendingChatUpdate) {
+      console.log('Applying update to chat:', pendingChatUpdate.id);
       setChats(prevChats =>
         prevChats.map(chat =>
-          chat.id === pendingUpdate.id ? { ...chat, ...pendingUpdate } : chat
+          chat.id === pendingChatUpdate.id
+            ? { ...chat, ...pendingChatUpdate }
+            : chat
         )
       );
-      global.pendingChatUpdate = undefined;
+      setPendingChatUpdate(undefined);
     }
 
     // Check for force refresh flag
-    if (global.forceInboxRefresh) {
-      global.forceInboxRefresh = false;
+    if (forceInboxRefresh) {
+      setForceInboxRefresh(false);
       setChats(prevChats => [...prevChats]);
     }
-  }, []);
+  }, [
+    pendingChatUpdate,
+    forceInboxRefresh,
+    setPendingChatUpdate,
+    setForceInboxRefresh,
+  ]);
 
   // Remove unused focus tracking that was causing re-renders
 
@@ -133,9 +138,9 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
   // Handle cleanup when returning from chat screen
   useFocusEffect(
     React.useCallback(() => {
-      // One-time cleanup of any pending global state
-      handleGlobalStateCleanup();
-    }, [handleGlobalStateCleanup])
+      // Handle any pending updates from app store
+      handlePendingUpdates();
+    }, [handlePendingUpdates])
   );
   const renderChatItem = ({ item }: { item: ChatItem }) => (
     <ChatListItem

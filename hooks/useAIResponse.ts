@@ -11,7 +11,8 @@ import {
   createCrossfadeAnimation,
   animateChatSlideUp,
   createMessageAnimationValues,
-  animateMessageSlideUp,
+  animateAIMessageSlideUp,
+  animateMusicBubbleSlideUp,
   ANIMATION_DELAYS,
 } from '../utils/messageAnimations';
 
@@ -100,9 +101,9 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(textMessage);
 
-              // Start text message animation
+              // Start text message animation with smooth timing
               if (textAnimationValues.animationValue) {
-                animateMessageSlideUp(
+                animateAIMessageSlideUp(
                   textAnimationValues.animationValue
                 ).start();
               }
@@ -205,13 +206,13 @@ export const useAIResponse = ({
                   // Add music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start music bubble animation immediately like user messages
+                  // Start music bubble animation with smooth timing
                   if (musicAnimationValues.animationValue) {
-                    animateMessageSlideUp(
+                    animateMusicBubbleSlideUp(
                       musicAnimationValues.animationValue
                     ).start();
                   }
-                  
+
                   // Scroll to end immediately
                   scrollToEnd();
 
@@ -259,17 +260,13 @@ export const useAIResponse = ({
                   // Add fallback music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start fallback music bubble animation
+                  // Start fallback music bubble animation with smooth timing
                   setTimeout(() => {
                     if (fallbackMusicAnimationValues.animationValue) {
-                      animateMessageSlideUp(
+                      animateMusicBubbleSlideUp(
                         fallbackMusicAnimationValues.animationValue
                       ).start();
                     }
-                  }, 50);
-
-                  // Animate the entire chat upward to reveal the music bubble
-                  setTimeout(() => {
                     scrollToEnd();
                   }, 100);
 
@@ -296,7 +293,7 @@ export const useAIResponse = ({
           }
         );
       } else {
-        // Create regular text message
+        // Create regular text message with animation values
         const aiAnimationValues = createMessageAnimationValues();
         const aiMessage: Message = {
           ...createMessage(structuredResponse.content, false),
@@ -312,15 +309,20 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(aiMessage);
 
-              // Start AI message animation immediately like user messages
+              // Start AI message animation first, then slide chat up after it completes
               if (aiAnimationValues.animationValue) {
-                animateMessageSlideUp(aiAnimationValues.animationValue).start();
+                animateAIMessageSlideUp(aiAnimationValues.animationValue).start(() => {
+                  // Only slide chat up after AI message animation completes
+                  animateChatSlideUp(chatSlideDown).start(() => {
+                    scrollToEnd();
+                  });
+                });
+              } else {
+                // Fallback if no animation value
+                animateChatSlideUp(chatSlideDown).start(() => {
+                  scrollToEnd();
+                });
               }
-              
-              // Reset chat position immediately
-              animateChatSlideUp(chatSlideDown).start(() => {
-                scrollToEnd();
-              });
 
               // Update inbox preview for text messages
               onUpdateLastSentMessage(

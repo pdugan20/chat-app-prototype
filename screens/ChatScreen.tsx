@@ -16,22 +16,13 @@ import TypingSection from '../components/TypingSection';
 import { allConversations } from '../data/messages';
 import { Colors, Spacing } from '../constants/theme';
 import { RootStackParamList } from '../types/navigation';
-import { Message } from '../types/message';
 import { useKeyboard } from '../hooks/useKeyboard';
 import { useMessages } from '../hooks/useMessages';
 import { useAIResponse } from '../hooks/useAIResponse';
 import { getChatSlideTransform } from '../utils/messageAnimations';
 import { useChatUpdates } from '../contexts/ChatUpdateContext';
 
-// Global type declarations
-interface GlobalState {
-  resetAllChats?: boolean;
-  pendingChatUpdate?: { id: string; [key: string]: unknown };
-  forceInboxRefresh?: boolean;
-  chatMessages?: { [chatId: string]: Message[] };
-}
-
-declare let global: GlobalState;
+import { useAppStore, useChatStore } from '../stores';
 
 type ChatScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -52,6 +43,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   // Hooks
   const { keyboardVisible, keyboardHeight } = useKeyboard();
   const { updateChat } = useChatUpdates();
+  const { setPendingChatUpdate } = useAppStore();
 
   // Find initial messages
   const initialMessages = (() => {
@@ -59,6 +51,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       conv =>
         conv.name === contactName || conv.id.toString() === chatId.toString()
     );
+    console.log('ChatScreen: Looking for conversation with contactName:', contactName, 'chatId:', chatId);
+    console.log('ChatScreen: Found conversation:', !!conversation);
+    console.log('ChatScreen: Initial messages count:', conversation?.messages?.length || 0);
     return conversation ? conversation.messages : [];
   })();
 
@@ -90,7 +85,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     contactName,
     aiEnabled,
     onAddMessage: message => {
-      setMessages(prev => [...prev, message]);
+      const { addMessage: addToStore } = useChatStore.getState();
+      addToStore(chatId, message);
     },
     onUpdateLastSentMessage: (text, timestamp, isUserMessage) => {
       lastSentMessageRef.current = { text, timestamp, isUserMessage };
@@ -125,47 +121,42 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   }, []);
 
   // Set delivered indicator on last sender message when chat loads
+  const { updateMessage: updateMessageInStore } = useChatStore();
   const hasSetInitialDelivered = useRef(false);
   useEffect(() => {
-    if (hasSetInitialDelivered.current) return;
+    if (hasSetInitialDelivered.current || !messages || !Array.isArray(messages)) return;
 
     // Find the last sender message
-    const lastSenderMessageIndex = messages
-      .map((msg, index) => ({ msg, index }))
+    const lastSenderMessage = messages
+      .slice() // Create a copy to avoid mutating
       .reverse()
-      .find(({ msg }) => msg.isSender)?.index;
+      .find((msg) => msg.isSender);
 
-    if (lastSenderMessageIndex !== undefined) {
+    if (lastSenderMessage) {
       // Create individual animation values for initial delivered indicator
       const initialDeliveredOpacity = new Animated.Value(1);
       const initialDeliveredScale = new Animated.Value(1);
 
-      setMessages(prev =>
-        prev.map((msg, index) => {
-          if (index === lastSenderMessageIndex) {
-            return {
-              ...msg,
-              showDelivered: true,
-              deliveredOpacity: initialDeliveredOpacity,
-              deliveredScale: initialDeliveredScale,
-            };
-          } else if (msg.showDelivered) {
-            // Remove delivered from other messages
-            return {
-              ...msg,
-              showDelivered: false,
-            };
-          }
-          return msg;
-        })
-      );
+      // Remove delivered status from all messages first
+      messages.forEach((msg) => {
+        if (msg.showDelivered) {
+          updateMessageInStore(chatId, msg.id, { showDelivered: false });
+        }
+      });
+
+      // Add delivered status to the last sender message
+      updateMessageInStore(chatId, lastSenderMessage.id, {
+        showDelivered: true,
+        deliveredOpacity: initialDeliveredOpacity,
+        deliveredScale: initialDeliveredScale,
+      });
 
       // Set initial values for immediate visibility (no animation needed for existing delivered)
       initialDeliveredOpacity.setValue(1);
       initialDeliveredScale.setValue(1);
       hasSetInitialDelivered.current = true;
     }
-  }, [deliveredOpacity, deliveredScale, messages, setMessages]); // Only run once on mount
+  }, [messages, chatId, updateMessageInStore]); // React to messages changes
 
   // Auto-scroll for new messages with smooth animation
   const previousLength = useRef(messages.length);
@@ -224,14 +215,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       'beforeRemove',
       () => {
         if (lastSentMessageRef.current) {
-          global.pendingChatUpdate = {
+          setPendingChatUpdate({
             id: chatId,
             lastMessage: lastSentMessageRef.current.isUserMessage
               ? `You: ${lastSentMessageRef.current.text}`
               : lastSentMessageRef.current.text,
             timestamp: lastSentMessageRef.current.timestamp,
             unread: false,
-          };
+          });
           lastSentMessageRef.current = null;
         }
       }
@@ -243,14 +234,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       e => {
         // Only update on backwards transition (going back to inbox)
         if (e.data?.closing && lastSentMessageRef.current) {
-          global.pendingChatUpdate = {
+          setPendingChatUpdate({
             id: chatId,
             lastMessage: lastSentMessageRef.current.isUserMessage
               ? `You: ${lastSentMessageRef.current.text}`
               : lastSentMessageRef.current.text,
             timestamp: lastSentMessageRef.current.timestamp,
             unread: false,
-          };
+          });
           lastSentMessageRef.current = null;
         }
       }
@@ -261,7 +252,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       unsubscribeBeforeRemove();
       unsubscribeTransitionStart();
     };
-  }, [navigation, chatId]);
+  }, [navigation, chatId, setPendingChatUpdate]);
 
   // Handlers
   const handleScrollViewLayout = () => {

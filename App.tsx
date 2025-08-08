@@ -12,17 +12,14 @@ import { musicPreloader } from './utils/musicPreloader';
 import { allConversations } from './data/messages';
 import { ChatUpdateProvider } from './contexts/ChatUpdateContext';
 import { resetEmitter } from './utils/resetEmitter';
-
-declare const global: {
-  resetAllChats?: boolean;
-  pendingChatUpdate?: { id: string; [key: string]: unknown };
-  forceInboxRefresh?: boolean;
-  chatMessages?: { [chatId: string]: unknown[] };
-};
+import { useAppStore, useChatStore } from './stores';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
+  const { resetApp, setPendingChatUpdate } = useAppStore();
+  const { clearAllChats } = useChatStore();
+
   // Preload music data for all conversations on app startup
   useEffect(() => {
     const preloadAllMusic = async () => {
@@ -71,16 +68,13 @@ export default function App() {
           text: 'Reset chats',
           style: 'destructive',
           onPress: () => {
-            // Clear the global pending update and reset chats
-            global.pendingChatUpdate = undefined;
-            global.resetAllChats = true;
-            // Also clear all stored chat messages
-            if (global.chatMessages) {
-              global.chatMessages = {};
-            }
+            // Clear the pending update and reset chats
+            setPendingChatUpdate(undefined);
+            clearAllChats();
+            resetApp();
             // Clear music preloader cache
             musicPreloader.clearCache();
-            // Emit reset event instead of using global flag
+            // Emit reset event
             resetEmitter.emit();
           },
         },

@@ -57,7 +57,18 @@ export const animateMessageSlideUp = (animationValue: Animated.Value) => {
 export const animateMusicBubbleSlideUp = (animationValue: Animated.Value) => {
   return Animated.timing(animationValue, {
     toValue: 1,
-    duration: 300,
+    duration: 200,
+    useNativeDriver: true,
+  });
+};
+
+/**
+ * Animate AI message sliding up with smooth timing (no bounce)
+ */
+export const animateAIMessageSlideUp = (animationValue: Animated.Value) => {
+  return Animated.timing(animationValue, {
+    toValue: 1,
+    duration: 200, // Match music bubble duration
     useNativeDriver: true,
   });
 };
@@ -182,13 +193,16 @@ export const getMessageSlideTransform = (
   animationValue: Animated.Value | undefined,
   isSender: boolean
 ) => {
-  if (!animationValue || !isSender) return [];
+  if (!animationValue) return [];
 
+  // Use small offset for AI messages so they start very close to final position
+  const offset = isSender ? 20 : 20;
+  
   return [
     {
       translateY: animationValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [20, 0],
+        outputRange: [offset, 0],
       }),
     },
   ];
@@ -206,7 +220,7 @@ export const getMusicBubbleSlideTransform = (
     {
       translateY: animationValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [120, 0], // Start 120px below (behind input bar)
+        outputRange: [20, 0], // Start 20px below (very close to final position)
       }),
     },
   ];
