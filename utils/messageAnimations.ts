@@ -2,12 +2,17 @@ import { Animated } from 'react-native';
 
 // Animation constants
 export const ANIMATION_DURATIONS = {
-  MESSAGE_FADE: 300,
-  DELIVERED_FADE: 300, // Back to normal timing
+  DELIVERED_FADE: 300,
   TYPING_INDICATOR: 300,
   CHAT_SLIDE: 300,
   CHAT_SLIDE_FAST: 150,
-  CROSSFADE: 300,
+} as const;
+
+// Animation offsets
+export const ANIMATION_OFFSETS = {
+  USER_MESSAGE_SLIDE: 20,
+  AI_MESSAGE_SLIDE: 0,
+  CHAT_SLIDE: 30,
 } as const;
 
 export const ANIMATION_DELAYS = {
@@ -15,7 +20,7 @@ export const ANIMATION_DELAYS = {
   AI_RESPONSE_START: 1500,
   AI_RESPONSE_MIN: 2000,
   CHAT_SLIDE_PAUSE: 1000,
-  MESSAGE_RENDER: 50,
+  MESSAGE_RENDER: 150, // Increased for longer AI responses
 } as const;
 
 export const SPRING_CONFIG = {
@@ -48,28 +53,6 @@ export const animateMessageSlideUp = (animationValue: Animated.Value) => {
     toValue: 1,
     useNativeDriver: true,
     ...SPRING_CONFIG.MESSAGE_SLIDE,
-  });
-};
-
-/**
- * Animate music bubble sliding up with timing (no spring)
- */
-export const animateMusicBubbleSlideUp = (animationValue: Animated.Value) => {
-  return Animated.timing(animationValue, {
-    toValue: 1,
-    duration: 200,
-    useNativeDriver: true,
-  });
-};
-
-/**
- * Animate AI message sliding up with smooth timing (no bounce)
- */
-export const animateAIMessageSlideUp = (animationValue: Animated.Value) => {
-  return Animated.timing(animationValue, {
-    toValue: 1,
-    duration: 200, // Match music bubble duration
-    useNativeDriver: true,
   });
 };
 
@@ -195,32 +178,15 @@ export const getMessageSlideTransform = (
 ) => {
   if (!animationValue) return [];
 
-  // Use small offset for AI messages so they start very close to final position
-  const offset = isSender ? 20 : 20;
-  
+  const offset = isSender
+    ? ANIMATION_OFFSETS.USER_MESSAGE_SLIDE
+    : ANIMATION_OFFSETS.AI_MESSAGE_SLIDE;
+
   return [
     {
       translateY: animationValue.interpolate({
         inputRange: [0, 1],
         outputRange: [offset, 0],
-      }),
-    },
-  ];
-};
-
-/**
- * Get transform styles for music bubble slide animation (larger offset)
- */
-export const getMusicBubbleSlideTransform = (
-  animationValue: Animated.Value | undefined
-) => {
-  if (!animationValue) return [];
-
-  return [
-    {
-      translateY: animationValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [20, 0], // Start 20px below (very close to final position)
       }),
     },
   ];
@@ -234,7 +200,7 @@ export const getChatSlideTransform = (slideValue: Animated.Value) => {
     {
       translateY: slideValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, 30],
+        outputRange: [0, ANIMATION_OFFSETS.CHAT_SLIDE],
       }),
     },
   ];

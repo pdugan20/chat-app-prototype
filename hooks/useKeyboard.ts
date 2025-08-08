@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, Animated, Platform } from 'react-native';
+import { animateKeyboard } from '../utils/messageAnimations';
 
 interface UseKeyboardReturn {
   keyboardHeight: Animated.Value;
@@ -18,24 +19,12 @@ export const useKeyboard = (): UseKeyboardReturn => {
 
     const keyboardShowListener = Keyboard.addListener(showEvent, event => {
       setKeyboardVisible(true);
-      Animated.spring(keyboardHeight, {
-        toValue: event.endCoordinates.height,
-        useNativeDriver: false,
-        velocity: 12,
-        tension: 150,
-        friction: 20,
-      }).start();
+      animateKeyboard(keyboardHeight, event.endCoordinates.height).start();
     });
 
     const keyboardHideListener = Keyboard.addListener(hideEvent, () => {
       setKeyboardVisible(false);
-      Animated.spring(keyboardHeight, {
-        toValue: 0,
-        useNativeDriver: false,
-        velocity: 12,
-        tension: 150,
-        friction: 20,
-      }).start();
+      animateKeyboard(keyboardHeight, 0).start();
     });
 
     return () => {

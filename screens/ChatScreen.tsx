@@ -51,14 +51,24 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       conv =>
         conv.name === contactName || conv.id.toString() === chatId.toString()
     );
-    console.log('ChatScreen: Looking for conversation with contactName:', contactName, 'chatId:', chatId);
+    console.log(
+      'ChatScreen: Looking for conversation with contactName:',
+      contactName,
+      'chatId:',
+      chatId
+    );
     console.log('ChatScreen: Found conversation:', !!conversation);
-    console.log('ChatScreen: Initial messages count:', conversation?.messages?.length || 0);
+    console.log(
+      'ChatScreen: Initial messages count:',
+      conversation?.messages?.length || 0
+    );
     return conversation ? conversation.messages : [];
   })();
 
-  const { messages, setMessages, addMessage, showDeliveredIndicator } =
-    useMessages(chatId, initialMessages);
+  const { messages, addMessage, showDeliveredIndicator } = useMessages(
+    chatId,
+    initialMessages
+  );
 
   // State
   const [aiEnabled] = useState(true);
@@ -124,13 +134,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const { updateMessage: updateMessageInStore } = useChatStore();
   const hasSetInitialDelivered = useRef(false);
   useEffect(() => {
-    if (hasSetInitialDelivered.current || !messages || !Array.isArray(messages)) return;
+    if (hasSetInitialDelivered.current || !messages || !Array.isArray(messages))
+      return;
 
     // Find the last sender message
     const lastSenderMessage = messages
       .slice() // Create a copy to avoid mutating
       .reverse()
-      .find((msg) => msg.isSender);
+      .find(msg => msg.isSender);
 
     if (lastSenderMessage) {
       // Create individual animation values for initial delivered indicator
@@ -138,7 +149,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       const initialDeliveredScale = new Animated.Value(1);
 
       // Remove delivered status from all messages first
-      messages.forEach((msg) => {
+      messages.forEach(msg => {
         if (msg.showDelivered) {
           updateMessageInStore(chatId, msg.id, { showDelivered: false });
         }

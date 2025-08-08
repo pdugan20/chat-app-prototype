@@ -11,8 +11,6 @@ import {
   createCrossfadeAnimation,
   animateChatSlideUp,
   createMessageAnimationValues,
-  animateAIMessageSlideUp,
-  animateMusicBubbleSlideUp,
   ANIMATION_DELAYS,
 } from '../utils/messageAnimations';
 
@@ -101,14 +99,9 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(textMessage);
 
-              // Start text message animation with smooth timing
-              if (textAnimationValues.animationValue) {
-                animateAIMessageSlideUp(
-                  textAnimationValues.animationValue
-                ).start();
-              }
+              // No animation needed for AI text messages (0px offset)
 
-              // Slide chat back up immediately after text message appears
+              // Give text message time to render before sliding chat up
               setTimeout(() => {
                 animateChatSlideUp(chatSlideDown).start();
               }, ANIMATION_DELAYS.MESSAGE_RENDER);
@@ -206,15 +199,10 @@ export const useAIResponse = ({
                   // Add music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start music bubble animation with smooth timing
-                  if (musicAnimationValues.animationValue) {
-                    animateMusicBubbleSlideUp(
-                      musicAnimationValues.animationValue
-                    ).start();
-                  }
-
-                  // Scroll to end immediately
-                  scrollToEnd();
+                  // Give music bubble time to render before scrolling
+                  setTimeout(() => {
+                    scrollToEnd();
+                  }, ANIMATION_DELAYS.MESSAGE_RENDER);
 
                   // Update inbox preview with song info
                   const inboxDisplayText = songData
@@ -260,15 +248,10 @@ export const useAIResponse = ({
                   // Add fallback music bubble to chat flow
                   onAddMessage(musicMessage);
 
-                  // Start fallback music bubble animation with smooth timing
+                  // Give fallback music bubble time to render before scrolling
                   setTimeout(() => {
-                    if (fallbackMusicAnimationValues.animationValue) {
-                      animateMusicBubbleSlideUp(
-                        fallbackMusicAnimationValues.animationValue
-                      ).start();
-                    }
                     scrollToEnd();
-                  }, 100);
+                  }, ANIMATION_DELAYS.MESSAGE_RENDER);
 
                   // Update inbox preview for fallback case (no song data)
                   onUpdateLastSentMessage(
@@ -309,20 +292,12 @@ export const useAIResponse = ({
               setShowTypingIndicator(false);
               onAddMessage(aiMessage);
 
-              // Start AI message animation first, then slide chat up after it completes
-              if (aiAnimationValues.animationValue) {
-                animateAIMessageSlideUp(aiAnimationValues.animationValue).start(() => {
-                  // Only slide chat up after AI message animation completes
-                  animateChatSlideUp(chatSlideDown).start(() => {
-                    scrollToEnd();
-                  });
-                });
-              } else {
-                // Fallback if no animation value
+              // Give AI message time to render before sliding chat up
+              setTimeout(() => {
                 animateChatSlideUp(chatSlideDown).start(() => {
                   scrollToEnd();
                 });
-              }
+              }, ANIMATION_DELAYS.MESSAGE_RENDER);
 
               // Update inbox preview for text messages
               onUpdateLastSentMessage(
