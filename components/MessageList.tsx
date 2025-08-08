@@ -126,7 +126,7 @@ const MessageList: React.FC<MessageListProps> = ({
         return (
           <Animated.View
             style={{
-              opacity: message.animationValue || 1,
+              opacity: 1,
               transform: getMessageSlideTransform(
                 message.animationValue,
                 message.isSender
@@ -202,8 +202,9 @@ const MessageList: React.FC<MessageListProps> = ({
       onLayout={onLayout}
       onContentSizeChange={onContentSizeChange}
       removeClippedSubviews={false}
-      maxToRenderPerBatch={20}
-      windowSize={10}
+      maxToRenderPerBatch={50}
+      windowSize={20}
+      initialNumToRender={50}
       keyboardShouldPersistTaps='handled'
       keyboardDismissMode='interactive'
       automaticallyAdjustKeyboardInsets={true}

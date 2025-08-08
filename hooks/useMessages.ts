@@ -97,10 +97,8 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
       const hasExistingDelivered = messages.some(msg => msg.showDelivered);
 
       if (hasExistingDelivered) {
-        // Handle crossfade between old and new delivered indicators
-        const newDeliveredOpacity = new Animated.Value(0);
-        const newDeliveredScale = new Animated.Value(0.7);
-
+        // Let old animate out completely, then add new and animate in
+        
         // Find old delivered message and store its animation reference
         const oldDeliveredMessage = messages.find(
           msg => msg.showDelivered && msg.id !== messageId
@@ -108,48 +106,47 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
         const oldDeliveredOpacity = oldDeliveredMessage?.deliveredOpacity;
         const oldDeliveredScale = oldDeliveredMessage?.deliveredScale;
         const oldMessageId = oldDeliveredMessage?.id;
-        
 
-        // First, add the new delivered indicator
-        setMessages(prev =>
-          prev.map(msg => {
-            if (msg.id === messageId) {
-              return {
-                ...msg,
-                showDelivered: true,
-                deliveredOpacity: newDeliveredOpacity,
-                deliveredScale: newDeliveredScale,
-              };
-            }
-            return msg;
-          })
-        );
-
-        // Start both animations at the exact same time
+        // Start old delivered fade-out first
         setTimeout(() => {
-          // Start old delivered fade-out
           if (oldDeliveredOpacity && oldDeliveredScale) {
-            animateDeliveredFadeOut(oldDeliveredOpacity, oldDeliveredScale).start();
+            animateDeliveredFadeOut(oldDeliveredOpacity, oldDeliveredScale).start(() => {
+              // Remove old delivered after animation completes
+              if (oldMessageId) {
+                setMessages(prev =>
+                  prev.map(msg => {
+                    if (msg.id === oldMessageId) {
+                      return { ...msg, showDelivered: false };
+                    }
+                    return msg;
+                  })
+                );
+
+                // Add new delivered and animate in immediately after old is removed
+                const newDeliveredOpacity = new Animated.Value(0);
+                const newDeliveredScale = new Animated.Value(0.7);
+
+                setMessages(prev =>
+                  prev.map(msg => {
+                    if (msg.id === messageId) {
+                      return {
+                        ...msg,
+                        showDelivered: true,
+                        deliveredOpacity: newDeliveredOpacity,
+                        deliveredScale: newDeliveredScale,
+                      };
+                    }
+                    return msg;
+                  })
+                );
+
+                // Animate in the new delivered indicator immediately
+                animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(() => {
+                  onComplete?.();
+                });
+              }
+            });
           }
-
-          // Start new delivered fade-in simultaneously  
-          animateDeliveredFadeIn(newDeliveredOpacity, newDeliveredScale).start(() => {
-            onComplete?.();
-          });
-
-          // Remove old delivered from DOM at exactly 150ms (halfway through animations)
-          setTimeout(() => {
-            if (oldMessageId) {
-              setMessages(prev =>
-                prev.map(msg => {
-                  if (msg.id === oldMessageId && msg.showDelivered) {
-                    return { ...msg, showDelivered: false };
-                  }
-                  return msg;
-                })
-              );
-            }
-          }, 150); // Remove halfway through the 300ms animations
         }, 200);
       } else {
         // No existing delivered message, use same animation approach

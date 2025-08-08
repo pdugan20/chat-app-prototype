@@ -53,7 +53,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const { keyboardVisible, keyboardHeight } = useKeyboard();
   const { updateChat } = useChatUpdates();
 
-
   // Find initial messages
   const initialMessages = (() => {
     const conversation = allConversations.find(
@@ -115,7 +114,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     },
   });
 
-  // Immediately scroll to bottom when component mounts
+  // Immediately scroll to bottom when component mounts (inverted list uses offset 0)
   useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToOffset({
@@ -215,6 +214,12 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Navigation handling
   useEffect(() => {
+    // Scroll to bottom when screen starts focusing (before transition becomes visible)
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      // Set flag to scroll when content size changes (ensuring content is fully laid out)
+      setShouldScrollOnContentChange(true);
+    });
+
     const unsubscribeBeforeRemove = navigation.addListener(
       'beforeRemove',
       () => {
@@ -231,7 +236,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         }
       }
     );
-    
+
     // Also listen for transition start to handle swipe back earlier
     const unsubscribeTransitionStart = navigation.addListener(
       'transitionStart',
@@ -252,6 +257,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     );
 
     return () => {
+      unsubscribeFocus();
       unsubscribeBeforeRemove();
       unsubscribeTransitionStart();
     };
@@ -268,8 +274,17 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const [shouldScrollOnContentChange, setShouldScrollOnContentChange] = useState(false);
+
   const handleContentSizeChange = () => {
-    // Don't auto-scroll on content size change to avoid conflicts
+    // Only scroll if we're expecting it (after focus event)
+    if (shouldScrollOnContentChange && scrollViewRef.current) {
+      scrollViewRef.current.scrollToOffset({
+        offset: 999999,
+        animated: false,
+      });
+      setShouldScrollOnContentChange(false);
+    }
   };
 
   const handleSendMessage = (text: string) => {
