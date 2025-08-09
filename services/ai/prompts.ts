@@ -1,14 +1,5 @@
-/**
- * Prompt Templates
- * Contains all prompt templates and prompt generation functions
- */
+import { ANTHROPIC_FORMATS, MUSIC_RESPONSE_FORMATS } from './constants';
 
-import { ANTHROPIC_FORMATS } from './providers';
-import { MUSIC_RESPONSE_FORMATS } from './music';
-
-/**
- * Basic chat prompt template
- */
 export const createChatPrompt = (contactName: string = 'Friend') =>
   `You are having a casual text conversation with a friend. 
 Your name is ${contactName}. Keep responses natural, conversational, and brief like real text messages. 
@@ -16,17 +7,11 @@ Don't use formal language. Match the tone and style of the conversation.
 Respond as if you're texting on a phone - short, casual messages.
 Maximum 2-3 sentences per message.`;
 
-/**
- * Creates context for mentioned songs to avoid repetition
- */
 export const createMentionedSongsContext = (songs: string[]): string =>
   songs.length > 0
     ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${songs.join('\n- ')}\n\nAlways suggest different songs/artists that haven't been mentioned.`
     : '';
 
-/**
- * Music detection prompt for Anthropic
- */
 export const createMusicDetectionPrompt = (
   contactName: string = 'Friend',
   mentionedSongs: string[] = []

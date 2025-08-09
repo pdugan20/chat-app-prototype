@@ -1,0 +1,156 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { AIStructuredResponse } from '../types';
+import { BaseAIProvider } from './base';
+import {
+  API_CONFIG,
+  ENV_KEYS,
+  ERROR_MESSAGES,
+  RESPONSE_TYPES,
+  ANTHROPIC_FORMATS,
+  MUSIC_RESPONSE_FORMATS,
+  MOCK_RESPONSES,
+  LOG_MESSAGES,
+} from '../constants';
+import { createChatPrompt, createMusicDetectionPrompt } from '../prompts';
+import { AI_MODELS } from '../models';
+import { cleanAnthropicResponseArtifacts } from '../utils';
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+// Track mentioned songs to prevent repetition
+let mentionedSongs = new Set<string>();
+
+class AnthropicService extends BaseAIProvider {
+  private client: Anthropic | null = null;
+
+  constructor() {
+    super(
+      process.env[ENV_KEYS.anthropicApiKey],
+      'Anthropic',
+      ERROR_MESSAGES.anthropicNotConfigured
+    );
+
+    if (this.isConfigured()) {
+      this.client = new Anthropic({ apiKey: this.apiKey });
+    }
+  }
+
+  async generateResponse(
+    messages: ChatMessage[],
+    contactName: string = 'Friend'
+  ): Promise<string> {
+    this.validateConfiguration();
+
+    try {
+      const response = await this.client!.messages.create({
+        model: AI_MODELS.anthropic.default,
+        max_tokens: API_CONFIG.maxTokens,
+        temperature: API_CONFIG.temperature,
+        system: createChatPrompt(contactName),
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      });
+
+      const textContent = response.content.find(
+        content => content.type === 'text'
+      );
+
+      return textContent?.text || this.getDefaultFallback();
+    } catch (error) {
+      this.handleError(error, ERROR_MESSAGES.apiError);
+    }
+  }
+
+  async generateStructuredResponse(
+    messages: ChatMessage[],
+    contactName: string = 'Friend'
+  ): Promise<AIStructuredResponse> {
+    this.validateConfiguration();
+
+    try {
+      const mentionedSongsList = this.getMentionedSongs();
+      const musicDetectionPrompt = createMusicDetectionPrompt(
+        contactName,
+        mentionedSongsList
+      );
+
+      const response = await this.client!.messages.create({
+        model: AI_MODELS.anthropic.default,
+        max_tokens: API_CONFIG.maxTokens,
+        temperature: API_CONFIG.temperature,
+        system: musicDetectionPrompt,
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      });
+
+      const content =
+        response.content[0]?.type === 'text' ? response.content[0].text : '';
+
+      return this.parseStructuredResponse(content);
+    } catch (error) {
+      this.handleError(error, ERROR_MESSAGES.structuredResponseError);
+    }
+  }
+
+  private parseStructuredResponse(content: string): AIStructuredResponse {
+    if (
+      content.includes(ANTHROPIC_FORMATS.responseTypes.music) &&
+      content.includes(MUSIC_RESPONSE_FORMATS.queryPrefix)
+    ) {
+      const lines = content.split('\n').filter(line => line.trim());
+
+      const musicResponseIndex = lines.findIndex(
+        line => line.trim() === ANTHROPIC_FORMATS.responseTypes.music
+      );
+      const messageContent =
+        lines[musicResponseIndex + 1] || MOCK_RESPONSES.defaultMusic;
+
+      const musicQueryLine = lines.find(line =>
+        line.startsWith(MUSIC_RESPONSE_FORMATS.queryPrefix)
+      );
+      const musicQuery = musicQueryLine
+        ? musicQueryLine.replace(MUSIC_RESPONSE_FORMATS.queryPrefix, '').trim()
+        : this.getRandomMusicQuery();
+
+      this.addMentionedSong(musicQuery);
+
+      return {
+        type: RESPONSE_TYPES.MUSIC,
+        content: messageContent,
+        musicQuery: musicQuery,
+      };
+    }
+
+    // Clean up response artifacts
+    let messageContent = cleanAnthropicResponseArtifacts(content);
+
+    if (!messageContent) {
+      messageContent = MOCK_RESPONSES.defaultText;
+    }
+
+    return this.buildTextResponse(messageContent);
+  }
+
+  // Song tracking methods
+  addMentionedSong(songQuery: string): void {
+    mentionedSongs.add(songQuery.toLowerCase().trim());
+  }
+
+  getMentionedSongs(): string[] {
+    return Array.from(mentionedSongs);
+  }
+
+  resetMentionedSongs(): void {
+    mentionedSongs.clear();
+    console.log(LOG_MESSAGES.clearedMentionedSongs);
+  }
+}
+
+export default new AnthropicService();

@@ -32,11 +32,9 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     // Get current messages fresh from store inside the effect
     const currentMessagesInStore = getMessages(chatId);
 
-
     // Simple rule: if store is empty and we have initial messages, initialize
     const shouldInitialize =
       currentMessagesInStore.length === 0 && initialMessages.length > 0;
-
 
     if (shouldInitialize) {
       setChatMessages(chatId, initialMessages);
@@ -169,7 +167,6 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
       }
     }, ANIMATION_DELAYS.DELIVERED_SHOW);
   };
-
 
   return {
     messages: currentMessages,
