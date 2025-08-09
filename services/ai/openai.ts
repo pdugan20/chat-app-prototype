@@ -1,8 +1,16 @@
 import OpenAI from 'openai';
-import { CHAT_SYSTEM_PROMPT } from './prompts';
-import { AI_CONFIG } from './config';
-import { AI_MODELS } from './models';
 import { AIStructuredResponse } from './index';
+import {
+  AI_MODELS,
+  API_CONFIG,
+  PROVIDER_CONFIG,
+  ENV_KEYS,
+  ERROR_MESSAGES,
+  RESPONSE_TYPES,
+  MUSIC_KEYWORDS,
+  MOCK_MUSIC_QUERIES,
+  createChatPrompt,
+} from './constants';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -13,7 +21,7 @@ class OpenAIService {
   private client: OpenAI | null = null;
 
   constructor() {
-    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    const apiKey = process.env[ENV_KEYS.openaiApiKey];
     if (apiKey && apiKey.trim()) {
       this.client = new OpenAI({
         apiKey: apiKey,
@@ -26,13 +34,13 @@ class OpenAIService {
     contactName: string = 'Friend'
   ): Promise<string> {
     if (!this.client) {
-      throw new Error('OpenAI API key not configured');
+      throw new Error(ERROR_MESSAGES.openaiNotConfigured);
     }
 
     try {
       const systemMessage = {
         role: 'system' as const,
-        content: CHAT_SYSTEM_PROMPT(contactName),
+        content: createChatPrompt(contactName),
       };
 
       // Use the default model for OpenAI
@@ -41,18 +49,18 @@ class OpenAIService {
       const response = await this.client.chat.completions.create({
         model: model,
         messages: [systemMessage, ...messages],
-        max_tokens: AI_CONFIG.maxTokens,
-        temperature: AI_CONFIG.temperature,
-        presence_penalty: 0.6,
-        frequency_penalty: 0.5,
+        max_tokens: API_CONFIG.maxTokens,
+        temperature: API_CONFIG.temperature,
+        presence_penalty: PROVIDER_CONFIG.openai.presencePenalty,
+        frequency_penalty: PROVIDER_CONFIG.openai.frequencyPenalty,
       });
 
       // Extract text from response
       const messageContent = response.choices[0]?.message?.content;
 
-      return messageContent || AI_CONFIG.defaultFallback;
+      return messageContent || API_CONFIG.defaultFallback;
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      console.error(ERROR_MESSAGES.apiError, error);
       throw error;
     }
   }
@@ -65,33 +73,22 @@ class OpenAIService {
     // In production, you'd implement OpenAI-specific structured response logic
     const lastMessage =
       messages[messages.length - 1]?.content.toLowerCase() || '';
-    const musicKeywords = [
-      'song',
-      'music',
-      'track',
-      'artist',
-      'band',
-      'album',
-      'listen',
-      'playlist',
-      'recommend',
-    ];
-    const containsMusicKeyword = musicKeywords.some(keyword =>
+    const containsMusicKeyword = MUSIC_KEYWORDS.some(keyword =>
       lastMessage.includes(keyword)
     );
 
     if (containsMusicKeyword) {
       return {
-        type: 'music',
+        type: RESPONSE_TYPES.MUSIC,
         content: "Here's a song you might like!",
-        musicQuery: 'search:never gonna give you up rick astley',
+        musicQuery: MOCK_MUSIC_QUERIES[0],
       };
     }
 
     // Otherwise, generate a normal text response
     const textResponse = await this.generateResponse(messages, contactName);
     return {
-      type: 'text',
+      type: RESPONSE_TYPES.TEXT,
       content: textResponse,
     };
   }

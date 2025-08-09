@@ -32,27 +32,13 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     // Get current messages fresh from store inside the effect
     const currentMessagesInStore = getMessages(chatId);
 
-    console.log('useMessages: Effect running for chatId:', chatId);
-    console.log('useMessages: initialMessages length:', initialMessages.length);
-    console.log(
-      'useMessages: Current messages in store:',
-      currentMessagesInStore.length
-    );
 
     // Simple rule: if store is empty and we have initial messages, initialize
     const shouldInitialize =
       currentMessagesInStore.length === 0 && initialMessages.length > 0;
 
-    console.log('useMessages: Should initialize?', shouldInitialize);
 
     if (shouldInitialize) {
-      console.log(
-        'useMessages: Initializing messages for chatId:',
-        chatId,
-        'with',
-        initialMessages.length,
-        'messages'
-      );
       setChatMessages(chatId, initialMessages);
     }
   }, [chatId, getMessages, setChatMessages]); // Include getMessages for freshness
@@ -184,12 +170,6 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     }, ANIMATION_DELAYS.DELIVERED_SHOW);
   };
 
-  console.log(
-    'useMessages: Returning messages for chatId:',
-    chatId,
-    'count:',
-    currentMessages.length
-  );
 
   return {
     messages: currentMessages,

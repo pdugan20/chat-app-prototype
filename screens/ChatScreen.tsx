@@ -51,17 +51,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       conv =>
         conv.name === contactName || conv.id.toString() === chatId.toString()
     );
-    console.log(
-      'ChatScreen: Looking for conversation with contactName:',
-      contactName,
-      'chatId:',
-      chatId
-    );
-    console.log('ChatScreen: Found conversation:', !!conversation);
-    console.log(
-      'ChatScreen: Initial messages count:',
-      conversation?.messages?.length || 0
-    );
     return conversation ? conversation.messages : [];
   })();
 
@@ -381,7 +370,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
             Keyboard.dismiss();
             navigation.goBack();
           }}
-          onContactPress={() => console.log('Contact pressed')}
+          onContactPress={() => {}}
         />
       </View>
     </View>

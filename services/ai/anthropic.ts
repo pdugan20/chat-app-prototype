@@ -1,8 +1,19 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { CHAT_SYSTEM_PROMPT } from './prompts';
-import { AI_CONFIG } from './config';
-import { AI_MODELS } from './models';
 import { AIStructuredResponse } from './index';
+import {
+  AI_MODELS,
+  API_CONFIG,
+  ENV_KEYS,
+  ERROR_MESSAGES,
+  RESPONSE_TYPES,
+  ANTHROPIC_FORMATS,
+  MUSIC_RESPONSE_FORMATS,
+  MOCK_RESPONSES,
+  MOCK_MUSIC_QUERIES,
+  LOG_MESSAGES,
+  createChatPrompt,
+  createMusicDetectionPrompt,
+} from './constants';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -16,7 +27,7 @@ class AnthropicService {
   private client: Anthropic | null = null;
 
   constructor() {
-    const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+    const apiKey = process.env[ENV_KEYS.anthropicApiKey];
     if (apiKey && apiKey.trim()) {
       this.client = new Anthropic({
         apiKey: apiKey,
@@ -29,15 +40,15 @@ class AnthropicService {
     contactName: string = 'Friend'
   ): Promise<string> {
     if (!this.client) {
-      throw new Error('Anthropic API key not configured');
+      throw new Error(ERROR_MESSAGES.anthropicNotConfigured);
     }
 
     try {
       const response = await this.client.messages.create({
         model: AI_MODELS.anthropic.default,
-        max_tokens: AI_CONFIG.maxTokens,
-        temperature: AI_CONFIG.temperature,
-        system: CHAT_SYSTEM_PROMPT(contactName),
+        max_tokens: API_CONFIG.maxTokens,
+        temperature: API_CONFIG.temperature,
+        system: createChatPrompt(contactName),
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
@@ -49,9 +60,9 @@ class AnthropicService {
         content => content.type === 'text'
       );
 
-      return textContent?.text || AI_CONFIG.defaultFallback;
+      return textContent?.text || API_CONFIG.defaultFallback;
     } catch (error) {
-      console.error('Anthropic API error:', error);
+      console.error(ERROR_MESSAGES.apiError, error);
       throw error;
     }
   }
@@ -61,101 +72,21 @@ class AnthropicService {
     contactName: string = 'Friend'
   ): Promise<AIStructuredResponse> {
     if (!this.client) {
-      throw new Error('Anthropic API key not configured');
+      throw new Error(ERROR_MESSAGES.anthropicNotConfigured);
     }
 
     try {
       // Build list of mentioned songs to avoid repetition
       const mentionedSongsList = this.getMentionedSongs();
-      const mentionedSongsContext =
-        mentionedSongsList.length > 0
-          ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${mentionedSongsList.join('\n- ')}\n\nAlways suggest different songs/artists that haven't been mentioned.`
-          : '';
-
-      const musicDetectionPrompt = `You are ${contactName}, having a casual text conversation with a friend. 
-Keep responses natural, conversational, and brief like real text messages.${mentionedSongsContext}
-
-CRITICAL RULES:
-1. Use MUSIC_RESPONSE whenever the conversation involves actual songs or artists that could be shared
-2. Use MUSIC_RESPONSE for ANY of these scenarios:
-   - "play a song" / "play some music" 
-   - "recommend a song/artist/album"
-   - "what should I listen to?"
-   - "send me a song"
-   - "what's your favorite [artist] song?"
-   - "do you know another song by [artist]?"
-   - "any other songs you like?"
-   - "what song should I play next?"
-   - mentioning liking/loving a specific song
-   - asking about or discussing specific songs/artists
-   - when YOU mention a specific song name in your response
-   - when conversation is about music preferences
-   - when sharing music recommendations or favorites
-
-3. DEFAULT to TEXT_RESPONSE only for non-music conversation (weather, plans, feelings, etc.)
-
-Response formats:
-TEXT_RESPONSE
-[Your casual, friendly response - 1-2 sentences max, like a text message]
-
-MUSIC_RESPONSE
-[One short reaction]
-MUSIC_QUERY:[search query]
-
-Examples - USE TEXT_RESPONSE FOR THESE:
-User: "Hey!"
-TEXT_RESPONSE
-Hey! What's up?
-
-User: "Have you seen Sinners?"
-TEXT_RESPONSE
-Not yet! Is it good?
-
-User: "I'm bored"
-TEXT_RESPONSE
-Same tbh. Wanna hang out?
-
-User: "What are you doing this weekend?"
-TEXT_RESPONSE
-Not much planned yet. You?
-
-Use MUSIC_RESPONSE for music requests:
-User: "Send me a good song"
-MUSIC_RESPONSE
-This one's been on repeat!
-MUSIC_QUERY:search:flowers miley cyrus
-
-User: "Play something upbeat"
-MUSIC_RESPONSE
-Perfect energy boost!
-MUSIC_QUERY:search:levitating dua lipa
-
-User: "What's your favorite Taylor Swift song?"
-MUSIC_RESPONSE
-Love this one from her!
-MUSIC_QUERY:search:anti hero taylor swift
-
-User: "Know any other Beastie Boys songs?"
-MUSIC_RESPONSE
-Classic 90s vibes!
-MUSIC_QUERY:search:fight for your right beastie boys
-
-User: "I love that new Olivia Rodrigo song"
-MUSIC_RESPONSE
-Yes! It's so good
-MUSIC_QUERY:search:vampire olivia rodrigo
-
-User: "What do you think of Dua Lipa?"
-MUSIC_RESPONSE
-She's amazing! Love this track
-MUSIC_QUERY:search:levitating dua lipa
-
-Remember: You're just ${contactName} texting casually. Most messages are just normal conversation - NOT about music.`;
+      const musicDetectionPrompt = createMusicDetectionPrompt(
+        contactName,
+        mentionedSongsList
+      );
 
       const response = await this.client.messages.create({
         model: AI_MODELS.anthropic.default,
-        max_tokens: AI_CONFIG.maxTokens,
-        temperature: AI_CONFIG.temperature,
+        max_tokens: API_CONFIG.maxTokens,
+        temperature: API_CONFIG.temperature,
         system: musicDetectionPrompt,
         messages: messages.map(msg => ({
           role: msg.role,
@@ -168,53 +99,64 @@ Remember: You're just ${contactName} texting casually. Most messages are just no
 
       // Parse the structured response - be more flexible with parsing
       if (
-        content.includes('MUSIC_RESPONSE') &&
-        content.includes('MUSIC_QUERY:')
+        content.includes(ANTHROPIC_FORMATS.responseTypes.music) &&
+        content.includes(MUSIC_RESPONSE_FORMATS.queryPrefix)
       ) {
         const lines = content.split('\n').filter(line => line.trim());
 
         // Find the line after MUSIC_RESPONSE for the message content
         const musicResponseIndex = lines.findIndex(
-          line => line.trim() === 'MUSIC_RESPONSE'
+          line => line.trim() === ANTHROPIC_FORMATS.responseTypes.music
         );
         const messageContent =
-          lines[musicResponseIndex + 1] || "Here's a song recommendation!";
+          lines[musicResponseIndex + 1] || MOCK_RESPONSES.defaultMusic;
 
         // Find the MUSIC_QUERY line
         const musicQueryLine = lines.find(line =>
-          line.startsWith('MUSIC_QUERY:')
+          line.startsWith(MUSIC_RESPONSE_FORMATS.queryPrefix)
         );
         const musicQuery = musicQueryLine
-          ? musicQueryLine.replace('MUSIC_QUERY:', '').trim()
-          : 'search:never gonna give you up rick astley';
+          ? musicQueryLine
+              .replace(MUSIC_RESPONSE_FORMATS.queryPrefix, '')
+              .trim()
+          : MOCK_MUSIC_QUERIES[0];
 
         // Track this song to prevent repetition
         this.addMentionedSong(musicQuery);
 
         return {
-          type: 'music',
+          type: RESPONSE_TYPES.MUSIC,
           content: messageContent,
           musicQuery: musicQuery,
         };
       } else {
         // Clean up TEXT_RESPONSE prefix and any remaining MUSIC_* artifacts
         let messageContent = content
-          .replace(/TEXT_RESPONSE\n?/g, '')
-          .replace(/MUSIC_RESPONSE\n?/g, '')
-          .replace(/MUSIC_QUERY:.*$/gm, '')
+          .replace(
+            new RegExp(`${ANTHROPIC_FORMATS.responseTypes.text}\n?`, 'g'),
+            ''
+          )
+          .replace(
+            new RegExp(`${ANTHROPIC_FORMATS.responseTypes.music}\n?`, 'g'),
+            ''
+          )
+          .replace(
+            new RegExp(`${MUSIC_RESPONSE_FORMATS.queryPrefix}.*$`, 'gm'),
+            ''
+          )
           .trim();
 
         if (!messageContent) {
-          messageContent = "That's interesting!";
+          messageContent = MOCK_RESPONSES.defaultText;
         }
 
         return {
-          type: 'text',
+          type: RESPONSE_TYPES.TEXT,
           content: messageContent,
         };
       }
     } catch (error) {
-      console.error('Anthropic structured response error:', error);
+      console.error(ERROR_MESSAGES.structuredResponseError, error);
       throw error;
     }
   }
@@ -236,7 +178,7 @@ Remember: You're just ${contactName} texting casually. Most messages are just no
   // Reset mentioned songs (for chat reset)
   resetMentionedSongs(): void {
     mentionedSongs.clear();
-    console.log('🎵 Cleared mentioned songs list');
+    console.log(LOG_MESSAGES.clearedMentionedSongs);
   }
 }
 

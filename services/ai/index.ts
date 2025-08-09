@@ -1,5 +1,14 @@
 import anthropicService from './anthropic';
 import openaiService from './openai';
+import {
+  PROVIDER_NAMES,
+  ENV_KEYS,
+  WARNING_MESSAGES,
+  MOCK_RESPONSES,
+  MUSIC_KEYWORDS,
+  MOCK_MUSIC_QUERIES,
+  RESPONSE_TYPES,
+} from './constants';
 
 export interface AIMessage {
   role: 'user' | 'assistant';
@@ -32,16 +41,17 @@ class AIServiceManager {
   private service: AIService;
 
   constructor() {
-    const aiProvider = process.env.EXPO_PUBLIC_AI_PROVIDER || 'anthropic';
+    const aiProvider =
+      process.env[ENV_KEYS.provider] || PROVIDER_NAMES.ANTHROPIC;
 
     // Initialize based on provider
     switch (aiProvider) {
-      case 'anthropic':
+      case PROVIDER_NAMES.ANTHROPIC:
         this.service = anthropicService.isConfigured()
           ? anthropicService
           : this.getMockService();
         break;
-      case 'openai':
+      case PROVIDER_NAMES.OPENAI:
         this.service = openaiService.isConfigured()
           ? openaiService
           : this.getMockService();
@@ -54,14 +64,7 @@ class AIServiceManager {
   private getMockService(): AIService {
     return {
       async generateResponse(): Promise<string> {
-        const responses = [
-          "Hey! How's it going?",
-          "That's awesome!",
-          'Tell me more about that',
-          'Interesting! 🤔',
-          'For sure!',
-          'I totally get that',
-        ];
+        const responses = MOCK_RESPONSES.general;
         // Simulate API delay
         await new Promise(resolve =>
           setTimeout(resolve, 1000 + Math.random() * 1000)
@@ -80,48 +83,27 @@ class AIServiceManager {
           messages[messages.length - 1]?.content.toLowerCase() || '';
 
         // Detect music-related requests
-        const musicKeywords = [
-          'song',
-          'music',
-          'track',
-          'artist',
-          'band',
-          'album',
-          'listen',
-          'playlist',
-          'recommend',
-        ];
-        const containsMusicKeyword = musicKeywords.some(keyword =>
+        const containsMusicKeyword = MUSIC_KEYWORDS.some(keyword =>
           lastMessage.includes(keyword)
         );
 
         if (containsMusicKeyword) {
-          const musicResponses = [
-            "Perfect classic! You're gonna love this one 🎵",
-            'This track is absolutely infectious!',
-            'Great choice - pure nostalgia and fun!',
-            'This one always makes me smile!',
-          ];
+          const musicResponses = MOCK_RESPONSES.musicReactions;
 
-          const queries = [
-            'search:never gonna give you up rick astley',
-            'search:sweet child o mine guns n roses',
-            "search:don't stop believin journey",
-            'search:mr brightside the killers',
-          ];
+          const queries = MOCK_MUSIC_QUERIES;
 
           const randomIndex = Math.floor(Math.random() * musicResponses.length);
 
           return {
-            type: 'music',
+            type: RESPONSE_TYPES.MUSIC,
             content: musicResponses[randomIndex],
             musicQuery: queries[randomIndex],
           };
         }
 
         return {
-          type: 'text',
-          content: "That's interesting!",
+          type: RESPONSE_TYPES.TEXT,
+          content: MOCK_RESPONSES.defaultText,
         };
       },
       isConfigured(): boolean {
@@ -135,7 +117,7 @@ class AIServiceManager {
     contactName?: string
   ): Promise<string> {
     if (!this.service.isConfigured()) {
-      console.warn('AI service not configured');
+      console.warn(WARNING_MESSAGES.serviceNotConfigured);
       return this.getFallbackResponse();
     }
 
@@ -152,9 +134,9 @@ class AIServiceManager {
     contactName?: string
   ): Promise<AIStructuredResponse> {
     if (!this.service.isConfigured()) {
-      console.warn('AI service not configured');
+      console.warn(WARNING_MESSAGES.serviceNotConfigured);
       return {
-        type: 'text',
+        type: RESPONSE_TYPES.TEXT,
         content: this.getFallbackResponse(),
       };
     }
@@ -167,18 +149,14 @@ class AIServiceManager {
     } catch (error) {
       console.error('AI structured response error:', error);
       return {
-        type: 'text',
+        type: RESPONSE_TYPES.TEXT,
         content: this.getFallbackResponse(),
       };
     }
   }
 
   private getFallbackResponse(): string {
-    const responses = [
-      "Hey! I'm having trouble connecting right now.",
-      'Let me get back to you on that!',
-      "That's interesting!",
-    ];
+    const responses = MOCK_RESPONSES.fallback;
     return responses[Math.floor(Math.random() * responses.length)];
   }
 
@@ -187,7 +165,7 @@ class AIServiceManager {
   }
 
   getCurrentProvider(): string {
-    return process.env.EXPO_PUBLIC_AI_PROVIDER || 'anthropic';
+    return process.env[ENV_KEYS.provider] || PROVIDER_NAMES.ANTHROPIC;
   }
 
   // Song tracking methods - pass through to underlying service
