@@ -81,3 +81,5 @@ interface Message {
 - Typing indicator shown during AI response generation
 - Contextual responses based on last 10 messages
 - Fallback to preset responses if API unavailable
+- Music detection and Apple Music integration for music-related queries
+- See `docs/AI_FLOW.md` for detailed AI response flow and decision logic

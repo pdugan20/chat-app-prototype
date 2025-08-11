@@ -84,6 +84,7 @@ export const MOCK_RESPONSES = {
   defaultText: "That's interesting!",
 } as const;
 
+// Keywords for detecting special intents (currently music, can be extended)
 export const MUSIC_KEYWORDS = [
   'song',
   'music',

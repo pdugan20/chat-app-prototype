@@ -7,18 +7,12 @@ class MockService extends BaseAIProvider {
     super('mock-key', 'Mock Service', 'Mock service error');
   }
 
-  async generateResponse(): Promise<string> {
-    await this.simulateDelay();
-    const responses = MOCK_RESPONSES.general;
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
   async generateStructuredResponse(
     messages: AIMessage[]
   ): Promise<AIStructuredResponse> {
     await this.simulateDelay();
 
-    if (this.detectMusicIntent(messages)) {
+    if (this.detectSpecialIntent(messages)) {
       const musicResponses = MOCK_RESPONSES.musicReactions;
       const randomIndex = Math.floor(Math.random() * musicResponses.length);
 

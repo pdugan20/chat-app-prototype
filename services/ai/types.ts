@@ -10,10 +10,6 @@ export interface AIStructuredResponse {
 }
 
 export interface AIService {
-  generateResponse(
-    messages: AIMessage[],
-    contactName?: string
-  ): Promise<string>;
   generateStructuredResponse(
     messages: AIMessage[],
     contactName?: string

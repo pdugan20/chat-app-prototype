@@ -35,23 +35,6 @@ class AIServiceManager implements AIService {
     }
   }
 
-  async generateResponse(
-    messages: AIMessage[],
-    contactName?: string
-  ): Promise<string> {
-    if (!this.service.isConfigured()) {
-      console.warn(WARNING_MESSAGES.serviceNotConfigured);
-      return this.getFallbackResponse();
-    }
-
-    try {
-      return await this.service.generateResponse(messages, contactName);
-    } catch (error) {
-      console.error(ERROR_MESSAGES.apiError, error);
-      return this.getFallbackResponse();
-    }
-  }
-
   async generateStructuredResponse(
     messages: AIMessage[],
     contactName?: string

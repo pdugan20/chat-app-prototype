@@ -21,11 +21,6 @@ export abstract class BaseAIProvider implements AIService {
     this.errorMessage = errorMessage;
   }
 
-  abstract generateResponse(
-    messages: AIMessage[],
-    contactName?: string
-  ): Promise<string>;
-
   abstract generateStructuredResponse(
     messages: AIMessage[],
     contactName?: string
@@ -50,9 +45,10 @@ export abstract class BaseAIProvider implements AIService {
     return API_CONFIG.defaultFallback;
   }
 
-  protected detectMusicIntent(messages: AIMessage[]): boolean {
+  protected detectSpecialIntent(messages: AIMessage[]): boolean {
     const lastMessage =
       messages[messages.length - 1]?.content.toLowerCase() || '';
+    // Currently only detecting music, but can be extended for other intents
     return MUSIC_KEYWORDS.some(keyword => lastMessage.includes(keyword));
   }
 
@@ -61,12 +57,17 @@ export abstract class BaseAIProvider implements AIService {
     return queries[Math.floor(Math.random() * queries.length)];
   }
 
-  protected buildSimpleMusicResponse(): AIStructuredResponse {
-    return {
-      type: RESPONSE_TYPES.MUSIC,
-      content: "Here's a song you might like!",
-      musicQuery: this.getRandomMusicQuery(),
-    };
+  protected buildSpecialResponse(type: 'music'): AIStructuredResponse {
+    // Can be extended to handle different special response types
+    if (type === 'music') {
+      return {
+        type: RESPONSE_TYPES.MUSIC,
+        content: "Here's a song you might like!",
+        musicQuery: this.getRandomMusicQuery(),
+      };
+    }
+    // Default fallback for unknown types
+    return this.buildTextResponse("I'll help you with that!");
   }
 
   protected buildTextResponse(content: string): AIStructuredResponse {

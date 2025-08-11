@@ -7,7 +7,7 @@ import {
   ENV_KEYS,
   ERROR_MESSAGES,
 } from '../constants';
-import { createChatPrompt } from '../prompts';
+import { createStructuredPrompt } from '../prompts';
 import { AI_MODELS } from '../models';
 
 interface ChatMessage {
@@ -30,16 +30,17 @@ class OpenAIService extends BaseAIProvider {
     }
   }
 
-  async generateResponse(
+  async generateStructuredResponse(
     messages: ChatMessage[],
     contactName: string = 'Friend'
-  ): Promise<string> {
+  ): Promise<AIStructuredResponse> {
     this.validateConfiguration();
 
     try {
+      // Use structured prompt to handle both text and special responses (music, etc.)
       const systemMessage = {
         role: 'system' as const,
-        content: createChatPrompt(contactName),
+        content: createStructuredPrompt(contactName),
       };
 
       const response = await this.client!.chat.completions.create({
@@ -51,23 +52,21 @@ class OpenAIService extends BaseAIProvider {
         frequency_penalty: PROVIDER_CONFIG.openai.frequencyPenalty,
       });
 
-      return response.choices[0]?.message?.content || this.getDefaultFallback();
+      const content = response.choices[0]?.message?.content || '';
+
+      // Parse the response similar to Anthropic's approach
+      // Check if response indicates special intent (music, etc.)
+      if (
+        this.detectSpecialIntent(messages) ||
+        content.includes('MUSIC_RESPONSE')
+      ) {
+        return this.buildSpecialResponse('music');
+      }
+
+      return this.buildTextResponse(content);
     } catch (error) {
-      this.handleError(error, ERROR_MESSAGES.apiError);
+      this.handleError(error, ERROR_MESSAGES.structuredResponseError);
     }
-  }
-
-  async generateStructuredResponse(
-    messages: ChatMessage[],
-    contactName: string = 'Friend'
-  ): Promise<AIStructuredResponse> {
-    // For now, use simple detection. Could be enhanced with function calling later
-    if (this.detectMusicIntent(messages)) {
-      return this.buildSimpleMusicResponse();
-    }
-
-    const textResponse = await this.generateResponse(messages, contactName);
-    return this.buildTextResponse(textResponse);
   }
 }
 
