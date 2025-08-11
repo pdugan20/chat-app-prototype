@@ -34,17 +34,14 @@ graph TB
     ParseResponse --> ResponseType{Response Type?}
     MockResponse --> ResponseType
     
-    ResponseType -->|MUSIC_RESPONSE| SpecialFlow[Special Response Flow - Music]
-    ResponseType -->|TEXT_RESPONSE| TextFlow[Text Response Flow]
+    ResponseType -->|MUSIC_RESPONSE| ShowText[Display text message]
+    ResponseType -->|TEXT_RESPONSE| ShowTextOnly[Display text message]
     
-    SpecialFlow --> ShowText[1. Show text message]
-    ShowText --> FetchMusic[2. Fetch Apple Music data]
-    FetchMusic --> ShowMusic[3. Show music bubble]
+    ShowText --> FetchMusic[Fetch Apple Music data]
+    FetchMusic --> ShowMusic[Display music bubble]
     
-    TextFlow --> ShowTextOnly[Show text message only]
-    
-    ShowMusic --> End([Message displayed])
-    ShowTextOnly --> End
+    ShowMusic --> MusicEnd([AI sent text + music, awaiting reply])
+    ShowTextOnly --> TextEnd([AI sent text, awaiting reply])
 ```
 
 ## Decision Tree

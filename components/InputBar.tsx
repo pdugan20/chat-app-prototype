@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SymbolView } from 'expo-symbols';
 import { Colors, Typography, Spacing, Layout } from '../constants/theme';
+import AppleMusicBubble from './bubbles/AppleMusicBubble';
 
 interface InputBarProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, appleMusicUrl?: string) => void;
   keyboardVisible?: boolean;
   onHeightChange?: (height: number) => void;
   disabled?: boolean;
+}
+
+interface AppleMusicAttachment {
+  url: string;
+  songId: string;
 }
 
 const InputBar: React.FC<InputBarProps> = ({
@@ -18,12 +30,41 @@ const InputBar: React.FC<InputBarProps> = ({
   disabled = false,
 }) => {
   const [message, setMessage] = useState('');
+  const [appleMusicAttachment, setAppleMusicAttachment] =
+    useState<AppleMusicAttachment | null>(null);
+
+  // Detect Apple Music URLs in the message
+  useEffect(() => {
+    const appleMusicRegex =
+      /https:\/\/music\.apple\.com\/[^\s]+\/(\d+)(\?i=(\d+))?/;
+    const match = message.match(appleMusicRegex);
+
+    if (match && !appleMusicAttachment) {
+      const albumId = match[1];
+      const trackId = match[3] || match[1];
+
+      // Remove the URL from the message
+      const cleanedMessage = message.replace(match[0], '').trim();
+      setMessage(cleanedMessage);
+
+      // Add as attachment
+      setAppleMusicAttachment({
+        url: match[0],
+        songId: trackId,
+      });
+    }
+  }, [message, appleMusicAttachment]);
 
   const handleSend = () => {
-    if (message.trim() && !disabled) {
-      onSendMessage(message.trim());
+    if ((message.trim() || appleMusicAttachment) && !disabled) {
+      onSendMessage(message.trim(), appleMusicAttachment?.url);
       setMessage('');
+      setAppleMusicAttachment(null);
     }
+  };
+
+  const removeAppleMusicAttachment = () => {
+    setAppleMusicAttachment(null);
   };
 
   return (
@@ -49,10 +90,47 @@ const InputBar: React.FC<InputBarProps> = ({
           />
         </TouchableOpacity>
 
-        <View style={styles.textInputContainer}>
+        <View
+          style={[
+            styles.textInputContainer,
+            appleMusicAttachment && styles.textInputContainerWithAttachment,
+          ]}
+        >
+          {appleMusicAttachment && (
+            <View style={styles.attachmentInInput}>
+              <View style={styles.attachmentBubbleWrapper}>
+                <AppleMusicBubble
+                  songId={appleMusicAttachment.songId}
+                  isSender={false}
+                  isLastInGroup={false}
+                  useDynamicColors={true}
+                  maxWidth='85%'
+                  playDisabled={true}
+                />
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={removeAppleMusicAttachment}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <View style={styles.removeButtonBackground}>
+                    <SymbolView
+                      name='xmark'
+                      size={10}
+                      type='hierarchical'
+                      tintColor={Colors.white}
+                      weight='bold'
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
           <TextInput
-            style={styles.textInput}
-            placeholder='iMessage'
+            style={[
+              styles.textInput,
+              appleMusicAttachment && styles.textInputWithAttachment,
+            ]}
+            placeholder={appleMusicAttachment ? '' : 'iMessage'}
             placeholderTextColor={Colors.placeholder}
             value={message}
             onChangeText={setMessage}
@@ -61,7 +139,7 @@ const InputBar: React.FC<InputBarProps> = ({
             returnKeyType='default'
             blurOnSubmit={false}
           />
-          {!message.trim() ? (
+          {!message.trim() && !appleMusicAttachment ? (
             <View style={styles.micIconContainer}>
               <SymbolView
                 name='mic.fill'
@@ -102,6 +180,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: Spacing.addButtonSize,
   },
+  attachmentBubbleWrapper: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+  },
+  attachmentInInput: {
+    paddingBottom: 12,
+    paddingTop: 4,
+    alignItems: 'flex-start',
+  },
   container: {
     backgroundColor: Colors.blurBackground,
     paddingBottom: Layout.inputPaddingBottom,
@@ -127,6 +214,22 @@ const styles = StyleSheet.create({
     right: Spacing.micIconContainerRight,
     width: Spacing.micIconContainerSize,
   },
+  removeButton: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    zIndex: 10,
+  },
+  removeButtonBackground: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: Colors.white,
+    borderRadius: 9,
+    borderWidth: 1,
+    height: 18,
+    justifyContent: 'center',
+    width: 18,
+  },
   sendButton: {
     alignItems: 'center',
     backgroundColor: Colors.systemBlue,
@@ -149,7 +252,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.input,
     letterSpacing: -0.68,
     lineHeight: Typography.inputLineHeight,
-    maxHeight: 100,
     minHeight: 20,
     paddingBottom: 0,
     paddingRight: 40,
@@ -162,13 +264,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    maxHeight: 120,
+    flexDirection: 'column',
     minHeight: Spacing.inputHeight,
     paddingHorizontal: Spacing.inputPadding,
     paddingVertical: Spacing.inputPaddingVertical,
     position: 'relative',
+  },
+  textInputContainerWithAttachment: {
+    minHeight: 100,
+    paddingTop: 6,
+    paddingBottom: 4,
+  },
+  textInputWithAttachment: {
+    paddingTop: 0,
+    paddingBottom: 12,
+    minHeight: 20,
   },
 });
 

@@ -40,6 +40,8 @@ interface AppleMusicBubbleProps {
     textColor4?: string;
   };
   useDynamicColors?: boolean; // Enable dynamic colors from Apple Music API
+  maxWidth?: string; // Custom max width override
+  playDisabled?: boolean; // Disable play button interaction
   onPlay?: () => void;
   onPause?: () => void;
 }
@@ -59,6 +61,8 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
   isLastInGroup = false,
   colors: propColors,
   useDynamicColors = false,
+  maxWidth,
+  playDisabled = false,
   onPlay,
   onPause,
 }) => {
@@ -227,6 +231,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         styles.container,
         isSender ? styles.senderContainer : styles.recipientContainer,
         hasReaction && styles.containerWithReaction,
+        maxWidth && { maxWidth },
       ]}
     >
       <TouchableOpacity
@@ -310,7 +315,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
               isLoading={isLoading}
               progress={progress}
               onPress={() => {
-                if (!isLoading) {
+                if (!isLoading && !playDisabled) {
                   handlePlayPause();
                   // Call action callbacks for Storybook
                   if (isPlaying) {
@@ -322,7 +327,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
               }}
               isSender={isSender}
               size={30}
-              disabled={isLoading}
+              disabled={isLoading || playDisabled}
               hasEverBeenPlayed={hasEverBeenPlayed}
               backgroundStrokeColor={dynamicStyles.backgroundStrokeColor}
             />

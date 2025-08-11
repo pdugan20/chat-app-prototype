@@ -7,6 +7,8 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/,
       },
+      // Debounce control updates to reduce re-renders
+      debounce: 200,
     },
   },
   globalTypes: {

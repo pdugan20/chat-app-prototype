@@ -64,6 +64,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
             }
             strokeWidth='2'
             fill={isInitialState ? Colors.systemRed : 'none'}
+            opacity={disabled ? 0.8 : 1}
           />
           {/* Progress circle - only show after first play */}
           {!isInitialState && (
@@ -77,6 +78,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              opacity={disabled ? 0.8 : 1}
             />
           )}
         </Svg>
@@ -85,7 +87,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
           size={iconSize}
           type='hierarchical'
           tintColor={isInitialState ? Colors.white : Colors.systemRed}
-          style={styles.playIcon}
+          style={[styles.playIcon, { opacity: disabled ? 0.5 : 1 }]}
         />
       </View>
     </TouchableOpacity>

@@ -279,8 +279,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const handleSendMessage = (text: string) => {
-    if (isSending || !text.trim()) return;
+  const handleSendMessage = (text: string, appleMusicUrl?: string) => {
+    if (isSending || (!text.trim() && !appleMusicUrl)) return;
 
     setIsSending(true);
 
@@ -289,12 +289,26 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       minute: '2-digit',
     });
 
+    // Determine message text and type
+    let messageText = text;
+    let messageType: 'text' | 'appleMusic' = 'text';
+    
+    if (appleMusicUrl) {
+      messageType = 'appleMusic';
+      // Extract song ID from URL for the bubble
+      const match = appleMusicUrl.match(/\/(\d+)(\?i=(\d+))?/);
+      const songId = match ? (match[3] || match[1]) : '';
+      
+      // Create a special message format for Apple Music
+      messageText = `applemusic:${songId}`;
+    }
+
     // Add message with animations
-    const newMessage = addMessage(text, true);
+    const newMessage = addMessage(messageText, true);
 
     // Store for inbox update
     lastSentMessageRef.current = {
-      text,
+      text: appleMusicUrl ? 'Shared a song' : text,
       timestamp: currentTime,
       isUserMessage: true,
     };
@@ -302,7 +316,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     // Update chat preview immediately via context
     updateChat(chatId, {
       id: chatId,
-      lastMessage: `You: ${text}`,
+      lastMessage: appleMusicUrl ? 'You: Shared a song' : `You: ${text}`,
       timestamp: currentTime,
       unread: false,
     });
@@ -310,7 +324,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     // Show delivered indicator
     showDeliveredIndicator(newMessage.id, () => {
       if (aiEnabled) {
-        generateAIResponse(text);
+        generateAIResponse(appleMusicUrl ? 'Shared a song' : text);
       }
       setIsSending(false);
     });
