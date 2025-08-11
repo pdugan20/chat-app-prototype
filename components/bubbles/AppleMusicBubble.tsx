@@ -231,6 +231,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         styles.container,
         isSender ? styles.senderContainer : styles.recipientContainer,
         hasReaction && styles.containerWithReaction,
+        // @ts-expect-error - maxWidth type mismatch
         maxWidth && { maxWidth },
       ]}
     >

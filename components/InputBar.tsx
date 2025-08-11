@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SymbolView } from 'expo-symbols';
 import { Colors, Typography, Spacing, Layout } from '../constants/theme';
-import AppleMusicBubble from './bubbles/AppleMusicBubble';
+import { urlPreviewService, URLPreview } from '../services/urlPreview';
+import InputPreviewContainer from './previews/InputPreviewContainer';
+
+// Initialize preview system
+import '../services/urlPreview/setup';
 
 interface InputBarProps {
   onSendMessage: (message: string, appleMusicUrl?: string) => void;
   keyboardVisible?: boolean;
   onHeightChange?: (height: number) => void;
   disabled?: boolean;
-}
-
-interface AppleMusicAttachment {
-  url: string;
-  songId: string;
 }
 
 const InputBar: React.FC<InputBarProps> = ({
@@ -30,41 +23,43 @@ const InputBar: React.FC<InputBarProps> = ({
   disabled = false,
 }) => {
   const [message, setMessage] = useState('');
-  const [appleMusicAttachment, setAppleMusicAttachment] =
-    useState<AppleMusicAttachment | null>(null);
+  const [previews, setPreviews] = useState<URLPreview[]>([]);
 
-  // Detect Apple Music URLs in the message
+  // Parse URLs for previews
   useEffect(() => {
-    const appleMusicRegex =
-      /https:\/\/music\.apple\.com\/[^\s]+\/(\d+)(\?i=(\d+))?/;
-    const match = message.match(appleMusicRegex);
+    const parseURLs = async () => {
+      if (message.trim() && previews.length === 0) {
+        const detectedPreviews = await urlPreviewService.parseURL(message);
+        if (detectedPreviews.length > 0) {
+          setPreviews(detectedPreviews);
 
-    if (match && !appleMusicAttachment) {
-      const albumId = match[1];
-      const trackId = match[3] || match[1];
+          // Clean URLs from message text
+          const urls = urlPreviewService.extractURLs(message);
+          const cleanedMessage = urlPreviewService.cleanTextFromURLs(
+            message,
+            urls
+          );
+          setMessage(cleanedMessage);
+        }
+      }
+    };
 
-      // Remove the URL from the message
-      const cleanedMessage = message.replace(match[0], '').trim();
-      setMessage(cleanedMessage);
-
-      // Add as attachment
-      setAppleMusicAttachment({
-        url: match[0],
-        songId: trackId,
-      });
-    }
-  }, [message, appleMusicAttachment]);
+    parseURLs();
+  }, [message, previews.length]);
 
   const handleSend = () => {
-    if ((message.trim() || appleMusicAttachment) && !disabled) {
-      onSendMessage(message.trim(), appleMusicAttachment?.url);
+    if ((message.trim() || previews.length > 0) && !disabled) {
+      // For now, we'll pass the first preview's URL for backward compatibility
+      // In the future, this could be enhanced to pass all preview data
+      const appleMusicUrl = previews.find(p => p.type === 'appleMusic')?.url;
+      onSendMessage(message.trim(), appleMusicUrl);
       setMessage('');
-      setAppleMusicAttachment(null);
+      setPreviews([]);
     }
   };
 
-  const removeAppleMusicAttachment = () => {
-    setAppleMusicAttachment(null);
+  const removePreview = (previewId: string) => {
+    setPreviews(prev => prev.filter(p => p.id !== previewId));
   };
 
   return (
@@ -93,44 +88,22 @@ const InputBar: React.FC<InputBarProps> = ({
         <View
           style={[
             styles.textInputContainer,
-            appleMusicAttachment && styles.textInputContainerWithAttachment,
+            previews.length > 0 && styles.textInputContainerWithAttachment,
           ]}
         >
-          {appleMusicAttachment && (
-            <View style={styles.attachmentInInput}>
-              <View style={styles.attachmentBubbleWrapper}>
-                <AppleMusicBubble
-                  songId={appleMusicAttachment.songId}
-                  isSender={false}
-                  isLastInGroup={false}
-                  useDynamicColors={true}
-                  maxWidth='85%'
-                  playDisabled={true}
-                />
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={removeAppleMusicAttachment}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <View style={styles.removeButtonBackground}>
-                    <SymbolView
-                      name='xmark'
-                      size={10}
-                      type='hierarchical'
-                      tintColor={Colors.white}
-                      weight='bold'
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+          {previews.map(preview => (
+            <InputPreviewContainer
+              key={preview.id}
+              preview={preview}
+              onRemove={() => removePreview(preview.id)}
+            />
+          ))}
           <TextInput
             style={[
               styles.textInput,
-              appleMusicAttachment && styles.textInputWithAttachment,
+              previews.length > 0 && styles.textInputWithAttachment,
             ]}
-            placeholder={appleMusicAttachment ? '' : 'iMessage'}
+            placeholder={previews.length > 0 ? '' : 'iMessage'}
             placeholderTextColor={Colors.placeholder}
             value={message}
             onChangeText={setMessage}
@@ -139,7 +112,7 @@ const InputBar: React.FC<InputBarProps> = ({
             returnKeyType='default'
             blurOnSubmit={false}
           />
-          {!message.trim() && !appleMusicAttachment ? (
+          {!message.trim() && previews.length === 0 ? (
             <View style={styles.micIconContainer}>
               <SymbolView
                 name='mic.fill'
@@ -180,15 +153,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: Spacing.addButtonSize,
   },
-  attachmentBubbleWrapper: {
-    position: 'relative',
-    alignSelf: 'flex-start',
-  },
-  attachmentInInput: {
-    paddingBottom: 12,
-    paddingTop: 4,
-    alignItems: 'flex-start',
-  },
   container: {
     backgroundColor: Colors.blurBackground,
     paddingBottom: Layout.inputPaddingBottom,
@@ -213,22 +177,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: Spacing.micIconContainerRight,
     width: Spacing.micIconContainerSize,
-  },
-  removeButton: {
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    zIndex: 10,
-  },
-  removeButtonBackground: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    borderColor: Colors.white,
-    borderRadius: 9,
-    borderWidth: 1,
-    height: 18,
-    justifyContent: 'center',
-    width: 18,
   },
   sendButton: {
     alignItems: 'center',
@@ -272,13 +220,13 @@ const styles = StyleSheet.create({
   },
   textInputContainerWithAttachment: {
     minHeight: 100,
-    paddingTop: 6,
     paddingBottom: 4,
+    paddingTop: 6,
   },
   textInputWithAttachment: {
-    paddingTop: 0,
-    paddingBottom: 12,
     minHeight: 20,
+    paddingBottom: 12,
+    paddingTop: 0,
   },
 });
 

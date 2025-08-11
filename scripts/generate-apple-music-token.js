@@ -21,8 +21,10 @@ function generateAppleMusicToken() {
   try {
     // Validate required environment variables
     if (!config.keyFile || !config.keyId || !config.teamId) {
-      throw new Error('Missing required environment variables in .env file:\n' +
-        '  APPLE_MUSIC_KEY_FILE, APPLE_MUSIC_KEY_ID, APPLE_MUSIC_TEAM_ID');
+      throw new Error(
+        'Missing required environment variables in .env file:\n' +
+          '  APPLE_MUSIC_KEY_FILE, APPLE_MUSIC_KEY_ID, APPLE_MUSIC_TEAM_ID'
+      );
     }
 
     // Read the private key
@@ -37,12 +39,12 @@ function generateAppleMusicToken() {
     const payload = {
       iss: config.teamId,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + (6 * 30 * 24 * 60 * 60)
+      exp: Math.floor(Date.now() / 1000) + 6 * 30 * 24 * 60 * 60,
     };
 
     const token = jwt.sign(payload, privateKey, {
       algorithm: 'ES256',
-      keyid: config.keyId
+      keyid: config.keyId,
     });
 
     // Automatically save to .env file
@@ -60,7 +62,6 @@ function generateAppleMusicToken() {
       console.log('✅ Token generated. Add this to your .env file:');
       console.log(`EXPO_PUBLIC_APPLE_MUSIC_TOKEN=${token}`);
     }
-
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

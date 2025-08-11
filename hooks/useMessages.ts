@@ -53,17 +53,20 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
   const addMessage = (text: string, isSender: boolean = true) => {
     const animationValues = createMessageAnimationValues();
     let newMessage: Message;
-    
+
     // Check if this is an Apple Music message
     if (text.startsWith('applemusic:')) {
       const songId = text.replace('applemusic:', '');
       newMessage = {
-        ...createAppleMusicMessage({ 
-          songId, 
-          songTitle: '', 
-          artistName: '', 
-          albumArtUrl: '' 
-        }, isSender),
+        ...createAppleMusicMessage(
+          {
+            songId,
+            songTitle: '',
+            artistName: '',
+            albumArtUrl: '',
+          },
+          isSender
+        ),
         ...animationValues,
       };
     } else {

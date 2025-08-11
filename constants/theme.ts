@@ -40,6 +40,7 @@ export const Colors = {
   messageBubbleBlue: ColorPrimitives.blue,
   inputBackground: 'rgba(255, 255, 255, 0.9)',
   blurBackground: 'rgba(255, 255, 255, 0.75)',
+  semiTransparentWhite: '#FFFFFF80',
   addButtonBackground: ColorPrimitives.gray300,
   screenBackground: ColorPrimitives.white,
   inboxBackground: ColorPrimitives.gray100,

@@ -9,37 +9,37 @@ This document describes the AI response generation flow in the chat application,
 ```mermaid
 graph TB
     Start([User sends message]) --> Hook[useAIResponse Hook]
-    
+
     Hook --> History[Build conversation history<br/>Last 10 messages]
-    
+
     History --> API[aiService.generateStructuredResponse]
-    
+
     API --> Provider{AI Provider}
-    
+
     Provider -->|Anthropic| AnthropicService[AnthropicService]
     Provider -->|OpenAI| OpenAIService[OpenAIService]
     Provider -->|None/Mock| MockService[MockService]
-    
+
     AnthropicService --> StructuredPrompt[createStructuredPrompt]
     OpenAIService --> StructuredPrompt
     MockService --> SpecialDetect[detectSpecialIntent]
-    
+
     StructuredPrompt --> Claude[Claude API]
     StructuredPrompt --> GPT[OpenAI API]
-    
+
     Claude --> ParseResponse[Parse Response]
     GPT --> ParseResponse
     SpecialDetect --> MockResponse[Generate Mock Response]
-    
+
     ParseResponse --> ResponseType{Response Type?}
     MockResponse --> ResponseType
-    
+
     ResponseType -->|MUSIC_RESPONSE| ShowText[Display text message]
     ResponseType -->|TEXT_RESPONSE| ShowTextOnly[Display text message]
-    
+
     ShowText --> FetchMusic[Fetch Apple Music data]
     FetchMusic --> ShowMusic[Display music bubble]
-    
+
     ShowMusic --> MusicEnd([AI sent text + music, awaiting reply])
     ShowTextOnly --> TextEnd([AI sent text, awaiting reply])
 ```
@@ -75,6 +75,7 @@ User Message
 ### 2. Provider-Specific Logic
 
 #### Anthropic (Claude)
+
 ```
 createStructuredPrompt
     |
@@ -88,6 +89,7 @@ createStructuredPrompt
 ```
 
 #### OpenAI (GPT)
+
 ```
 createStructuredPrompt
     |
@@ -97,6 +99,7 @@ createStructuredPrompt
 ```
 
 #### Mock Service
+
 ```
 detectSpecialIntent (keyword-based)
     |
@@ -108,6 +111,7 @@ detectSpecialIntent (keyword-based)
 ## Response Processing Flow
 
 ### Text Response Flow
+
 ```
 1. AI generates text response
 2. Create Message object with animation values
@@ -118,6 +122,7 @@ detectSpecialIntent (keyword-based)
 ```
 
 ### Special Response Flow - Music
+
 ```
 1. AI generates special response (text + metadata)
 2. Show typing indicator
@@ -136,30 +141,30 @@ detectSpecialIntent (keyword-based)
 
 ### Services
 
-| Service | File | Purpose |
-|---------|------|---------|
-| AIServiceManager | `services/ai/manager.ts` | Routes to appropriate AI provider |
-| AnthropicService | `services/ai/providers/anthropic.ts` | Claude API integration |
-| OpenAIService | `services/ai/providers/openai.ts` | OpenAI API integration |
-| MockService | `services/ai/providers/mock.ts` | Fallback when no API configured |
+| Service          | File                                 | Purpose                           |
+| ---------------- | ------------------------------------ | --------------------------------- |
+| AIServiceManager | `services/ai/manager.ts`             | Routes to appropriate AI provider |
+| AnthropicService | `services/ai/providers/anthropic.ts` | Claude API integration            |
+| OpenAIService    | `services/ai/providers/openai.ts`    | OpenAI API integration            |
+| MockService      | `services/ai/providers/mock.ts`      | Fallback when no API configured   |
 
 ### Core Functions
 
-| Function | Purpose | Used By |
-|-----------|---------|---------|
-| `createStructuredPrompt` | Detects special intents and generates appropriate responses | All providers |
-| `detectSpecialIntent` | Keyword-based detection for special response types | Mock/fallback |
-| `parseStructuredResponse` | Parses AI response into appropriate type | Anthropic |
-| `parseMusicResponse` | Extracts music metadata from response | Anthropic |
-| `buildSpecialResponse` | Constructs special response objects | Base class |
+| Function                  | Purpose                                                     | Used By       |
+| ------------------------- | ----------------------------------------------------------- | ------------- |
+| `createStructuredPrompt`  | Detects special intents and generates appropriate responses | All providers |
+| `detectSpecialIntent`     | Keyword-based detection for special response types          | Mock/fallback |
+| `parseStructuredResponse` | Parses AI response into appropriate type                    | Anthropic     |
+| `parseMusicResponse`      | Extracts music metadata from response                       | Anthropic     |
+| `buildSpecialResponse`    | Constructs special response objects                         | Base class    |
 
 ### Response Types
 
 ```typescript
 interface AIStructuredResponse {
-  type: 'text' | 'music';  // Extensible for future types
-  content: string;          // Message text
-  musicQuery?: string;      // Apple Music search query (music type only)
+  type: 'text' | 'music'; // Extensible for future types
+  content: string; // Message text
+  musicQuery?: string; // Apple Music search query (music type only)
   // Future additions:
   // location?: LocationData;
   // calendarEvent?: EventData;
@@ -170,14 +175,18 @@ interface AIStructuredResponse {
 ## Special Intent Detection
 
 ### Currently Implemented: Music
+
 The system detects music intent when messages contain:
+
 - Direct requests: "play", "song", "music", "listen"
 - Artist/song mentions: specific names
 - Music questions: "favorite song", "recommend", "what should I play"
 - Context words: "album", "track", "artist", "band"
 
 ### Future Special Intents
+
 The architecture supports adding:
+
 - **Location sharing**: "where are you", "send location", "meet at"
 - **Calendar events**: "schedule", "meeting", "appointment"
 - **File sharing**: "send file", "document", "photo"
@@ -202,6 +211,7 @@ Special Messages (Music):
 ## Configuration
 
 ### Environment Variables
+
 ```bash
 AI_PROVIDER=anthropic|openai  # Select provider
 ANTHROPIC_API_KEY=...         # Claude API
@@ -210,6 +220,7 @@ APPLE_MUSIC_API_KEY=...       # Music data
 ```
 
 ### Provider Selection Priority
+
 1. Check AI_PROVIDER env variable
 2. Use provider if API key configured
 3. Fall back to MockService

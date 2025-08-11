@@ -10,7 +10,7 @@ This project includes Storybook for React Native to showcase and test components
 # Start Storybook on web (recommended for development)
 npm run storybook
 
-# Run Storybook on iOS simulator  
+# Run Storybook on iOS simulator
 npm run storybook:ios
 ```
 
@@ -26,6 +26,7 @@ npm run storybook:ios
 A component that displays music information in an iMessage-style bubble.
 
 **Stories:**
+
 - `HelloNasty` - Beastie Boys album as received message
 - `WeezerBlueAlbum` - Weezer album as sent message (blue)
 - `WithHeartReaction` - Music bubble with heart reaction
@@ -34,6 +35,7 @@ A component that displays music information in an iMessage-style bubble.
 - `GroupMessage` - Message without tail (part of group)
 
 **Interactive Controls:**
+
 - Toggle `isSender` to switch between sent/received styles
 - Toggle `hasReaction` to show/hide reactions
 - Select `reactionType` to test different reactions
