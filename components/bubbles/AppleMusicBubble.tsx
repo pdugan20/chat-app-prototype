@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import MessageTail from '../MessageTail';
 import AlbumArt from '../AlbumArt';
@@ -15,6 +9,8 @@ import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useSongData } from '../../hooks/useSongData';
 import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
 import { ReactionType } from '../../utils/reactions';
+import { handleOpenAppleMusic } from '../../utils/appleMusicHelpers';
+import { getDynamicStyles, addTransparency } from '../../utils/colorHelpers';
 
 interface AppleMusicBubbleProps {
   songId: string;
@@ -23,7 +19,7 @@ interface AppleMusicBubbleProps {
   albumArtUrl?: string;
   previewUrl?: string;
   duration?: number; // in seconds
-  appleMusicId?: string; // Apple Music song ID for deep linking
+  appleMusicId?: string;
   playParams?: {
     id: string;
     kind: string;
@@ -39,9 +35,9 @@ interface AppleMusicBubbleProps {
     textColor3?: string;
     textColor4?: string;
   };
-  useDynamicColors?: boolean; // Enable dynamic colors from Apple Music API
-  maxWidth?: string; // Custom max width override
-  playDisabled?: boolean; // Disable play button interaction
+  useDynamicColors?: boolean;
+  maxWidth?: string;
+  playDisabled?: boolean;
   onPlay?: () => void;
   onPause?: () => void;
 }
@@ -84,146 +80,23 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
 
   // Determine which colors to use
   const artworkColors = propColors || songData?.colors;
-  const shouldUseApiColors = useDynamicColors && artworkColors;
-
-  // Format colors from API (add # prefix if needed)
-  const formatColor = (color?: string) => {
-    if (!color) return undefined;
-    return color.startsWith('#') ? color : `#${color}`;
-  };
-
-  // Check if background color is white or very close to white
-  const isWhiteBackground = (bgColor?: string) => {
-    if (!bgColor) return false;
-
-    const color = formatColor(bgColor);
-    if (!color) return false;
-
-    // Convert hex to RGB
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-
-    // Check if all RGB values are close to white (above 240)
-    return r > 240 && g > 240 && b > 240;
-  };
-
-  // Add transparency to color for softer appearance
-  const addTransparency = (color?: string, opacity: number = 0.6) => {
-    if (!color) return undefined;
-
-    const formattedColor = formatColor(color);
-    if (!formattedColor) return undefined;
-
-    // Convert hex to RGB and add alpha
-    const hex = formattedColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
+  const shouldUseApiColors = !!(useDynamicColors && artworkColors);
 
   // Handle opening Apple Music
-  const handleOpenAppleMusic = async () => {
-    try {
-      let appleMusicUrl = '';
-
-      // First try to use the message-level Apple Music ID (from AI response)
-      if (propAppleMusicId) {
-        appleMusicUrl = `https://music.apple.com/song/${propAppleMusicId}`;
-        console.log('🎵 Using message Apple Music ID:', propAppleMusicId);
-      } else if (propPlayParams?.id) {
-        // Alternative: use message-level playParams ID
-        appleMusicUrl = `https://music.apple.com/song/${propPlayParams.id}`;
-        console.log('🎵 Using message playParams ID:', propPlayParams.id);
-      } else if (songData?.id) {
-        // Use songData Apple Music ID (from useSongData hook)
-        appleMusicUrl = `https://music.apple.com/song/${songData.id}`;
-        console.log('🎵 Using songData Apple Music ID:', songData.id);
-      } else if (songData?.playParams?.id) {
-        // Alternative: use songData playParams ID
-        appleMusicUrl = `https://music.apple.com/song/${songData.playParams.id}`;
-        console.log('🎵 Using songData playParams ID:', songData.playParams.id);
-      } else if (songData?.title && songData?.artist) {
-        // Fallback to search if no direct ID is available
-        const query = encodeURIComponent(
-          `${songData.title} ${songData.artist}`
-        );
-        appleMusicUrl = `https://music.apple.com/search?term=${query}`;
-        console.log('🎵 Falling back to search URL');
-      } else {
-        console.log('🎵 No song data available to open in Apple Music');
-        return;
-      }
-
-      if (appleMusicUrl) {
-        console.log('🎵 Opening Apple Music:', appleMusicUrl);
-
-        // Try multiple URL schemes for better compatibility
-        const urlSchemes = [
-          appleMusicUrl, // HTTPS URL (works in browser/web view)
-          appleMusicUrl.replace('https://', 'music://'), // Apple Music app deep link
-          appleMusicUrl.replace(
-            'https://music.apple.com',
-            'itmss://music.apple.com'
-          ), // iTunes Store scheme
-        ];
-
-        let opened = false;
-        for (const url of urlSchemes) {
-          try {
-            const supported = await Linking.canOpenURL(url);
-            if (supported) {
-              await Linking.openURL(url);
-              opened = true;
-              console.log('🎵 Successfully opened with URL:', url);
-              break;
-            }
-          } catch (err) {
-            console.log('🎵 Failed to open URL:', url, err);
-          }
-        }
-
-        if (!opened) {
-          console.log(
-            '🎵 Could not open Apple Music. This is common in simulators.'
-          );
-          console.log(
-            '🎵 Try testing on a real device or ensure Safari can open the URL.'
-          );
-          // In simulator, just log the URL that would be opened
-          console.log('🎵 Would open:', appleMusicUrl);
-        }
-      }
-    } catch (error) {
-      console.error('🎵 Failed to open Apple Music:', error);
-    }
+  const onOpenAppleMusic = async () => {
+    await handleOpenAppleMusic({
+      propAppleMusicId: propAppleMusicId,
+      propPlayParams: propPlayParams,
+      songData: songData || undefined,
+    });
   };
 
   // Define dynamic styles based on Apple Music colors
-  const dynamicStyles = shouldUseApiColors
-    ? {
-        bubbleBackground: isWhiteBackground(artworkColors.bgColor)
-          ? Colors.messageBubbleGray
-          : formatColor(artworkColors.bgColor),
-        titleColor: formatColor(artworkColors.textColor1), // Primary text for title
-        artistColor: formatColor(artworkColors.textColor2), // Secondary text for artist
-        labelColor: formatColor(artworkColors.textColor3), // Tertiary for "Music" label and Apple logo
-        iconColor: formatColor(artworkColors.textColor3), // Using textColor3 for consistency
-        backgroundStrokeColor: addTransparency(artworkColors.textColor4, 0.4), // Soften textColor4 with transparency
-      }
-    : {
-        bubbleBackground: isSender
-          ? Colors.systemBlue
-          : Colors.messageBubbleGray,
-        titleColor: isSender ? Colors.white : Colors.black,
-        artistColor: isSender ? Colors.white : Colors.black,
-        labelColor: isSender ? Colors.white : Colors.black,
-        iconColor: isSender ? Colors.white : Colors.black,
-        backgroundStrokeColor: undefined, // Use default colors
-      };
+  const dynamicStyles = getDynamicStyles(
+    artworkColors,
+    isSender,
+    shouldUseApiColors
+  );
 
   return (
     <View
@@ -241,7 +114,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
           isSender ? styles.senderBubble : styles.recipientBubble,
           { backgroundColor: dynamicStyles.bubbleBackground },
         ]}
-        onPress={handleOpenAppleMusic}
+        onPress={onOpenAppleMusic}
         activeOpacity={0.8}
       >
         <View style={styles.content}>
@@ -260,12 +133,8 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
                 shouldUseApiColors
                   ? addTransparency(artworkColors.textColor4, 0.4)
                   : undefined
-              } // Use textColor4 with 40% opacity as placeholder background when dynamic colors enabled
-              onError={() => {
-                // Note: In a more complex setup, you might want to expose
-                // an error handler from the useSongData hook
-                console.log('🖼️ Album art failed to load');
-              }}
+              }
+              onError={() => {}}
             />
           </View>
 
@@ -433,11 +302,12 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   songInfo: {
+    flexShrink: 1,
     justifyContent: 'space-between',
-    marginRight: 9,
-    maxWidth: 140,
+    maxWidth: 180,
     minHeight: 44,
     paddingHorizontal: 4,
+    paddingRight: 11,
   },
   songTitle: {
     fontFamily: Typography.fontFamily,

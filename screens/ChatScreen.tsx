@@ -291,10 +291,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
     // Determine message text and type
     let messageText = text;
-    let messageType: 'text' | 'appleMusic' = 'text';
 
     if (appleMusicUrl) {
-      messageType = 'appleMusic';
       // Extract song ID from URL for the bubble
       const match = appleMusicUrl.match(/\/(\d+)(\?i=(\d+))?/);
       const songId = match ? match[3] || match[1] : '';
