@@ -44,7 +44,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.playButton, { width: size, height: size }]}
+      style={{ width: size, height: size }}
       onPress={onPress}
       activeOpacity={disabled ? 1 : 0.7}
       disabled={disabled}
@@ -87,7 +87,7 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
           size={iconSize}
           type='hierarchical'
           tintColor={isInitialState ? Colors.white : Colors.systemRed}
-          style={[styles.playIcon, { opacity: disabled ? 0.5 : 1 }]}
+          style={[styles.playIcon, disabled && styles.disabledIcon]}
         />
       </View>
     </TouchableOpacity>
@@ -95,13 +95,12 @@ const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  playButton: {
-    // Size is set dynamically via props
+  disabledIcon: {
+    opacity: 0.5,
   },
   playButtonInner: {
     alignItems: 'center',
     justifyContent: 'center',
-    // Size is set dynamically via props
   },
   playIcon: {
     position: 'absolute',

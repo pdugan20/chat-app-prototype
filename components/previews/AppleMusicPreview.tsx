@@ -7,7 +7,7 @@ const AppleMusicPreview: React.FC<PreviewComponentProps> = ({
   isSender,
   isLastInGroup = false,
   hasReaction = false,
-  reactionType = 'heart',
+  reactionType,
   maxWidth,
   playDisabled = false,
 }) => {

@@ -53,7 +53,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
   playParams: propPlayParams,
   isSender,
   hasReaction = false,
-  reactionType = 'heart',
+  reactionType,
   isLastInGroup = false,
   colors: propColors,
   useDynamicColors = false,
@@ -205,7 +205,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         </View>
       </TouchableOpacity>
 
-      {hasReaction && (
+      {hasReaction && reactionType && (
         <Reaction reactionType={reactionType} isSender={isSender} />
       )}
 

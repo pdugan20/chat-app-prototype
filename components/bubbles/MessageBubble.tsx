@@ -18,7 +18,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   text,
   isSender,
   hasReaction = false,
-  reactionType = 'heart',
+  reactionType,
   isLastInGroup = false,
   _isFirstInGroup = false,
 }) => {
@@ -45,7 +45,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
           {text}
         </Text>
       </View>
-      {hasReaction && (
+      {hasReaction && reactionType && (
         <Reaction reactionType={reactionType} isSender={isSender} />
       )}
       {isLastInGroup && (

@@ -1,12 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  Keyboard,
-  Animated,
-  FlatList,
-} from 'react-native';
+import { View, StyleSheet, Keyboard, Animated, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import InputBar from '../components/InputBar';

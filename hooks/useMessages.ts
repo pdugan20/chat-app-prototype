@@ -39,7 +39,7 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     if (shouldInitialize) {
       setChatMessages(chatId, initialMessages);
     }
-  }, [chatId, getMessages, setChatMessages]); // Include getMessages for freshness
+  }, [chatId, getMessages, setChatMessages, initialMessages]);
 
   // Cleanup timeout when component unmounts
   useEffect(() => {
