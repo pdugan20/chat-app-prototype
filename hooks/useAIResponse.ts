@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
-import { Animated, Image } from 'react-native';
+import { Animated } from 'react-native';
+import { Image } from 'expo-image';
 import { Message, AppleMusicMessage } from '../types/message';
+import { formatArtworkUrl } from '../constants/music';
 
 import aiService from '../services/ai';
 import { appleMusicApi } from '../services/appleMusicApi';
@@ -139,10 +141,7 @@ export const useAIResponse = ({
                   // Create music message with direct Apple Music artwork URL (same as Storybook)
                   let artworkUrl = null;
                   if (songData && songData.attributes.artwork?.url) {
-                    artworkUrl = songData.attributes.artwork.url
-                      .replace('{w}', '100')
-                      .replace('{h}', '100')
-                      .replace('{f}', 'bb.jpg');
+                    artworkUrl = formatArtworkUrl(songData.attributes.artwork.url);
                     console.log('🖼️ Using artwork URL:', artworkUrl);
 
                     // Preload the image to prevent layout jump

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { appleMusicApi, mockAppleMusicData } from '../services/appleMusicApi';
+import { formatArtworkUrl } from '../constants/music';
 
 // Simple in-memory cache for song data
 const songDataCache = new Map<string, { data: SongData; timestamp: number }>();
@@ -116,10 +117,7 @@ export const useSongData = ({
           if (song) {
             let artworkUrl = null;
             if (song.attributes.artwork?.url) {
-              artworkUrl = song.attributes.artwork.url
-                .replace('{w}', '100')
-                .replace('{h}', '100')
-                .replace('{f}', 'bb.jpg');
+              artworkUrl = formatArtworkUrl(song.attributes.artwork.url);
             }
 
             apiData = {

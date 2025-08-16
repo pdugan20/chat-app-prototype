@@ -4,17 +4,15 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "ios": "expo run:ios",
+    "start:ios": "expo start --ios",
     "build:ios": "expo build:ios",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "android": "expo run:android",
     "generate-apple-token": "node scripts/generate-apple-music-token.js",
     "storybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start",
     "storybook:ios": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --ios",
-    "storybook:android": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --android",
     "storybook:dev": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --tunnel",
     "storybook-generate": "sb-rn-get-stories"
   },

@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   messagesContentKeyboardVisible: {
-    paddingBottom: 55, // Extra space for delivered indicator when keyboard is visible
+    paddingBottom: 60, // Extra space for typing indicator and delivered indicator when keyboard is visible
   },
   messagesList: {
     backgroundColor: Colors.screenBackground,

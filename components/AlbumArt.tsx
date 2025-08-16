@@ -112,6 +112,9 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
               priority='high'
               onError={handleImageError}
               onLoad={handleImageLoad}
+              recyclingKey={url}
+              allowDownscaling={false}
+              retryDelay={1000}
             />
           </Animated.View>
           {!imageLoaded && (

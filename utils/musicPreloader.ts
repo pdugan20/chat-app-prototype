@@ -1,6 +1,7 @@
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 import { AppleMusicMessage, Message } from '../types/message';
 import { appleMusicApi } from '../services/appleMusicApi';
+import { formatArtworkUrl } from '../constants/music';
 
 interface PreloadedMusicData {
   songTitle: string;
@@ -81,12 +82,9 @@ export class MusicPreloader {
           // Format artwork URL
           let artworkUrl = null;
           if (songData.attributes.artwork?.url) {
-            artworkUrl = songData.attributes.artwork.url
-              .replace('{w}', '100')
-              .replace('{h}', '100')
-              .replace('{f}', 'bb.jpg');
+            artworkUrl = formatArtworkUrl(songData.attributes.artwork.url);
 
-            // Preload the image
+            // Preload the image using expo-image
             try {
               console.log(`🖼️ Preloading album art: ${artworkUrl}`);
               await Image.prefetch(artworkUrl);
