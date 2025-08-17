@@ -2,11 +2,11 @@ import React from 'react';
 import { TouchableOpacity, View, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { SymbolView } from 'expo-symbols';
-import { Colors } from '../constants/theme';
+import { Colors } from '../../../constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface CircularPlayButtonProps {
+interface PlayPauseButtonProps {
   isPlaying: boolean;
   isLoading: boolean;
   progress: Animated.Value;
@@ -18,7 +18,7 @@ interface CircularPlayButtonProps {
   backgroundStrokeColor?: string; // Custom color for background circle stroke (playing/paused state)
 }
 
-const CircularPlayButton: React.FC<CircularPlayButtonProps> = ({
+const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
   isPlaying,
   isLoading,
   progress,
@@ -107,4 +107,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CircularPlayButton;
+export default PlayPauseButton;

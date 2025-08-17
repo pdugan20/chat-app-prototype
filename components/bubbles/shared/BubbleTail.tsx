@@ -1,15 +1,15 @@
 import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Colors } from '../constants/theme';
+import { Colors } from '../../../constants/theme';
 
-interface MessageTailProps {
+interface BubbleTailProps {
   color?: string;
   size?: number;
   flipped?: boolean;
 }
 
-const MessageTail: React.FC<MessageTailProps> = ({
+const BubbleTail: React.FC<BubbleTailProps> = ({
   color = Colors.systemBlue,
   size = 17,
   flipped = false,
@@ -32,4 +32,4 @@ const MessageTail: React.FC<MessageTailProps> = ({
   );
 };
 
-export default MessageTail;
+export default BubbleTail;

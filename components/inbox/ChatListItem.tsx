@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { Colors, Typography, Spacing } from '../constants/theme';
-import GroupAvatar from './GroupAvatar';
-import UserAvatar from './UserAvatar';
-import { ChatItem } from '../data/inbox';
+import { Colors, Typography, Spacing } from '../../constants/theme';
+import GroupAvatar from '../avatars/GroupAvatar';
+import UserAvatar from '../avatars/UserAvatar';
+import { ChatItem } from '../../data/inbox';
 
 interface ChatListItemProps {
   item: ChatItem;

@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import { Animated, StyleSheet, View, FlatList } from 'react-native';
-import BubbleRenderer from './bubbles/BubbleRenderer';
-import TimestampHeader from './TimestampHeader';
-import { Message } from '../types/message';
+import BubbleRenderer from '../bubbles/BubbleRenderer';
+import ChatBanner from './ChatBanner';
+import { Message } from '../../types/message';
 import {
   shouldShowTimestamp,
   shouldAddGroupSpacing,
   isLastInGroup,
   isFirstInGroup,
-} from '../utils/messageUtils';
+} from '../../utils/messageUtils';
 import {
   getMessageSlideTransform,
   getDeliveredScaleTransform,
-} from '../utils/messageAnimations';
-import { Colors, Typography, Spacing } from '../constants/theme';
+} from '../../utils/messageAnimations';
+import { Colors, Typography, Spacing } from '../../constants/theme';
 
 // Types for flattened data structure
 type MessageItem = {
@@ -117,7 +117,7 @@ const MessageList: React.FC<MessageListProps> = ({
   const renderItem = ({ item }: { item: FlatListItem }) => {
     switch (item.type) {
       case 'timestamp':
-        return <TimestampHeader timestamp={item.timestamp} />;
+        return <ChatBanner type='timestamp' content={item.timestamp} />;
 
       case 'spacing':
         return <View style={styles.groupSpacing} />;

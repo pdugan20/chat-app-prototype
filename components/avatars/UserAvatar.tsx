@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Spacing } from '../../constants/theme';
 
 interface UserAvatarProps {
   avatar?: any;
@@ -11,7 +11,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ avatar }) => {
     <View style={styles.persona}>
       <View style={styles.avatar}>
         <Image
-          source={avatar || require('../assets/profile-photos/Ruth.png')}
+          source={avatar || require('../../assets/profile-photos/Ruth.png')}
           style={styles.avatarImage}
           resizeMode='cover'
         />

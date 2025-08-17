@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Image } from 'expo-image';
 
-interface AlbumArtProps {
+interface AlbumArtworkProps {
   url: string | null;
   size?: number;
   onLoad?: () => void;
@@ -13,7 +13,7 @@ interface AlbumArtProps {
   placeholderBackgroundColor?: string; // Custom background color for placeholder
 }
 
-const AlbumArt: React.FC<AlbumArtProps> = ({
+const AlbumArtwork: React.FC<AlbumArtworkProps> = ({
   url,
   size = 50,
   onLoad,
@@ -114,7 +114,6 @@ const AlbumArt: React.FC<AlbumArtProps> = ({
               onLoad={handleImageLoad}
               recyclingKey={url}
               allowDownscaling={false}
-              retryDelay={1000}
             />
           </Animated.View>
           {!imageLoaded && (
@@ -146,4 +145,4 @@ const styles = StyleSheet.create({
   placeholder: {},
 });
 
-export default AlbumArt;
+export default AlbumArtwork;

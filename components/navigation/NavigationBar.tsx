@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SymbolView } from 'expo-symbols';
-import { Colors, Typography, Spacing, Layout } from '../constants/theme';
+import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
 
 interface NavigationBarProps {
   contactName: string;
@@ -64,7 +64,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     ? typeof contactAvatar === 'string'
                       ? { uri: contactAvatar }
                       : contactAvatar
-                    : require('../assets/profile-photos/Ruth.png')
+                    : require('../../assets/profile-photos/Ruth.png')
                 }
                 style={styles.profileImage}
                 resizeMode='cover'

@@ -5,7 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { Colors, Spacing } from '../constants/theme';
 import aiService from '../services/ai';
-import ChatListItem from '../components/ChatListItem';
+import ChatListItem from '../components/inbox/ChatListItem';
 import { ChatItem, mockChats } from '../data/inbox';
 import { useChatUpdates } from '../contexts/ChatUpdateContext';
 import { resetEmitter } from '../utils/resetEmitter';

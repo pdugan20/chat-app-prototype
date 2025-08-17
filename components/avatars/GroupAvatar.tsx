@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Spacing } from '../../constants/theme';
 
 interface GroupAvatarProps {
   avatars: any[];
@@ -12,14 +12,14 @@ const GroupAvatar: React.FC<GroupAvatarProps> = ({ avatars }) => {
       <View style={styles.groupBackground} />
       <View style={styles.groupAvatar1}>
         <Image
-          source={avatars[0] || require('../assets/profile-photos/Ruth.png')}
+          source={avatars[0] || require('../../assets/profile-photos/Ruth.png')}
           style={styles.groupAvatarImage1}
           resizeMode='cover'
         />
       </View>
       <View style={styles.groupAvatar2}>
         <Image
-          source={avatars[1] || require('../assets/profile-photos/Gus.png')}
+          source={avatars[1] || require('../../assets/profile-photos/Gus.png')}
           style={styles.groupAvatarImage2}
           resizeMode='cover'
         />

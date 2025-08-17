@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Typography, Spacing } from '../constants/theme';
-import { ReactionType, getReactionEmoji } from '../utils/reactions';
+import { Colors, Typography, Spacing } from '../../constants/theme';
+import { ReactionType, getReactionEmoji } from '../../utils/reactions';
 
 interface ReactionProps {
   reactionType: ReactionType;

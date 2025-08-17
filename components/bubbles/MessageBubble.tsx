@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MessageTail from '../MessageTail';
-import Reaction from '../Reaction';
+import BubbleTail from './shared/BubbleTail';
+import Reaction from '../chat/Reaction';
 import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
 import { ReactionType } from '../../utils/reactions';
 
@@ -50,7 +50,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       )}
       {isLastInGroup && (
         <View style={isSender ? styles.senderTail : styles.recipientTail}>
-          <MessageTail
+          <BubbleTail
             color={isSender ? Colors.systemBlue : Colors.messageBubbleGray}
             size={16}
             flipped={!isSender}

@@ -141,7 +141,9 @@ export const useAIResponse = ({
                   // Create music message with direct Apple Music artwork URL (same as Storybook)
                   let artworkUrl = null;
                   if (songData && songData.attributes.artwork?.url) {
-                    artworkUrl = formatArtworkUrl(songData.attributes.artwork.url);
+                    artworkUrl = formatArtworkUrl(
+                      songData.attributes.artwork.url
+                    );
                     console.log('🖼️ Using artwork URL:', artworkUrl);
 
                     // Preload the image to prevent layout jump

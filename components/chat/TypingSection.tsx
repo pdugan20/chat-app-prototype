@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { Animated, View, StyleSheet } from 'react-native';
 import TypingIndicator from './TypingIndicator';
-import { Message } from '../types/message';
-import { Spacing } from '../constants/theme';
+import { Message } from '../../types/message';
+import { Spacing } from '../../constants/theme';
 
 interface TypingSectionProps {
   showTypingIndicator: boolean;

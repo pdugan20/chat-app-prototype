@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import MessageTail from '../MessageTail';
-import AlbumArt from '../AlbumArt';
-import CircularPlayButton from '../CircularPlayButton';
-import Reaction from '../Reaction';
+import BubbleTail from './shared/BubbleTail';
+import AlbumArtwork from './shared/AlbumArtwork';
+import PlayPauseButton from './shared/PlayPauseButton';
+import Reaction from '../chat/Reaction';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useSongData } from '../../hooks/useSongData';
 import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
@@ -119,7 +119,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
       >
         <View style={styles.content}>
           <View style={styles.albumArt}>
-            <AlbumArt
+            <AlbumArtwork
               url={
                 typeof songData?.albumArt === 'string'
                   ? songData.albumArt
@@ -180,7 +180,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
           </View>
 
           <View onStartShouldSetResponder={() => true}>
-            <CircularPlayButton
+            <PlayPauseButton
               isPlaying={isPlaying}
               isLoading={isLoading}
               progress={progress}
@@ -211,7 +211,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
 
       {isLastInGroup && (
         <View style={isSender ? styles.senderTail : styles.recipientTail}>
-          <MessageTail
+          <BubbleTail
             color={dynamicStyles.bubbleBackground}
             size={16}
             flipped={!isSender}

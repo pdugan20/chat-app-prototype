@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SymbolView } from 'expo-symbols';
-import { Colors, Typography, Spacing, Layout } from '../constants/theme';
-import { urlPreviewService, URLPreview } from '../services/urlPreview';
-import InputPreviewContainer from './previews/InputPreviewContainer';
+import { Colors, Typography, Spacing, Layout } from '../../constants/theme';
+import { urlPreviewService, URLPreview } from '../../services/urlPreview';
+import InputPreviewContainer from '../previews/InputPreviewContainer';
 
 // Initialize preview system
-import '../services/urlPreview/setup';
+import '../../services/urlPreview/setup';
 
 interface InputBarProps {
   onSendMessage: (message: string, appleMusicUrl?: string) => void;
