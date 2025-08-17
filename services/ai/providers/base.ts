@@ -4,7 +4,11 @@ import {
   MUSIC_KEYWORDS,
   MOCK_MUSIC_QUERIES,
   RESPONSE_TYPES,
+  LOG_MESSAGES,
 } from '../constants';
+
+// Track mentioned songs to prevent repetition
+let mentionedSongs = new Set<string>();
 
 export abstract class BaseAIProvider implements AIService {
   protected apiKey: string | undefined;
@@ -25,6 +29,20 @@ export abstract class BaseAIProvider implements AIService {
     messages: AIMessage[],
     contactName?: string
   ): Promise<AIStructuredResponse>;
+
+  // Song tracking methods - shared implementation
+  addMentionedSong(songQuery: string): void {
+    mentionedSongs.add(songQuery.toLowerCase().trim());
+  }
+
+  getMentionedSongs(): string[] {
+    return Array.from(mentionedSongs);
+  }
+
+  resetMentionedSongs(): void {
+    mentionedSongs.clear();
+    console.log(LOG_MESSAGES.clearedMentionedSongs);
+  }
 
   isConfigured(): boolean {
     return !!this.apiKey;

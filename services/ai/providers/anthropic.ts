@@ -9,7 +9,6 @@ import {
   ANTHROPIC_FORMATS,
   MUSIC_RESPONSE_FORMATS,
   MOCK_RESPONSES,
-  LOG_MESSAGES,
 } from '../constants';
 import { createStructuredPrompt } from '../prompts';
 import { AI_MODELS } from '../models';
@@ -19,9 +18,6 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
-
-// Track mentioned songs to prevent repetition
-let mentionedSongs = new Set<string>();
 
 class AnthropicService extends BaseAIProvider {
   private client: Anthropic | null = null;
@@ -118,20 +114,6 @@ class AnthropicService extends BaseAIProvider {
       content: messageContent,
       musicQuery: musicQuery,
     };
-  }
-
-  // Song tracking methods
-  addMentionedSong(songQuery: string): void {
-    mentionedSongs.add(songQuery.toLowerCase().trim());
-  }
-
-  getMentionedSongs(): string[] {
-    return Array.from(mentionedSongs);
-  }
-
-  resetMentionedSongs(): void {
-    mentionedSongs.clear();
-    console.log(LOG_MESSAGES.clearedMentionedSongs);
   }
 }
 

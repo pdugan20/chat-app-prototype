@@ -6,9 +6,14 @@ import {
   PROVIDER_CONFIG,
   ENV_KEYS,
   ERROR_MESSAGES,
+  RESPONSE_TYPES,
+  ANTHROPIC_FORMATS,
+  MUSIC_RESPONSE_FORMATS,
+  MOCK_RESPONSES,
 } from '../constants';
 import { createStructuredPrompt } from '../prompts';
 import { AI_MODELS } from '../models';
+import { cleanAnthropicResponseArtifacts } from '../utils';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -37,10 +42,15 @@ class OpenAIService extends BaseAIProvider {
     this.validateConfiguration();
 
     try {
-      // Use structured prompt to handle both text and special responses (music, etc.)
+      const mentionedSongsList = this.getMentionedSongs();
+      const structuredPrompt = createStructuredPrompt(
+        contactName,
+        mentionedSongsList
+      );
+
       const systemMessage = {
         role: 'system' as const,
-        content: createStructuredPrompt(contactName),
+        content: structuredPrompt,
       };
 
       const response = await this.client!.chat.completions.create({
@@ -54,19 +64,59 @@ class OpenAIService extends BaseAIProvider {
 
       const content = response.choices[0]?.message?.content || '';
 
-      // Parse the response similar to Anthropic's approach
-      // Check if response indicates special intent (music, etc.)
-      if (
-        this.detectSpecialIntent(messages) ||
-        content.includes('MUSIC_RESPONSE')
-      ) {
-        return this.buildSpecialResponse('music');
-      }
-
-      return this.buildTextResponse(content);
+      return this.parseStructuredResponse(content);
     } catch (error) {
       this.handleError(error, ERROR_MESSAGES.structuredResponseError);
     }
+  }
+
+  private parseStructuredResponse(content: string): AIStructuredResponse {
+    // Check for special response types (currently music, can be extended)
+    if (
+      content.includes(ANTHROPIC_FORMATS.responseTypes.music) &&
+      content.includes(MUSIC_RESPONSE_FORMATS.queryPrefix)
+    ) {
+      return this.parseMusicResponse(content);
+    }
+
+    // Future special response types can be added here:
+    // if (content.includes(ANTHROPIC_FORMATS.responseTypes.location)) {
+    //   return this.parseLocationResponse(content);
+    // }
+
+    // Default to text response
+    let messageContent = cleanAnthropicResponseArtifacts(content);
+
+    if (!messageContent) {
+      messageContent = MOCK_RESPONSES.defaultText;
+    }
+
+    return this.buildTextResponse(messageContent);
+  }
+
+  private parseMusicResponse(content: string): AIStructuredResponse {
+    const lines = content.split('\n').filter(line => line.trim());
+
+    const musicResponseIndex = lines.findIndex(
+      line => line.trim() === ANTHROPIC_FORMATS.responseTypes.music
+    );
+    const messageContent =
+      lines[musicResponseIndex + 1] || MOCK_RESPONSES.defaultMusic;
+
+    const musicQueryLine = lines.find(line =>
+      line.startsWith(MUSIC_RESPONSE_FORMATS.queryPrefix)
+    );
+    const musicQuery = musicQueryLine
+      ? musicQueryLine.replace(MUSIC_RESPONSE_FORMATS.queryPrefix, '').trim()
+      : this.getRandomMusicQuery();
+
+    this.addMentionedSong(musicQuery);
+
+    return {
+      type: RESPONSE_TYPES.MUSIC,
+      content: messageContent,
+      musicQuery: musicQuery,
+    };
   }
 }
 
