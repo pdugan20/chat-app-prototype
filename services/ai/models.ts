@@ -17,19 +17,19 @@ export const AI_MODELS = {
     },
   },
   openai: {
-    default: 'gpt-3.5-turbo',
+    default: 'gpt-4-turbo',
     models: {
-      'gpt-3.5-turbo': {
-        name: 'GPT-3.5 Turbo',
-        description: 'Fast and affordable',
+      'gpt-4o-mini': {
+        name: 'GPT-4o Mini',
+        description: 'Fastest, most cost-efficient version',
       },
-      'gpt-4': {
-        name: 'GPT-4',
-        description: 'Most capable',
+      'gpt-4o': {
+        name: 'GPT-4o',
+        description: 'Best balance of speed and capability',
       },
-      'gpt-4-turbo-preview': {
+      'gpt-4-turbo': {
         name: 'GPT-4 Turbo',
-        description: 'Latest GPT-4 with longer context',
+        description: 'Most capable for complex tasks',
       },
     },
   },

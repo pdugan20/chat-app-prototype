@@ -24,7 +24,7 @@ export function getAvailableModels(provider: AIProvider) {
   }));
 }
 
-export function cleanAnthropicResponseArtifacts(content: string): string {
+export function cleanAIResponseArtifacts(content: string): string {
   return content
     .replace(new RegExp(`TEXT_RESPONSE\\n?`, 'g'), '')
     .replace(new RegExp(`MUSIC_RESPONSE\\n?`, 'g'), '')

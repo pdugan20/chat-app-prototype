@@ -37,7 +37,7 @@ export const RESPONSE_TYPES = {
   MUSIC: 'music',
 } as const;
 
-export const ANTHROPIC_FORMATS = {
+export const AI_RESPONSE_FORMATS = {
   responseTypes: {
     text: 'TEXT_RESPONSE',
     music: 'MUSIC_RESPONSE',

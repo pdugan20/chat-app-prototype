@@ -7,13 +7,13 @@ import {
   ENV_KEYS,
   ERROR_MESSAGES,
   RESPONSE_TYPES,
-  ANTHROPIC_FORMATS,
+  AI_RESPONSE_FORMATS,
   MUSIC_RESPONSE_FORMATS,
   MOCK_RESPONSES,
 } from '../constants';
 import { createStructuredPrompt } from '../prompts';
 import { AI_MODELS } from '../models';
-import { cleanAnthropicResponseArtifacts } from '../utils';
+import { cleanAIResponseArtifacts } from '../utils';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -73,7 +73,7 @@ class OpenAIService extends BaseAIProvider {
   private parseStructuredResponse(content: string): AIStructuredResponse {
     // Check for special response types (currently music, can be extended)
     if (
-      content.includes(ANTHROPIC_FORMATS.responseTypes.music) &&
+      content.includes(AI_RESPONSE_FORMATS.responseTypes.music) &&
       content.includes(MUSIC_RESPONSE_FORMATS.queryPrefix)
     ) {
       return this.parseMusicResponse(content);
@@ -85,7 +85,17 @@ class OpenAIService extends BaseAIProvider {
     // }
 
     // Default to text response
-    let messageContent = cleanAnthropicResponseArtifacts(content);
+    let messageContent = content.trim();
+
+    // Remove TEXT_RESPONSE prefix if present
+    if (messageContent.startsWith(AI_RESPONSE_FORMATS.responseTypes.text)) {
+      messageContent = messageContent
+        .replace(AI_RESPONSE_FORMATS.responseTypes.text, '')
+        .trim();
+    }
+
+    // Clean any remaining artifacts
+    messageContent = cleanAIResponseArtifacts(messageContent);
 
     if (!messageContent) {
       messageContent = MOCK_RESPONSES.defaultText;
@@ -98,7 +108,7 @@ class OpenAIService extends BaseAIProvider {
     const lines = content.split('\n').filter(line => line.trim());
 
     const musicResponseIndex = lines.findIndex(
-      line => line.trim() === ANTHROPIC_FORMATS.responseTypes.music
+      line => line.trim() === AI_RESPONSE_FORMATS.responseTypes.music
     );
     const messageContent =
       lines[musicResponseIndex + 1] || MOCK_RESPONSES.defaultMusic;
