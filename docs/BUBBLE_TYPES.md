@@ -16,7 +16,7 @@ The bubble types system provides an extensible way to add new special response t
 ### How It Works
 
 ```
-User Message → AI Provider → Structured Prompt (generated from configs) 
+User Message → AI Provider → Structured Prompt (generated from configs)
 → AI Response → Universal Parser → Typed Response
 ```
 
@@ -72,10 +72,10 @@ protected parseLocationResponse(content: string): AIStructuredResponse {
   const locationIndex = lines.findIndex(
     line => line.trim() === 'LOCATION_RESPONSE'
   );
-  
+
   const locationName = lines[locationIndex + 1] || 'Current location';
   const dataLine = lines.find(line => line.startsWith('LOCATION_DATA:'));
-  const coordinates = dataLine 
+  const coordinates = dataLine
     ? dataLine.replace('LOCATION_DATA:', '').trim()
     : null;
 
@@ -113,21 +113,22 @@ export interface AIStructuredResponse {
 
 Each bubble type configuration has the following properties:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `type` | string | The response type identifier |
-| `formatKey` | string | The format header the AI uses (e.g., "MUSIC_RESPONSE") |
-| `triggers` | string[] | Regex patterns that trigger this response type |
-| `negativeContext` | string[] | Phrases that prevent this type from triggering |
-| `responseFormat` | string | The expected format of the AI response |
-| `examples` | Example[] | Examples to train the AI |
-| `parser?` | function | Optional custom parser function |
+| Property          | Type      | Description                                            |
+| ----------------- | --------- | ------------------------------------------------------ |
+| `type`            | string    | The response type identifier                           |
+| `formatKey`       | string    | The format header the AI uses (e.g., "MUSIC_RESPONSE") |
+| `triggers`        | string[]  | Regex patterns that trigger this response type         |
+| `negativeContext` | string[]  | Phrases that prevent this type from triggering         |
+| `responseFormat`  | string    | The expected format of the AI response                 |
+| `examples`        | Example[] | Examples to train the AI                               |
+| `parser?`         | function  | Optional custom parser function                        |
 
 ## How the System Works
 
 ### 1. Prompt Generation
 
 The `createStructuredPromptV2` function:
+
 - Iterates through all bubble types
 - Builds trigger rules dynamically
 - Includes examples from each type
@@ -136,6 +137,7 @@ The `createStructuredPromptV2` function:
 ### 2. Response Detection
 
 When the AI responds:
+
 1. The response includes a format header (e.g., `MUSIC_RESPONSE`)
 2. The parser checks for known format headers
 3. Routes to the appropriate parser (custom or generic)
@@ -144,6 +146,7 @@ When the AI responds:
 ### 3. Extensibility
 
 The system is designed to be extended without modifying core logic:
+
 - Add new types to the configuration
 - System automatically includes them in prompts
 - Generic parser handles simple types
@@ -154,6 +157,7 @@ The system is designed to be extended without modifying core logic:
 ### Currently Implemented
 
 **Music** - Shares songs via Apple Music
+
 ```typescript
 type: 'music'
 triggers: ['play a song', 'send me music', 'favorite song']
@@ -163,6 +167,7 @@ response: { type: 'MUSIC', content: 'Love this one!', musicQuery: 'anti hero tay
 ### Potential Future Types
 
 **Location** - Share current location
+
 ```typescript
 type: 'location'
 triggers: ['where are you', 'send location']
@@ -170,6 +175,7 @@ response: { type: 'LOCATION', content: 'Coffee shop', locationData: '37.7749,-12
 ```
 
 **Photo** - Share images
+
 ```typescript
 type: 'photo'
 triggers: ['show me a photo', 'send a picture']
@@ -177,6 +183,7 @@ response: { type: 'PHOTO', content: 'Check this out!', photoUrl: 'https://...' }
 ```
 
 **Payment** - Apple Pay requests
+
 ```typescript
 type: 'payment'
 triggers: ['send me money', 'request payment']
@@ -184,6 +191,7 @@ response: { type: 'PAYMENT', content: 'For lunch', amount: 12.50 }
 ```
 
 **Game** - GamePigeon invitations
+
 ```typescript
 type: 'game'
 triggers: ['play a game', 'start game pigeon']
@@ -194,29 +202,34 @@ response: { type: 'GAME', content: "Let's play!", gameType: 'chess' }
 
 1. Add the configuration to `bubbleTypes.ts`
 2. Test with both AI providers:
+
    ```bash
    # Test with Anthropic
    EXPO_PUBLIC_AI_PROVIDER=anthropic npm run ios
-   
+
    # Test with OpenAI
    EXPO_PUBLIC_AI_PROVIDER=openai npm run ios
    ```
+
 3. Send messages that should trigger the new type
 4. Verify the response format and parsing
 
 ## Troubleshooting
 
 ### AI Not Using New Format
+
 - Check that `formatKey` is unique
 - Ensure examples clearly demonstrate the format
 - Verify triggers aren't too broad or conflicting
 
 ### Parser Not Working
+
 - Check format header matches exactly
 - Verify line splitting logic handles your format
 - Test with debug logging in `parseStructuredResponse`
 
 ### Type Not Triggering
+
 - Review trigger patterns (they use regex)
 - Check negative context isn't blocking valid requests
 - Test trigger patterns with regex tools
