@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { TouchableOpacity, Text, View, Alert, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -11,8 +11,8 @@ import ChatScreen from './screens/ChatScreen';
 import { musicPreloader } from './utils/musicPreloader';
 import { allConversations } from './data/messages';
 import { ChatUpdateProvider } from './contexts/ChatUpdateContext';
-import { resetEmitter } from './utils/resetEmitter';
 import { useAppStore, useChatStore } from './stores';
+import { showResetConfirmation } from './services/confirmationService';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -60,30 +60,7 @@ export default function App() {
   }, []);
 
   const handleEllipsisPress = () => {
-    Alert.alert(
-      'Reset prototype?',
-      'This will reset all conversations to their original state and clear any new messages.',
-      [
-        {
-          text: 'Reset chats',
-          style: 'destructive',
-          onPress: () => {
-            // Clear the pending update and reset chats
-            setPendingChatUpdate(undefined);
-            clearAllChats();
-            resetApp();
-            // Clear music preloader cache
-            musicPreloader.clearCache();
-            // Emit reset event
-            resetEmitter.emit();
-          },
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    showResetConfirmation(clearAllChats, resetApp, setPendingChatUpdate);
   };
   return (
     <>

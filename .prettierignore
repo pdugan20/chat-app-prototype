@@ -40,4 +40,7 @@ yarn-error.*
 .idea/
 
 # Generated files
-*.generated.* 
+*.generated.*
+
+# Storybook auto-generated files
+.rnstorybook/storybook.requires.ts 

@@ -21,7 +21,16 @@
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
         "UIViewControllerBasedStatusBarAppearance": false,
-        "LSApplicationQueriesSchemes": ["music", "itmss", "itms-apps", "https"],
+        "LSApplicationQueriesSchemes": [
+          "music",
+          "itmss",
+          "itms-apps",
+          "https",
+          "music",
+          "itmss",
+          "itms-apps",
+          "https"
+        ],
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true,
           "NSExceptionDomains": {
@@ -34,7 +43,13 @@
               "NSExceptionMinimumTLSVersion": "1.0"
             }
           }
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6359a694-e6ea-4469-8d9a-5ea15e97cafd"
       }
     }
   }
