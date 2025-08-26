@@ -7,7 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "platforms": ["ios"],
+    "platforms": [
+      "ios"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -51,6 +53,9 @@
       "eas": {
         "projectId": "6359a694-e6ea-4469-8d9a-5ea15e97cafd"
       }
-    }
+    },
+    "plugins": [
+      "expo-audio"
+    ]
   }
 }
