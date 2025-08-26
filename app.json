@@ -7,9 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -18,7 +16,7 @@
     "ios": {
       "icon": "./assets/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.imessage.prototype",
+      "bundleIdentifier": "com.example.chatapp",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleDefault",
@@ -54,8 +52,6 @@
         "projectId": "6359a694-e6ea-4469-8d9a-5ea15e97cafd"
       }
     },
-    "plugins": [
-      "expo-audio"
-    ]
+    "plugins": ["expo-audio", "expo-dev-client"]
   }
 }
