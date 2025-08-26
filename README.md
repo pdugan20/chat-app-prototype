@@ -27,21 +27,24 @@ This iMessage prototype replicates the authentic iOS Messages app experience, in
 
 ## Technology Stack
 
-- **React Native** with Expo SDK ~53.0.20
+- **React Native** with Expo SDK 53.0.22 (Development Build)
 - **TypeScript** with strict mode for type safety
 - **React Navigation** for native navigation patterns
 - **Animated API** for smooth animations and transitions
 - **Modern ESLint** with flat configuration
 - **Modular Architecture** with reusable components
 - **Theme System** with centralized colors, typography, and spacing
+- **Expo Development Build** for enhanced debugging and custom native code
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js v22 (recommended)
 - Expo CLI
+- Xcode (for iOS development)
 - iOS Simulator or physical iOS device
+- **Note**: This app uses Expo Development Build and requires building the native iOS app
 
 ### Installation
 
@@ -57,23 +60,45 @@ npm install
 cp .env.example .env
 # Edit .env and add your API key
 
-# Start the development server
-npm start
-
-# Run on iOS
+# Build and run the development build on iOS
 npm run ios
+
+# Or start the development server and use a pre-built dev client
+npm start
 ```
+
+**Important**: This app uses Expo Development Build, which means it needs to be built as a native iOS app rather than running in Expo Go. The `npm run ios` command will handle building and installing the development build automatically.
 
 ### Development Commands
 
 ```bash
 npm start           # Start Expo development server
-npm run ios         # Run on iOS simulator
+npm run ios         # Build and run development build on iOS simulator
 npm run build:ios   # Production iOS build
 npm run lint        # Run ESLint
 npm run lint:fix    # Fix ESLint issues
 npm run format      # Format code with Prettier
+
+# Storybook (Component Development)
+npm run sb          # Start Storybook in development build
+npm run sb:ios      # Build and run Storybook on iOS
+npm run sb:generate # Regenerate Storybook stories
+
+# Development Build Commands
+npx expo run:ios    # Build and run development build (alternative to npm run ios)
+npx expo prebuild   # Regenerate native iOS project files
+npx expo prebuild --clean  # Clean rebuild of native project (use when making config changes)
 ```
+
+### Development Build Management
+
+When working with the development build, you may need to rebuild the native project:
+
+- **After changing app.json**: Run `npx expo prebuild --clean` to regenerate the native project
+- **After adding native dependencies**: Run `npx expo prebuild` and then `npx expo run:ios`
+- **For configuration changes**: Use `npx expo prebuild --clean` for a clean rebuild
+
+**Important**: After modifying your project's configuration or native code, you will need to rebuild your project. Running `npx expo prebuild` again layers the changes on top of existing files and may produce different results after the build. Use `npx expo prebuild --clean` for a fresh start.
 
 ## Project Structure
 
@@ -87,8 +112,42 @@ chat-app/
 ├── constants/          # Theme and design constants
 ├── data/               # Mock data for development
 ├── types/              # TypeScript type definitions
-└── assets/             # Images and static resources
+├── assets/             # Images and static resources
+├── .rnstorybook/       # Storybook configuration and stories
+└── ios/                # Native iOS project files (development build)
 ```
+
+## Development Build vs Expo Go
+
+This app uses **Expo Development Build** instead of Expo Go because it includes:
+
+- **@expo/ui** components that require native iOS compilation
+- **Context menus** and other native iOS features
+- **Enhanced debugging** capabilities
+- **Better performance** for complex animations and interactions
+
+### Why Development Build?
+
+- **Custom Native Code**: Supports libraries that require native iOS compilation
+- **iOS-Specific Features**: Full access to iOS APIs and UI components
+- **Better Debugging**: More comprehensive error reporting and debugging tools
+- **Production-Like Environment**: Closer to how the final app will behave
+
+## Storybook Integration
+
+The app includes Storybook for component development and testing:
+
+- **Component Isolation**: Test individual components in isolation
+- **Interactive Controls**: Modify component props in real-time
+- **Visual Testing**: See how components look across different states
+- **Documentation**: Built-in component documentation and examples
+
+### Using Storybook
+
+1. **Start Storybook**: `npm run sb:ios`
+2. **View Components**: Browse components in the left sidebar
+3. **Modify Props**: Use the controls panel at the bottom to change component properties
+4. **Test Interactions**: Test component interactions and animations
 
 ## Architecture Highlights
 
