@@ -3,6 +3,7 @@ import { Animated } from 'react-native';
 export type MessageType =
   | 'text'
   | 'appleMusic'
+  | 'vinylRecord'
   | 'image'
   | 'video'
   | 'location'
@@ -83,9 +84,33 @@ export interface ContactMessage extends BaseMessage {
   avatarUrl?: string;
 }
 
+export interface VinylRecordMessage extends BaseMessage {
+  type: 'vinylRecord';
+  text: string; // fallback text (song title)
+  songId: string;
+  songTitle?: string;
+  artistName?: string;
+  albumArtUrl?: string;
+  previewUrl?: string;
+  duration?: number;
+  appleMusicId?: string;
+  playParams?: {
+    id: string;
+    kind: string;
+  };
+  colors?: {
+    bgColor?: string;
+    textColor1?: string;
+    textColor2?: string;
+    textColor3?: string;
+    textColor4?: string;
+  };
+}
+
 export type Message =
   | TextMessage
   | AppleMusicMessage
+  | VinylRecordMessage
   | ImageMessage
   | VideoMessage
   | LocationMessage

@@ -1,4 +1,4 @@
-import { Message, AppleMusicMessage } from '../types/message';
+import { Message, AppleMusicMessage, VinylRecordMessage } from '../types/message';
 
 // Ruth conversation about horror movie
 export const conversation1: Message[] = [
@@ -240,7 +240,136 @@ export const conversation2: Message[] = [
   },
 ];
 
+// Tina conversation about Sabrina Carpenter's new album
+export const conversation3: Message[] = [
+  {
+    id: '1',
+    text: "Have you listened to Sabrina Carpenter's new album yet?",
+    isSender: false,
+    timestamp: 'Tuesday 3:45 PM',
+    type: 'text',
+  },
+  {
+    id: '2',
+    text: "Man's Best Friend? Not yet! Is it good?",
+    isSender: true,
+    timestamp: '3:46 PM',
+    type: 'text',
+  },
+  {
+    id: '3',
+    text: "It's INCREDIBLE!! She really outdid herself with this one",
+    isSender: false,
+    timestamp: '3:47 PM',
+    hasReaction: true,
+    reactionType: 'heart',
+    type: 'text',
+  },
+  {
+    id: '4',
+    text: 'The production is insane and her vocals have never been better',
+    isSender: false,
+    timestamp: '3:47 PM',
+    type: 'text',
+  },
+  {
+    id: '5',
+    text: 'The whole album has this perfect mix of pop rock and her signature wit',
+    isSender: false,
+    timestamp: '3:48 PM',
+    type: 'text',
+  },
+  {
+    id: '6',
+    text: "I'm obsessed with how she's evolved from her earlier stuff",
+    isSender: true,
+    timestamp: '3:49 PM',
+    type: 'text',
+  },
+  {
+    id: '7',
+    text: 'From Disney to this... what a journey',
+    isSender: true,
+    timestamp: '3:49 PM',
+    type: 'text',
+  },
+  {
+    id: '8',
+    text: "Exactly! She's really found her sound. The album is so cohesive but every track stands out",
+    isSender: false,
+    timestamp: '3:50 PM',
+    type: 'text',
+  },
+  {
+    id: '9',
+    text: 'Have you seen the visuals for the tour? They look INSANE',
+    isSender: false,
+    timestamp: '3:51 PM',
+    type: 'text',
+  },
+  {
+    id: '10',
+    text: 'No way! Is she coming to our city?',
+    isSender: true,
+    timestamp: '3:52 PM',
+    type: 'text',
+  },
+  {
+    id: '11',
+    text: 'YES! June 15th at the arena. We HAVE to go!!',
+    isSender: false,
+    timestamp: '3:53 PM',
+    type: 'text',
+  },
+  {
+    id: '12',
+    text: "I'm so down! Let's get tickets as soon as they drop",
+    isSender: true,
+    timestamp: '3:54 PM',
+    type: 'text',
+  },
+  {
+    id: '13',
+    text: 'Wait let me send you my favorite track from the album',
+    isSender: false,
+    timestamp: '3:55 PM',
+    type: 'text',
+  },
+  {
+    id: '14',
+    text: 'House Tour',
+    isSender: false,
+    timestamp: '3:55 PM',
+    type: 'vinylRecord',
+    songId: 'search:house tour sabrina carpenter',
+  } as VinylRecordMessage,
+  {
+    id: '15',
+    text: 'OMG this is so good!! The guitar riffs are amazing',
+    isSender: true,
+    timestamp: '3:57 PM',
+    hasReaction: true,
+    reactionType: 'thumbsUp',
+    type: 'text',
+  },
+  {
+    id: '16',
+    text: 'RIGHT?! And the lyrics are so clever',
+    isSender: false,
+    timestamp: '3:58 PM',
+    type: 'text',
+  },
+  {
+    id: '17',
+    text: "Man's Best Friend really is the album of the year",
+    isSender: false,
+    timestamp: '3:58 PM',
+    type: 'text',
+  },
+];
+
 export const allConversations = [
   { id: 0, name: 'Ruth Acosta', messages: conversation1 },
   { id: 3, name: 'Will Fleming', messages: conversation2 },
+  { id: 1, name: 'Tina Hayes', messages: conversation3 },
 ];

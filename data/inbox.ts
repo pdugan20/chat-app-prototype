@@ -63,11 +63,11 @@ export const mockChats: ChatItem[] = [
     ],
   },
   {
-    id: '6',
+    id: '1',
     name: 'Tina Hayes',
     lastMessage:
-      "This is Tina from Dr. Miller's office confirming your dental appointment for Thursday at 9:1...",
-    timestamp: '9:15 AM',
+      "Man's Best Friend really is the album of the year",
+    timestamp: '3:58 PM',
     unread: false,
     avatar: require('../assets/profile-photos/Tina.png'),
   },

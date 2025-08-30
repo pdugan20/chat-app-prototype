@@ -2,6 +2,7 @@ import { ComponentType } from 'react';
 import { MessageType } from '../types/message';
 import MessageBubble from '../components/bubbles/MessageBubble';
 import AppleMusicBubble from '../components/bubbles/AppleMusicBubble';
+import VinylRecordBubble from '../components/bubbles/VinylRecordBubble';
 
 // Define the props that all bubble components should accept
 export interface BaseBubbleProps {
@@ -41,6 +42,12 @@ export const bubbleRegistry: BubbleRegistry = {
       playParams: message.playParams,
       colors: message.colors,
       useDynamicColors: true,
+    }),
+  },
+  vinylRecord: {
+    component: VinylRecordBubble,
+    extractProps: message => ({
+      message: message,
     }),
   },
   // Future bubble types can be added here
