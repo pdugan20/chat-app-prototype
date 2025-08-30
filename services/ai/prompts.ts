@@ -2,7 +2,9 @@ import { BUBBLE_TYPES } from './bubbleTypes';
 
 export const createMentionedSongsContext = (songs: string[]): string =>
   songs.length > 0
-    ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${songs.join('\n- ')}\n\nAlways suggest different songs/artists that haven't been mentioned.`
+    ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${songs.join(
+        '\n- '
+      )}\n\nAlways suggest different songs/artists that haven't been mentioned.`
     : '';
 
 export const createStructuredPrompt = (
@@ -26,7 +28,9 @@ ${config.responseFormat}`;
       const triggers = config.triggers.map(t => `   - "${t}"`).join('\n');
       const negatives =
         config.negativeContext.length > 0
-          ? `\n\nNEVER use ${config.formatKey} when:\n${config.negativeContext.map(n => `   - Message contains "${n}"`).join('\n')}`
+          ? `\n\nNEVER use ${config.formatKey} when:\n${config.negativeContext
+              .map(n => `   - Message contains "${n}"`)
+              .join('\n')}`
           : '';
 
       return `USE ${config.formatKey} ONLY when the current message matches patterns like:

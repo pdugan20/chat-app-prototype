@@ -254,14 +254,17 @@ Special Data Fetch Failure (e.g., Music)
 To add a new special response type:
 
 1. **Update constants** (`services/ai/constants.ts`):
+
    - Add new response type to `RESPONSE_TYPES`
    - Add detection keywords if needed
 
 2. **Update prompt** (`services/ai/prompts.ts`):
+
    - Add detection rules to `createStructuredPrompt`
    - Include examples for the new type
 
 3. **Update parser** (`services/ai/providers/anthropic.ts`):
+
    - Add new parsing method (e.g., `parseLocationResponse`)
    - Update `parseStructuredResponse` to handle new type
 

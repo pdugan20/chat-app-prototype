@@ -51,7 +51,9 @@ const AlbumArtwork: React.FC<AlbumArtworkProps> = ({
     const isInstantLoad = loadTime < 50; // If it loads in under 50ms, it's likely cached
 
     console.log(
-      `🖼️ Album art loaded in ${loadTime}ms (${isInstantLoad || isPreloaded ? 'cached/preloaded' : 'network'})`
+      `🖼️ Album art loaded in ${loadTime}ms (${
+        isInstantLoad || isPreloaded ? 'cached/preloaded' : 'network'
+      })`
     );
 
     if (!imageLoaded) {

@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { StoryContext } from '@storybook/react';
 import { Colors } from '../constants/theme';
+import { PositionControlWrapper } from './components/PositionControlWrapper';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,14 +21,8 @@ const decoratorStyles = StyleSheet.create({
   lightBackground: {
     backgroundColor: Colors.white,
   },
-  messageContainer: {
-    alignSelf: 'center',
-  },
   screenContainer: {
-    alignItems: 'center',
     flex: 1,
-    justifyContent: 'center',
-    padding: 20,
   },
 });
 
@@ -47,7 +42,7 @@ export const CenteredDecorator = (
   const componentName = context.title.split('/').pop() || 'Component';
   const storyName = context.name;
 
-  // Create a screen component that renders the story
+  // Create a screen component that renders the story with position control
   const StoryScreen = () => (
     <View
       style={[
@@ -57,14 +52,14 @@ export const CenteredDecorator = (
           : decoratorStyles.lightBackground,
       ]}
     >
-      <View style={decoratorStyles.messageContainer}>
+      <PositionControlWrapper>
         <StoryWithArgs />
-      </View>
+      </PositionControlWrapper>
     </View>
   );
 
   return (
-    <NavigationContainer independent={true}>
+    <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerTitle: `${componentName} | ${storyName}`,
@@ -93,7 +88,9 @@ export const FlexStartDecorator = (
           : decoratorStyles.lightBackground,
       ]}
     >
-      <Story />
+      <PositionControlWrapper>
+        <Story />
+      </PositionControlWrapper>
     </View>
   );
 };

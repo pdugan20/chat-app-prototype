@@ -36,7 +36,9 @@ export function formatArtworkUrl(url: string): string {
   // Use Cloudinary as a proxy to improve reliability
   // This helps with CORS issues and provides better caching
   const cloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
-  const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/w_${ALBUM_ART_SIZE},h_${ALBUM_ART_SIZE},c_fill,f_auto,q_auto/${encodeURIComponent(formattedUrl)}`;
+  const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/w_${ALBUM_ART_SIZE},h_${ALBUM_ART_SIZE},c_fill,f_auto,q_auto/${encodeURIComponent(
+    formattedUrl
+  )}`;
 
   console.log(`🖼️ Using Cloudinary proxy: ${cloudinaryUrl}`);
   return cloudinaryUrl;

@@ -65,7 +65,9 @@ class AppleMusicApiService {
     limit: number = 5
   ): Promise<AppleMusicSong[]> {
     try {
-      const url = `${this.baseUrl}/catalog/${this.storefront}/search?term=${encodeURIComponent(query)}&types=songs&limit=${limit}`;
+      const url = `${this.baseUrl}/catalog/${
+        this.storefront
+      }/search?term=${encodeURIComponent(query)}&types=songs&limit=${limit}`;
       console.log('🔍 Apple Music Search Request:', url);
 
       const response = await fetch(url, {

@@ -182,12 +182,14 @@ The app supports AI-powered contextual responses using either Anthropic's Claude
 1. **Get an API Key**
 
    **For Anthropic (Claude):**
+
    - Sign up at https://console.anthropic.com/
    - Navigate to API Keys section
    - Create a new API key
    - Copy the key (starts with `sk-ant-`)
 
    **For OpenAI (GPT):**
+
    - Sign up at https://platform.openai.com/
    - Navigate to API Keys section
    - Create a new API key
@@ -219,6 +221,67 @@ The app supports AI-powered contextual responses using either Anthropic's Claude
 - The typing indicator appears while the AI processes
 - A contextual response is generated based on the conversation
 - Falls back to preset responses if API is unavailable
+
+## Apple Music Integration (Optional)
+
+The app includes Apple Music integration for AI-powered music recommendations. When configured, the AI can respond with music suggestions that display as interactive Apple Music bubbles in the chat.
+
+### Prerequisites
+
+- Apple Developer Account
+- Apple Music API Key (.p8 file)
+- Node.js with `jsonwebtoken` package installed
+
+### Setup Instructions
+
+1. **Configure Apple Music Credentials**
+
+   Add the following to your `.env` file:
+
+   ```bash
+   # Apple Music API Configuration
+   APPLE_MUSIC_KEY_ID=YOUR_KEY_ID        # e.g., 99C4QGLP3J
+   APPLE_MUSIC_TEAM_ID=YOUR_TEAM_ID      # Your 10-character Team ID from Apple Developer
+   APPLE_MUSIC_KEY_FILE=path/to/AuthKey_XXXXX.p8  # Path to your .p8 key file
+   ```
+
+   - **Key ID**: Found in your Apple Developer account under Keys
+   - **Team ID**: Found in Apple Developer account under Membership
+   - **Key File**: The .p8 private key file downloaded from Apple Developer Portal
+
+2. **Generate Apple Music JWT Token**
+
+   Run the token generation script:
+
+   ```bash
+   npm run generate-apple-token
+   ```
+
+   This will:
+
+   - Generate a JWT token valid for 6 months
+   - Automatically save it to your `.env` file as `EXPO_PUBLIC_APPLE_MUSIC_TOKEN`
+   - Display a success message with expiration date
+
+3. **Restart Development Server**
+
+   ```bash
+   # Stop the server (Ctrl+C) and restart
+   npm start
+   ```
+
+### How Music Integration Works
+
+- When users mention music, songs, or artists in chat
+- The AI detects music intent and generates appropriate responses
+- Music suggestions appear as interactive Apple Music bubbles
+- Users can tap to play songs directly in Apple Music
+
+### Troubleshooting
+
+- **Token expired**: Regenerate using `npm run generate-apple-token`
+- **Invalid credentials**: Verify Team ID and Key ID in Apple Developer Portal
+- **Missing .p8 file**: Ensure the file path in `.env` is correct
 
 ## License
 
