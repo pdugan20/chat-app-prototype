@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-native';
-import { fn } from 'storybook/test';
 import React from 'react';
 import VinylRecordBubble from '../../components/bubbles/VinylRecordBubble';
 import { CenteredDecorator } from '../decorators';
@@ -7,33 +6,127 @@ import { VinylRecordMessage } from '../../types/message';
 
 // Extend the component props with story-specific controls
 type VinylRecordBubbleStoryArgs = {
-  message: VinylRecordMessage;
+  // VinylRecordMessage properties exposed as individual controls
+  songId: string;
+  songTitle?: string;
+  artistName?: string;
+  albumArtUrl?: string;
+  previewUrl?: string;
+  duration?: number;
+  appleMusicId?: string;
+  // Base message properties
+  isSender: boolean;
+  hasReaction?: boolean;
+  reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
+  // Story-specific controls
+  useDynamicColors?: boolean;
+  colors?: {
+    bgColor?: string;
+    textColor1?: string;
+    textColor2?: string;
+    textColor3?: string;
+    textColor4?: string;
+  };
   darkMode?: boolean;
 };
 
 const meta: Meta<VinylRecordBubbleStoryArgs> = {
   title: 'Components/VinylRecordBubble',
-  component: VinylRecordBubble,
+  // Don't assign component directly since args don't match props
   decorators: [
-    CenteredDecorator,
     (Story, context) => {
+      // Build the message object from individual controls
+      const message: VinylRecordMessage = {
+        id: 'vinyl-story',
+        type: 'vinylRecord',
+        text: context.args.songTitle || '',
+        songId: context.args.songId,
+        songTitle: context.args.songTitle,
+        artistName: context.args.artistName,
+        albumArtUrl: context.args.albumArtUrl,
+        previewUrl: context.args.previewUrl,
+        duration: context.args.duration,
+        appleMusicId: context.args.appleMusicId,
+        isSender: context.args.isSender,
+        timestamp: new Date().toISOString(),
+        hasReaction: context.args.hasReaction,
+        reactionType: context.args.hasReaction
+          ? context.args.reactionType
+          : undefined,
+        useDynamicColors: context.args.useDynamicColors,
+        colors: context.args.colors,
+      };
+
       // Make reactionType ineffective when hasReaction is false
-      if (!context.args.message.hasReaction) {
-        context.args.message.reactionType = undefined;
+      if (!context.args.hasReaction) {
+        message.reactionType = undefined;
       }
-      return <Story />;
+
+      // Apply CenteredDecorator with the correct args
+      const wrappedArgs = { message, darkMode: context.args.darkMode };
+      return CenteredDecorator(() => <VinylRecordBubble message={message} />, {
+        ...context,
+        args: wrappedArgs,
+      });
     },
   ],
   parameters: {
     actions: { argTypesRegex: '^on.*' },
   },
   argTypes: {
-    message: {
-      control: 'object',
+    songId: {
+      control: 'text',
+      description:
+        'Song identifier or search query (e.g. "search:song title artist")',
+    },
+    songTitle: {
+      control: 'text',
+      description: 'Song title to display',
+    },
+    artistName: {
+      control: 'text',
+      description: 'Artist name to display',
+    },
+    albumArtUrl: {
+      control: 'text',
+      description: 'Direct URL to album artwork image',
+    },
+    previewUrl: {
+      control: 'text',
+      description: 'URL to audio preview file',
+    },
+    duration: {
+      table: { disable: true },
+      description: 'Duration in seconds (auto-detected from API)',
+    },
+    appleMusicId: {
+      table: { disable: true },
+      description: 'Apple Music track ID (auto-detected from API)',
+    },
+    isSender: {
+      control: 'boolean',
+      description: 'Whether this is a sent message (blue) or received (gray)',
+    },
+    hasReaction: {
+      control: 'boolean',
+      description: 'Whether message has a reaction emoji',
+    },
+    reactionType: {
+      control: 'select',
+      options: ['heart', 'thumbsUp', 'haha', 'doubleExclamation'],
+      description:
+        'Type of reaction emoji (only visible when hasReaction is true)',
+    },
+    useDynamicColors: {
+      control: 'boolean',
+      description: 'Use dynamic colors extracted from album artwork',
+    },
+    colors: {
+      table: { disable: true },
+      description: 'Custom color overrides (advanced)',
     },
     darkMode: {
       control: 'boolean',
-      defaultValue: false,
       description: 'Toggle dark mode background for testing',
     },
   },
@@ -45,18 +138,13 @@ type Story = StoryObj<VinylRecordBubbleStoryArgs>;
 // Olivia Rodrigo - Love is Embarrassing
 export const LoveIsEmbarrassing: Story = {
   args: {
-    message: {
-      id: 'vinyl-1',
-      type: 'vinylRecord',
-      songId: 'search:love is embarrassing olivia rodrigo',
-      songTitle: 'love is embarrassing',
-      artistName: 'Olivia Rodrigo',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: true,
-    },
+    songId: 'search:love is embarrassing olivia rodrigo',
+    songTitle: 'love is embarrassing',
+    artistName: 'Olivia Rodrigo',
+    isSender: false,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -83,18 +171,13 @@ This shows the VinylRecordBubble component as a received message with:
 // The Beatles - Hey Jude (Classic Vinyl)
 export const HeyJude: Story = {
   args: {
-    message: {
-      id: 'vinyl-2',
-      type: 'vinylRecord',
-      songId: 'search:hey jude beatles',
-      songTitle: 'Hey Jude',
-      artistName: 'The Beatles',
-      text: '',
-      isSender: true,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: true,
-    },
+    songId: 'search:hey jude beatles',
+    songTitle: 'Hey Jude',
+    artistName: 'The Beatles',
+    isSender: true,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -114,19 +197,13 @@ Shows the VinylRecordBubble as a sent message (blue bubble) demonstrating:
 // Pink Floyd - Wish You Were Here
 export const WishYouWereHere: Story = {
   args: {
-    message: {
-      id: 'vinyl-3',
-      type: 'vinylRecord',
-      songId: 'search:wish you were here pink floyd',
-      songTitle: 'Wish You Were Here',
-      artistName: 'Pink Floyd',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: true,
-      reactionType: 'heart',
-      useDynamicColors: true,
-    },
+    songId: 'search:wish you were here pink floyd',
+    songTitle: 'Wish You Were Here',
+    artistName: 'Pink Floyd',
+    isSender: false,
+    hasReaction: true,
+    reactionType: 'heart',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -145,19 +222,13 @@ Demonstrates the VinylRecordBubble with a reaction attachment:
 // Fleetwood Mac - Dreams
 export const Dreams: Story = {
   args: {
-    message: {
-      id: 'vinyl-4',
-      type: 'vinylRecord',
-      songId: 'search:dreams fleetwood mac',
-      songTitle: 'Dreams',
-      artistName: 'Fleetwood Mac',
-      text: '',
-      isSender: true,
-      timestamp: new Date().toISOString(),
-      hasReaction: true,
-      reactionType: 'thumbsUp',
-      useDynamicColors: true,
-    },
+    songId: 'search:dreams fleetwood mac',
+    songTitle: 'Dreams',
+    artistName: 'Fleetwood Mac',
+    isSender: true,
+    hasReaction: true,
+    reactionType: 'thumbsUp',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -176,18 +247,13 @@ Combines sender styling with reaction:
 // Daft Punk - Get Lucky
 export const GetLucky: Story = {
   args: {
-    message: {
-      id: 'vinyl-5',
-      type: 'vinylRecord',
-      songId: 'search:get lucky daft punk',
-      songTitle: 'Get Lucky',
-      artistName: 'Daft Punk',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: true,
-    },
+    songId: 'search:get lucky daft punk',
+    songTitle: 'Get Lucky',
+    artistName: 'Daft Punk',
+    isSender: false,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: true,
     darkMode: true,
   },
   parameters: {
@@ -206,19 +272,13 @@ Shows vinyl bubble with modern electronic music:
 // Taylor Swift - Anti-Hero
 export const AntiHero: Story = {
   args: {
-    message: {
-      id: 'vinyl-6',
-      type: 'vinylRecord',
-      songId: 'search:anti hero taylor swift',
-      songTitle: 'Anti-Hero',
-      artistName: 'Taylor Swift',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: true,
-      reactionType: 'haha',
-      useDynamicColors: true,
-    },
+    songId: 'search:anti hero taylor swift',
+    songTitle: 'Anti-Hero',
+    artistName: 'Taylor Swift',
+    isSender: false,
+    hasReaction: true,
+    reactionType: 'haha',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -237,18 +297,13 @@ Contemporary pop on vinyl format:
 // Billie Eilish - bad guy
 export const BadGuy: Story = {
   args: {
-    message: {
-      id: 'vinyl-7',
-      type: 'vinylRecord',
-      songId: 'search:bad guy billie eilish',
-      songTitle: 'bad guy',
-      artistName: 'Billie Eilish',
-      text: '',
-      isSender: true,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: true,
-    },
+    songId: 'search:bad guy billie eilish',
+    songTitle: 'bad guy',
+    artistName: 'Billie Eilish',
+    isSender: true,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: true,
     darkMode: false,
   },
   parameters: {
@@ -267,19 +322,15 @@ Modern alternative pop aesthetic:
 // Loading State (Invalid ID)
 export const LoadingState: Story = {
   args: {
-    message: {
-      id: 'vinyl-loading',
-      type: 'vinylRecord',
-      songId: 'invalid-song-id',
-      songTitle: 'Loading...',
-      artistName: 'Loading...',
-      albumArtUrl: 'https://via.placeholder.com/100x100/f2f2f2/8e8e93?text=Loading',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: false,
-    },
+    songId: 'invalid-song-id',
+    songTitle: 'Loading...',
+    artistName: 'Loading...',
+    albumArtUrl:
+      'https://via.placeholder.com/100x100/f2f2f2/8e8e93?text=Loading',
+    isSender: false,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: false,
     darkMode: false,
   },
   parameters: {
@@ -299,24 +350,19 @@ Shows the component behavior when API calls fail or data is unavailable:
 // Custom Colors Example
 export const CustomColors: Story = {
   args: {
-    message: {
-      id: 'vinyl-custom',
-      type: 'vinylRecord',
-      songId: 'search:bohemian rhapsody queen',
-      songTitle: 'Bohemian Rhapsody',
-      artistName: 'Queen',
-      text: '',
-      isSender: false,
-      timestamp: new Date().toISOString(),
-      hasReaction: false,
-      useDynamicColors: true,
-      colors: {
-        bgColor: '#2C1810',
-        textColor1: '#FFD700',
-        textColor2: '#FFA500',
-        textColor3: '#FF8C00',
-        textColor4: '#FF6347',
-      },
+    songId: 'search:bohemian rhapsody queen',
+    songTitle: 'Bohemian Rhapsody',
+    artistName: 'Queen',
+    isSender: false,
+    hasReaction: false,
+    reactionType: 'heart',
+    useDynamicColors: true,
+    colors: {
+      bgColor: '#2C1810',
+      textColor1: '#FFD700',
+      textColor2: '#FFA500',
+      textColor3: '#FF8C00',
+      textColor4: '#FF6347',
     },
     darkMode: false,
   },

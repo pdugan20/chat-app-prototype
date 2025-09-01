@@ -41,7 +41,7 @@ const VinylPlayPauseButton: React.FC<VinylPlayPauseButtonProps> = ({
 
   // Determine visual state based on play status
   const isInitialState = !hasEverBeenPlayed;
-  
+
   // Show pause icon if playing OR if we're scrubbing and it was playing before
   const showPauseIcon = isPlaying || (isScrubbing && hasEverBeenPlayed);
 

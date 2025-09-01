@@ -105,6 +105,7 @@ export interface VinylRecordMessage extends BaseMessage {
     textColor3?: string;
     textColor4?: string;
   };
+  useDynamicColors?: boolean;
 }
 
 export type Message =

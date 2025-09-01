@@ -7,9 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -54,10 +52,7 @@
         "projectId": "6359a694-e6ea-4469-8d9a-5ea15e97cafd"
       }
     },
-    "plugins": [
-      "expo-audio",
-      "expo-dev-client"
-    ],
+    "plugins": ["expo-audio", "expo-dev-client"],
     "android": {
       "permissions": [
         "android.permission.RECORD_AUDIO",

@@ -43,6 +43,36 @@ const ArrowDownIcon = ({ color = '#73828C' }) => (
 // Store position state globally to persist across re-renders
 let globalIsAtTop = false;
 
+// Separate component for the floating button
+const FloatingButton: React.FC<{
+  isAtTop: boolean;
+  onPress: () => void;
+}> = ({ isAtTop, onPress }) => {
+  const theme = useTheme();
+  
+  return (
+    <View style={styles.buttonWrapper} pointerEvents="box-none">
+      <TouchableOpacity
+        style={[
+          styles.floatingButton,
+          {
+            backgroundColor: theme.background.content,
+            borderColor: theme.appBorderColor,
+          },
+        ]}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        {isAtTop ? (
+          <ArrowDownIcon color={theme.color.mediumdark} />
+        ) : (
+          <ArrowUpIcon color={theme.color.mediumdark} />
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
   children,
 }) => {
@@ -63,7 +93,7 @@ export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
 
   const handlePositionToggle = () => {
     const newIsAtTop = !isAtTop;
-    
+
     if (componentHeight === 0) return; // Don't animate if we haven't measured yet
 
     const offset = calculateOffset();
@@ -81,33 +111,22 @@ export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
   };
 
   // Measure the component height
-  const onLayout = useCallback((event: any) => {
-    const { height } = event.nativeEvent.layout;
-    setComponentHeight(height);
-    
-    // If we're supposed to be at top and just measured, apply the offset
-    if (globalIsAtTop && height > 0) {
-      // Recalculate offset with actual height
-      const centerY = screenHeight / 2;
-      const targetY = TOP_POSITION + height / 2;
-      const offset = centerY - targetY;
-      translateY.setValue(-offset);
-    }
-  }, [translateY]);
+  const onLayout = useCallback(
+    (event: any) => {
+      const { height } = event.nativeEvent.layout;
+      setComponentHeight(height);
 
-  // Dynamic button style matching Storybook's fullscreen button
-  // Fullscreen button is 28px wide (14px icon + 8px padding), positioned at right: 16px
-  // So we position at right: 49px (16 + 28 + 5 spacing)
-  const buttonStyle = {
-    position: 'absolute' as const,
-    bottom: 16,
-    right: 49, // 16 (fullscreen right) + 28 (fullscreen width) + 5 (spacing)
-    backgroundColor: theme.background.content,
-    padding: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: theme.appBorderColor,
-  };
+      // If we're supposed to be at top and just measured, apply the offset
+      if (globalIsAtTop && height > 0) {
+        // Recalculate offset with actual height
+        const centerY = screenHeight / 2;
+        const targetY = TOP_POSITION + height / 2;
+        const offset = centerY - targetY;
+        translateY.setValue(-offset);
+      }
+    },
+    [translateY]
+  );
 
   return (
     <>
@@ -119,32 +138,35 @@ export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
           },
         ]}
       >
-        <View onLayout={onLayout}>
-          {children}
-        </View>
+        <View onLayout={onLayout}>{children}</View>
       </Animated.View>
-
-      <TouchableOpacity
-        style={buttonStyle}
-        onPress={handlePositionToggle}
-        activeOpacity={0.8}
-      >
-        {isAtTop ? (
-          <ArrowDownIcon color={theme.color.mediumdark} />
-        ) : (
-          <ArrowUpIcon color={theme.color.mediumdark} />
-        )}
-      </TouchableOpacity>
+      
+      <FloatingButton isAtTop={isAtTop} onPress={handlePositionToggle} />
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  buttonWrapper: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
   contentWrapper: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
     width: '100%',
+  },
+  floatingButton: {
+    borderRadius: 4,
+    borderWidth: 1,
+    bottom: 16,
+    padding: 4,
+    position: 'absolute',
+    right: 50,
   },
 });
 

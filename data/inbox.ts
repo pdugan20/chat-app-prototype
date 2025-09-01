@@ -65,8 +65,7 @@ export const mockChats: ChatItem[] = [
   {
     id: '1',
     name: 'Tina Hayes',
-    lastMessage:
-      "Man's Best Friend really is the album of the year",
+    lastMessage: "Man's Best Friend really is the album of the year",
     timestamp: '3:58 PM',
     unread: false,
     avatar: require('../assets/profile-photos/Tina.png'),

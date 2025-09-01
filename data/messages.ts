@@ -1,4 +1,8 @@
-import { Message, AppleMusicMessage, VinylRecordMessage } from '../types/message';
+import {
+  Message,
+  AppleMusicMessage,
+  VinylRecordMessage,
+} from '../types/message';
 
 // Ruth conversation about horror movie
 export const conversation1: Message[] = [
