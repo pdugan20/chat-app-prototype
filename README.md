@@ -56,15 +56,17 @@ cd chat-app-prototype
 # Install dependencies
 npm install
 
-# Configure AI (optional - see AI Setup section below)
+# Setup git hooks (recommended)
+npm run setup-hooks
+
+# Configure integrations (optional)
 cp .env.example .env
-# Edit .env and add your API key
+# See docs/AI_SETUP.md and docs/APPLE_MUSIC_SETUP.md for configuration
 
-# Build and run the development build on iOS
-npm run ios
-
-# Or start the development server and use a pre-built dev client
-npm start
+# Start development
+npm run ios  # Build and run on iOS simulator
+# OR
+npm start    # Start dev server for pre-built dev client
 ```
 
 **Important**: This app uses Expo Development Build, which means it needs to be built as a native iOS app rather than running in Expo Go. The `npm run ios` command will handle building and installing the development build automatically.
@@ -72,24 +74,24 @@ npm start
 ### Development Commands
 
 ```bash
-npm start           # Start Expo development server
-npm run ios         # Build and run development build on iOS simulator
-npm run build:ios   # Production iOS build
-npm run lint        # Run ESLint
-npm run lint:fix    # Fix ESLint issues
-npm run format      # Format code with Prettier
-npm run format:check # Check code formatting
-npm run setup-hooks  # Setup git hooks for automated code quality
+npm start             # Start Expo development server
+npm run ios           # Build and run development build on iOS simulator
+npm run build:ios     # Production iOS build
+npm run lint          # Run ESLint
+npm run lint:fix      # Fix ESLint issues
+npm run format        # Format code with Prettier
+npm run format:check  # Check code formatting
+npm run setup-hooks   # Setup git hooks for automated code quality
 
-# Storybook (Component Development)
-npm run sb          # Start Storybook in development build
-npm run sb:ios      # Build and run Storybook on iOS
-npm run sb:generate # Regenerate Storybook stories
+# Component Configuration
+npm run sb            # Start Storybook in development build
+npm run sb:ios        # Build and run Storybook on iOS
+npm run sb:generate   # Regenerate Storybook stories
 
 # Development Build Commands
-npx expo run:ios    # Build and run development build (alternative to npm run ios)
-npx expo prebuild   # Regenerate native iOS project files
-npx expo prebuild --clean  # Clean rebuild of native project (use when making config changes)
+npx expo run:ios      # Build and run development build
+npx expo prebuild     # Regenerate native iOS project files
+npx expo prebuild --clean  # Clean rebuild of native project
 ```
 
 ### Development Build Management
@@ -176,115 +178,21 @@ The app includes Storybook for component development and testing:
 - Proper unread state management with reset functionality
 - Live preview text updates when sending messages
 
-## AI Chat Integration (Optional)
+## Optional Integrations
 
-The app supports AI-powered contextual responses using either Anthropic's Claude or OpenAI's GPT models. When enabled, the AI will automatically respond to your messages with natural, conversational replies.
+This project supports optional integrations to enhance the chat experience:
 
-### Setup Instructions
+### AI Chat Responses
 
-1. **Get an API Key**
+Enable AI-powered contextual responses using Anthropic's Claude or OpenAI's GPT models. When configured, the AI automatically responds to messages with natural, conversational replies.
 
-   **For Anthropic (Claude):**
+**Setup**: See [docs/AI_SETUP.md](./docs/AI_SETUP.md) for detailed configuration instructions.
 
-   - Sign up at https://console.anthropic.com/
-   - Navigate to API Keys section
-   - Create a new API key
-   - Copy the key (starts with `sk-ant-`)
+### Apple Music Integration
 
-   **For OpenAI (GPT):**
+Add Apple Music integration for AI-powered music recommendations. Music suggestions appear as interactive Apple Music bubbles with album art and playback controls.
 
-   - Sign up at https://platform.openai.com/
-   - Navigate to API Keys section
-   - Create a new API key
-   - Copy the key (starts with `sk-`)
-
-2. **Configure Environment**
-
-   ```bash
-   # Edit the .env file
-
-   # For Anthropic:
-   EXPO_PUBLIC_AI_PROVIDER=anthropic
-   EXPO_PUBLIC_ANTHROPIC_API_KEY=sk-ant-your-key-here
-
-   # For OpenAI:
-   EXPO_PUBLIC_AI_PROVIDER=openai
-   EXPO_PUBLIC_OPENAI_API_KEY=sk-your-key-here
-   ```
-
-3. **Restart the App**
-   ```bash
-   # Stop the server (Ctrl+C) and restart
-   npm start
-   ```
-
-### How It Works
-
-- Send a message in any chat
-- The typing indicator appears while the AI processes
-- A contextual response is generated based on the conversation
-- Falls back to preset responses if API is unavailable
-
-## Apple Music Integration (Optional)
-
-The app includes Apple Music integration for AI-powered music recommendations. When configured, the AI can respond with music suggestions that display as interactive Apple Music bubbles in the chat.
-
-### Prerequisites
-
-- Apple Developer Account
-- Apple Music API Key (.p8 file)
-- Node.js with `jsonwebtoken` package installed
-
-### Setup Instructions
-
-1. **Configure Apple Music Credentials**
-
-   Add the following to your `.env` file:
-
-   ```bash
-   # Apple Music API Configuration
-   APPLE_MUSIC_KEY_ID=YOUR_KEY_ID        # e.g., 99C4QGLP3J
-   APPLE_MUSIC_TEAM_ID=YOUR_TEAM_ID      # Your 10-character Team ID from Apple Developer
-   APPLE_MUSIC_KEY_FILE=path/to/AuthKey_XXXXX.p8  # Path to your .p8 key file
-   ```
-
-   - **Key ID**: Found in your Apple Developer account under Keys
-   - **Team ID**: Found in Apple Developer account under Membership
-   - **Key File**: The .p8 private key file downloaded from Apple Developer Portal
-
-2. **Generate Apple Music JWT Token**
-
-   Run the token generation script:
-
-   ```bash
-   npm run generate-apple-token
-   ```
-
-   This will:
-
-   - Generate a JWT token valid for 6 months
-   - Automatically save it to your `.env` file as `EXPO_PUBLIC_APPLE_MUSIC_TOKEN`
-   - Display a success message with expiration date
-
-3. **Restart Development Server**
-
-   ```bash
-   # Stop the server (Ctrl+C) and restart
-   npm start
-   ```
-
-### How Music Integration Works
-
-- When users mention music, songs, or artists in chat
-- The AI detects music intent and generates appropriate responses
-- Music suggestions appear as interactive Apple Music bubbles
-- Users can tap to play songs directly in Apple Music
-
-### Troubleshooting
-
-- **Token expired**: Regenerate using `npm run generate-apple-token`
-- **Invalid credentials**: Verify Team ID and Key ID in Apple Developer Portal
-- **Missing .p8 file**: Ensure the file path in `.env` is correct
+**Setup**: See [docs/APPLE_MUSIC_SETUP.md](./docs/APPLE_MUSIC_SETUP.md) for detailed configuration instructions.
 
 ## License
 
