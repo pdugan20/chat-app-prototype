@@ -111,8 +111,9 @@ npm run setup-hooks  # Configure git hooks (one-time setup)
 ```
 
 This sets up a pre-commit hook that automatically runs:
+
 - **Prettier** formatting check
-- **ESLint** code quality check  
+- **ESLint** code quality check
 - **TypeScript** type checking
 - **Expo** dependency compatibility check
 
