@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { AppleMusicMessage, Message } from '../types/message';
+import { AppleMusicMessage, VinylRecordMessage, Message } from '../types/message';
 import { appleMusicApi } from '../services/appleMusicApi';
 import { formatArtworkUrl } from '../constants/music';
 
@@ -37,9 +37,10 @@ export class MusicPreloader {
     console.log('🎵 Starting music preload for conversation...');
 
     try {
-      // Find all AppleMusic messages
+      // Find all music messages (AppleMusic and VinylRecord)
       const musicMessages = messages.filter(
-        (msg): msg is AppleMusicMessage => msg.type === 'appleMusic'
+        (msg): msg is AppleMusicMessage | VinylRecordMessage => 
+          msg.type === 'appleMusic' || msg.type === 'vinylRecord'
       );
 
       if (musicMessages.length === 0) {
@@ -137,7 +138,7 @@ export class MusicPreloader {
 
       // Update messages with preloaded data
       const updatedMessages = messages.map(message => {
-        if (message.type === 'appleMusic') {
+        if (message.type === 'appleMusic' || message.type === 'vinylRecord') {
           const preloadedData = this.preloadedData.get(message.songId);
           if (preloadedData) {
             return {
@@ -148,7 +149,7 @@ export class MusicPreloader {
               previewUrl: preloadedData.previewUrl,
               duration: preloadedData.duration,
               colors: preloadedData.colors,
-            } as AppleMusicMessage;
+            } as AppleMusicMessage | VinylRecordMessage;
           }
         }
         return message;

@@ -265,6 +265,9 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
               source={{ uri: songData.albumArt || '' }}
               style={styles.vinylAreaBackgroundImage}
               contentFit='cover'
+              priority='high'
+              cachePolicy='memory-disk'
+              transition={message.albumArtUrl ? 0 : 200}
             />
             <BlurView
               intensity={25}
@@ -333,6 +336,9 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
                     source={{ uri: songData.albumArt || '' }}
                     style={styles.albumArt}
                     contentFit='cover'
+                    priority='high'
+                    cachePolicy='memory-disk'
+                    transition={message.albumArtUrl ? 0 : 200}
                   />
                 </View>
 
