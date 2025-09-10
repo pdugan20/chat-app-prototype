@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Animated,
+  Easing,
   Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -100,8 +101,6 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
           setPosition(0);
           progressValue.setValue(0);
           progressAnimatedValue.setValue(0);
-          spinValue.setValue(0);
-          currentRotation.current = 0;
         }
       }
     }, 100); // Update every 100ms
@@ -126,20 +125,25 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
   // Spinning and progress animations
   useEffect(() => {
     if (isPlaying && !isScrubbing) {
-      // Create continuous rotation without resetting
-      const startValue = currentRotation.current;
-
       // Vinyl records typically spin at 33 1/3 RPM
       // That's 33.33 rotations per minute = 0.555 rotations per second
       // So one rotation takes about 1.8 seconds
       const rotationDuration = 1800; // milliseconds per rotation
-      const totalRotations = 100; // Enough for any song
+
+      // Calculate how many rotations we need for the remaining song duration
+      const remainingTime = duration > 0 ? duration - position : 30000; // Default 30 seconds if no duration
+      const totalRotations = Math.ceil(remainingTime / rotationDuration);
+
+      // Get current rotation value and continue from there
+      // @ts-expect-error - accessing private _value property for smooth animation continuation
+      const currentValue = spinValue._value || 0;
+      const targetValue = currentValue + 360 * totalRotations;
 
       spinAnimation.current = Animated.timing(spinValue, {
-        toValue: startValue + 360 * totalRotations,
-        duration: rotationDuration * totalRotations,
+        toValue: targetValue,
+        duration: totalRotations * rotationDuration,
         useNativeDriver: true,
-        easing: t => t, // Linear easing for constant speed
+        easing: Easing.linear,
       });
 
       spinAnimation.current.start();
@@ -171,7 +175,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
         spinAnimation.current.stop();
         // Store current rotation value when stopping
         spinValue.stopAnimation(value => {
-          currentRotation.current = value % 360; // Keep value within 0-360 range
+          currentRotation.current = value;
         });
       }
       if (progressAnimation.current) {
@@ -220,7 +224,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
   const spin = spinValue.interpolate({
     inputRange: [0, 360],
     outputRange: ['0deg', '360deg'],
-    extrapolate: 'extend', // Allow values beyond the input range
+    extrapolate: 'extend',
   });
 
   if (isLoading || !songData) {
