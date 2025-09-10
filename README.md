@@ -65,8 +65,6 @@ cp .env.example .env
 
 # Start development
 npm run ios  # Build and run on iOS simulator
-# OR
-npm start    # Start dev server for pre-built dev client
 ```
 
 **Important**: This app uses Expo Development Build, which means it needs to be built as a native iOS app rather than running in Expo Go. The `npm run ios` command will handle building and installing the development build automatically.
@@ -91,7 +89,6 @@ npm run sb:generate   # Regenerate Storybook stories
 # Development Build Commands
 npx expo run:ios      # Build and run development build
 npx expo prebuild     # Regenerate native iOS project files
-npx expo prebuild --clean  # Clean rebuild of native project
 ```
 
 ### Development Build Management
@@ -109,7 +106,7 @@ When working with the development build, you may need to rebuild the native proj
 This project includes automated code quality checks via git hooks. To enable them:
 
 ```bash
-npm run setup-hooks  # Configure git hooks (one-time setup)
+npm run setup-hooks  # Configure git hooks
 ```
 
 This sets up a pre-commit hook that automatically runs:
