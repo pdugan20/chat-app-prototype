@@ -53,7 +53,7 @@ jobs:
         run: npm ci
 
       - name: Check iOS build configuration
-        run: npx expo prebuild --platform ios --no-install --skip-dependency-update
+        run: npx expo prebuild --platform ios --no-install
 
       - name: Clean up prebuild artifacts
         run: rm -rf ios android
