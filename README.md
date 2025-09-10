@@ -78,6 +78,8 @@ npm run build:ios   # Production iOS build
 npm run lint        # Run ESLint
 npm run lint:fix    # Fix ESLint issues
 npm run format      # Format code with Prettier
+npm run format:check # Check code formatting
+npm run setup-hooks  # Setup git hooks for automated code quality
 
 # Storybook (Component Development)
 npm run sb          # Start Storybook in development build
@@ -99,6 +101,22 @@ When working with the development build, you may need to rebuild the native proj
 - **For configuration changes**: Use `npx expo prebuild --clean` for a clean rebuild
 
 **Important**: After modifying your project's configuration or native code, you will need to rebuild your project. Running `npx expo prebuild` again layers the changes on top of existing files and may produce different results after the build. Use `npx expo prebuild --clean` for a fresh start.
+
+### Git Hooks Setup
+
+This project includes automated code quality checks via git hooks. To enable them:
+
+```bash
+npm run setup-hooks  # Configure git hooks (one-time setup)
+```
+
+This sets up a pre-commit hook that automatically runs:
+- **Prettier** formatting check
+- **ESLint** code quality check  
+- **TypeScript** type checking
+- **Expo** dependency compatibility check
+
+The hook prevents commits if any checks fail. To bypass (not recommended): `git commit --no-verify`
 
 ## Project Structure
 

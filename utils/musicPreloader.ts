@@ -1,5 +1,9 @@
 import { Image } from 'expo-image';
-import { AppleMusicMessage, VinylRecordMessage, Message } from '../types/message';
+import {
+  AppleMusicMessage,
+  VinylRecordMessage,
+  Message,
+} from '../types/message';
 import { appleMusicApi } from '../services/appleMusicApi';
 import { formatArtworkUrl } from '../constants/music';
 
@@ -39,7 +43,7 @@ export class MusicPreloader {
     try {
       // Find all music messages (AppleMusic and VinylRecord)
       const musicMessages = messages.filter(
-        (msg): msg is AppleMusicMessage | VinylRecordMessage => 
+        (msg): msg is AppleMusicMessage | VinylRecordMessage =>
           msg.type === 'appleMusic' || msg.type === 'vinylRecord'
       );
 

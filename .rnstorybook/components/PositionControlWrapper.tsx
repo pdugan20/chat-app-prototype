@@ -49,9 +49,9 @@ const FloatingButton: React.FC<{
   onPress: () => void;
 }> = ({ isAtTop, onPress }) => {
   const theme = useTheme();
-  
+
   return (
-    <View style={styles.buttonWrapper} pointerEvents="box-none">
+    <View style={styles.buttonWrapper} pointerEvents='box-none'>
       <TouchableOpacity
         style={[
           styles.floatingButton,
@@ -79,7 +79,7 @@ export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
   const [isAtTop, setIsAtTop] = useState(globalIsAtTop);
   const [componentHeight, setComponentHeight] = useState(0);
   const translateY = useRef(new Animated.Value(0)).current;
-  const theme = useTheme();
+  // const theme = useTheme(); // Unused for now
 
   // Calculate the offset needed to position component at top
   const calculateOffset = useCallback(() => {
@@ -140,7 +140,7 @@ export const PositionControlWrapper: React.FC<PositionControlWrapperProps> = ({
       >
         <View onLayout={onLayout}>{children}</View>
       </Animated.View>
-      
+
       <FloatingButton isAtTop={isAtTop} onPress={handlePositionToggle} />
     </>
   );

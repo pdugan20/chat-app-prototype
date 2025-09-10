@@ -23,11 +23,13 @@ export default [
       globals: {
         'react-native/react-native': 'readonly',
         setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
         console: 'readonly',
         require: 'readonly',
         process: 'readonly',
         global: 'readonly',
-        clearTimeout: 'readonly',
         module: 'readonly',
         exports: 'readonly',
         __dirname: 'readonly',
@@ -47,7 +49,7 @@ export default [
       ...reactHooks.configs.recommended.rules,
       ...reactNative.configs.all.rules,
       ...prettierConfig.rules,
-      'prettier/prettier': 'error',
+      'prettier/prettier': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       '@typescript-eslint/no-unused-vars': [

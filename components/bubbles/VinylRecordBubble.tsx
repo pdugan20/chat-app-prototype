@@ -72,14 +72,14 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
     if (player) {
       setIsPlaying(player.playing);
     }
-  }, [player.playing]);
+  }, [player, player.playing]);
 
   // Track duration (only when it changes)
   useEffect(() => {
     if (player && player.duration > 0) {
       setDuration(player.duration * 1000); // Convert to milliseconds
     }
-  }, [player.duration]);
+  }, [player, player.duration]);
 
   // Update position and progress during playback (using a timer instead of continuous effect)
   useEffect(() => {
@@ -89,11 +89,11 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
       if (player.duration > 0) {
         const currentTime = player.currentTime * 1000; // Convert to milliseconds
         setPosition(currentTime);
-        
+
         const progress = player.currentTime / player.duration;
         progressValue.setValue(progress);
         progressAnimatedValue.setValue(progress);
-        
+
         // Handle track end
         if (player.currentTime >= player.duration) {
           setIsPlaying(false);
@@ -107,7 +107,14 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
     }, 100); // Update every 100ms
 
     return () => clearInterval(interval);
-  }, [isPlaying, isScrubbing, player, progressValue, progressAnimatedValue, spinValue]);
+  }, [
+    isPlaying,
+    isScrubbing,
+    player,
+    progressValue,
+    progressAnimatedValue,
+    spinValue,
+  ]);
 
   // Setup audio with expo-audio
   useEffect(() => {
@@ -263,8 +270,8 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
                   backgroundColor: shouldUseApiColors
                     ? dynamicStyles.bubbleBackground
                     : message.isSender
-                      ? Colors.messageBubbleBlue
-                      : Colors.messageBubbleGray,
+                    ? Colors.messageBubbleBlue
+                    : Colors.messageBubbleGray,
                 },
               ]}
             />

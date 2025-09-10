@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate-apple-token": "node scripts/generate-apple-music-token.js",
+    "setup-hooks": "chmod +x scripts/setup-hooks.sh .githooks/pre-commit && ./scripts/setup-hooks.sh",
     "sb": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start",
     "sb:ios": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --ios",
     "sb:dev": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --tunnel",
