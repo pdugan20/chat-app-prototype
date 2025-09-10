@@ -10,7 +10,7 @@ import {
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from 'expo-audio';
 import { SymbolView } from 'expo-symbols';
 import BubbleTail from './shared/BubbleTail';
 import VinylPlayPauseButton from './shared/VinylPlayPauseButton';
@@ -29,8 +29,8 @@ interface VinylRecordBubbleProps {
 }
 
 const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
+  const player = useAudioPlayer();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [duration, setDuration] = useState(0);
   const [position, setPosition] = useState(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
@@ -67,71 +67,54 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
     shouldUseApiColors
   );
 
-  const onPlaybackStatusUpdate = useRef((status: any) => {
-    if (status.isLoaded) {
-      setDuration(status.durationMillis || 0);
-
-      // Only update position and playing state if not scrubbing
-      if (!isScrubbing) {
-        setPosition(status.positionMillis || 0);
-
-        // Update progress values
-        if (status.durationMillis > 0) {
-          progressValue.setValue(status.positionMillis / status.durationMillis);
-          progressAnimatedValue.setValue(
-            status.positionMillis / status.durationMillis
-          );
-        }
-
-        setIsPlaying(status.isPlaying);
-      }
-
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-        setPosition(0);
-        progressValue.setValue(0);
-        progressAnimatedValue.setValue(0);
-        spinValue.setValue(0);
-        currentRotation.current = 0;
-      }
-    }
-  }).current;
-
-  // Setup audio
+  // Track playing state
   useEffect(() => {
-    let isMounted = true;
-    let audioSound: Audio.Sound | null = null;
+    if (player) {
+      setIsPlaying(player.playing);
+    }
+  }, [player.playing]);
 
-    const setupAudio = async () => {
-      if (!songData?.previewUrl) return;
+  // Track duration (only when it changes)
+  useEffect(() => {
+    if (player && player.duration > 0) {
+      setDuration(player.duration * 1000); // Convert to milliseconds
+    }
+  }, [player.duration]);
 
-      try {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: songData.previewUrl },
-          { shouldPlay: false },
-          onPlaybackStatusUpdate
-        );
-        if (isMounted) {
-          audioSound = newSound;
-          setSound(newSound);
-        } else {
-          // Component unmounted before audio loaded
-          await newSound.unloadAsync();
+  // Update position and progress during playback (using a timer instead of continuous effect)
+  useEffect(() => {
+    if (!player || !isPlaying || isScrubbing) return;
+
+    const interval = setInterval(() => {
+      if (player.duration > 0) {
+        const currentTime = player.currentTime * 1000; // Convert to milliseconds
+        setPosition(currentTime);
+        
+        const progress = player.currentTime / player.duration;
+        progressValue.setValue(progress);
+        progressAnimatedValue.setValue(progress);
+        
+        // Handle track end
+        if (player.currentTime >= player.duration) {
+          setIsPlaying(false);
+          setPosition(0);
+          progressValue.setValue(0);
+          progressAnimatedValue.setValue(0);
+          spinValue.setValue(0);
+          currentRotation.current = 0;
         }
-      } catch (error) {
-        console.error('Error setting up audio:', error);
       }
-    };
+    }, 100); // Update every 100ms
 
-    setupAudio();
+    return () => clearInterval(interval);
+  }, [isPlaying, isScrubbing, player, progressValue, progressAnimatedValue, spinValue]);
 
-    return () => {
-      isMounted = false;
-      if (audioSound) {
-        audioSound.unloadAsync();
-      }
-    };
-  }, [songData, onPlaybackStatusUpdate]);
+  // Setup audio with expo-audio
+  useEffect(() => {
+    if (songData?.previewUrl && player) {
+      player.replace({ uri: songData.previewUrl });
+    }
+  }, [songData?.previewUrl, player]);
 
   // Spinning and progress animations
   useEffect(() => {
@@ -201,27 +184,25 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
   ]);
 
   const handlePlayPause = async () => {
-    if (!sound) {
+    if (!player) {
       return;
     }
 
     try {
       if (isPlaying) {
-        await sound.pauseAsync();
+        player.pause();
         setIsPlaying(false);
         // Store the current progress value
         progressValue.stopAnimation();
         progressAnimatedValue.stopAnimation();
       } else {
-        // If starting from beginning, reset progress
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          const currentProgress =
-            status.positionMillis / (status.durationMillis || 1);
+        // Update progress values before playing
+        if (player.duration > 0) {
+          const currentProgress = player.currentTime / player.duration;
           progressValue.setValue(currentProgress);
           progressAnimatedValue.setValue(currentProgress);
         }
-        await sound.playAsync();
+        player.play();
         setIsPlaying(true);
       }
     } catch (error) {
@@ -295,16 +276,16 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
               setIsScrubbing(true);
               setWasPlayingBeforeScrub(isPlaying);
 
-              if (sound && isPlaying) {
-                sound.pauseAsync();
+              if (player && isPlaying) {
+                player.pause();
                 setIsPlaying(false);
               }
             }}
             onPressOut={() => {
               setIsScrubbing(false);
 
-              if (sound && wasPlayingBeforeScrub) {
-                sound.playAsync();
+              if (player && wasPlayingBeforeScrub) {
+                player.play();
                 setIsPlaying(true);
               }
             }}

@@ -117,22 +117,6 @@ chat-app/
 └── ios/                # Native iOS project files (development build)
 ```
 
-## Development Build vs Expo Go
-
-This app uses **Expo Development Build** instead of Expo Go because it includes:
-
-- **@expo/ui** components that require native iOS compilation
-- **Context menus** and other native iOS features
-- **Enhanced debugging** capabilities
-- **Better performance** for complex animations and interactions
-
-### Why Development Build?
-
-- **Custom Native Code**: Supports libraries that require native iOS compilation
-- **iOS-Specific Features**: Full access to iOS APIs and UI components
-- **Better Debugging**: More comprehensive error reporting and debugging tools
-- **Production-Like Environment**: Closer to how the final app will behave
-
 ## Storybook Integration
 
 The app includes Storybook for component development and testing:
