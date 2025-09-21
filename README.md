@@ -74,7 +74,6 @@ npm run ios  # Build and run on iOS simulator
 ```bash
 npm start             # Start Expo development server
 npm run ios           # Build and run development build on iOS simulator
-npm run build:ios     # Production iOS build
 npm run lint          # Run ESLint
 npm run lint:fix      # Fix ESLint issues
 npm run format        # Format code with Prettier
@@ -82,7 +81,7 @@ npm run format:check  # Check code formatting
 npm run setup-hooks   # Setup git hooks for automated code quality
 
 # Component Configuration
-npm run sb            # Start Storybook in development build
+npm run sb            # Start Storybook development server
 npm run sb:ios        # Build and run Storybook on iOS
 npm run sb:generate   # Regenerate Storybook stories
 
