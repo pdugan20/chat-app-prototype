@@ -52,13 +52,6 @@
         "projectId": "6359a694-e6ea-4469-8d9a-5ea15e97cafd"
       }
     },
-    "plugins": ["expo-audio", "expo-dev-client"],
-    "android": {
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
-      ],
-      "package": "com.example.chatapp"
-    }
+    "plugins": ["expo-audio", "expo-dev-client"]
   }
 }
