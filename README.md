@@ -143,14 +143,6 @@ The hooks prevent commits/pushes if any checks fail. To bypass (not recommended)
 
 This project uses Jest with React Native Testing Library for comprehensive component and integration testing.
 
-### Running Tests
-
-```bash
-npm test              # Run all tests
-npm run test:watch    # Run tests in watch mode
-npm run test:coverage # Generate coverage report
-```
-
 ### Test Structure
 
 - **Unit Tests**: Component behavior and props testing
@@ -209,29 +201,19 @@ The main branch is protected with required status checks. All CI jobs must pass 
 ```
 chat-app/
 ├── components/         # Reusable UI components
-│   └── __tests__/      # Component unit tests
 ├── screens/            # Main app screens (Inbox, Chat)
 ├── hooks/              # Custom React hooks
 ├── utils/              # Utility functions and helpers
 ├── services/           # External service integrations
-│   └── __tests__/      # Service unit tests
 ├── constants/          # Theme and design constants
 ├── data/               # Mock data for development
 ├── types/              # TypeScript type definitions
 ├── assets/             # Images and static resources
 ├── docs/               # Additional documentation
-│   ├── AI_SETUP.md     # AI integration guide
-│   ├── AI_FLOW.md      # AI response architecture
-│   ├── APPLE_MUSIC_SETUP.md  # Apple Music integration
-│   └── BUBBLE_TYPES.md # Message bubble types system
 ├── .github/            # GitHub Actions workflows and config
-│   ├── workflows/      # CI/CD pipeline definitions
-│   └── dependabot.yml  # Automated dependency updates
 ├── .githooks/          # Git hooks for code quality
 ├── .rnstorybook/       # Storybook configuration and stories
-├── ios/                # Native iOS project files (development build)
-├── CI_CD_SETUP.md      # Detailed CI/CD documentation
-└── CHANGELOG.md        # Auto-generated release notes
+└── ios/                # Native iOS project files (development build)
 ```
 
 ## Storybook Integration
@@ -299,4 +281,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [iMessage Chat Builder UI Kit](https://www.figma.com/community/file/1519446101653617639/imessage-chat-builder) for the design and component reference
 - [Figma MCP Server](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Dev-Mode-MCP-Server) for enabling rapid design-to-code workflow
 - [Expo](https://expo.dev) for the React Native development platform
-- React Native and Expo communities
