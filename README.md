@@ -1,5 +1,11 @@
 # iMessage Prototype
 
+[![CI/CD Pipeline](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/pdugan20/chat-app-prototype/branch/main/graph/badge.svg)](https://codecov.io/gh/pdugan20/chat-app-prototype)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-22.x-brightgreen.svg)](https://nodejs.org)
+[![Expo SDK](https://img.shields.io/badge/Expo-SDK%2054-000020.svg?logo=expo)](https://expo.dev)
+
 A React Native recreation of Apple's iMessage app, featuring a complete mock inbox, chat threads, and the ability to send messages.
 
 ## About This Project
@@ -27,11 +33,12 @@ This iMessage prototype replicates the authentic iOS Messages app experience, in
 
 ## Technology Stack
 
-- **React Native** with Expo SDK 53.0.22 (Development Build)
+- **React Native** with Expo SDK 54 (Development Build)
 - **TypeScript** with strict mode for type safety
 - **React Navigation** for native navigation patterns
 - **Animated API** for smooth animations and transitions
 - **Modern ESLint** with flat configuration
+- **Jest** with React Native Testing Library for comprehensive testing
 - **Modular Architecture** with reusable components
 - **Theme System** with centralized colors, typography, and spacing
 - **Expo Development Build** for enhanced debugging and custom native code
@@ -80,6 +87,12 @@ npm run format        # Format code with Prettier
 npm run format:check  # Check code formatting
 npm run setup-hooks   # Setup git hooks for automated code quality
 
+# Testing
+npm test              # Run test suite
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+npm run test:ci       # Run tests in CI mode
+
 # Component Configuration
 npm run sb            # Start Storybook development server
 npm run sb:ios        # Build and run Storybook on iOS
@@ -102,36 +115,123 @@ When working with the development build, you may need to rebuild the native proj
 
 ### Git Hooks Setup
 
-This project includes automated code quality checks via git hooks. To enable them:
+This project includes automated code quality and security checks via git hooks. To enable them:
 
 ```bash
 npm run setup-hooks  # Configure git hooks
 ```
 
-This sets up a pre-commit hook that automatically runs:
+This sets up automated hooks that run:
+
+**Pre-commit Hook:**
 
 - **Prettier** formatting check
 - **ESLint** code quality check
 - **TypeScript** type checking
 - **Expo** dependency compatibility check
+- **Gitleaks** secret scanning (if installed)
 
-The hook prevents commits if any checks fail. To bypass (not recommended): `git commit --no-verify`
+**Pre-push Hook:**
+
+- **Jest** test suite execution
+
+The hooks prevent commits/pushes if any checks fail. To bypass (not recommended): `git commit --no-verify` or `git push --no-verify`
+
+**Note**: Install Gitleaks for secret scanning: `brew install gitleaks`
+
+## Testing
+
+This project uses Jest with React Native Testing Library for comprehensive component and integration testing.
+
+### Running Tests
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Generate coverage report
+```
+
+### Test Structure
+
+- **Unit Tests**: Component behavior and props testing
+- **Integration Tests**: Component interaction testing
+- **Coverage Tracking**: Automated coverage reporting via Codecov
+- **Test Files**: Located in `__tests__` directories alongside components
+
+### Coverage Thresholds
+
+Coverage thresholds are currently disabled to allow gradual test addition. Once comprehensive coverage is achieved, thresholds will be enforced in CI/CD.
+
+## CI/CD Pipeline
+
+This project includes a comprehensive CI/CD pipeline that runs on every push and pull request.
+
+### Pipeline Jobs
+
+1. **Security Scanning**
+
+   - Gitleaks secret detection
+   - Dependency vulnerability review
+   - Automated security alerts
+
+2. **Code Quality Checks**
+
+   - ESLint code linting
+   - Prettier formatting validation
+   - TypeScript type checking (standard + strict mode)
+
+3. **Unit Tests**
+
+   - Jest test suite execution
+   - Coverage report generation
+   - Codecov integration
+
+4. **Build Validation**
+
+   - Expo dependency compatibility check
+   - iOS prebuild validation
+   - Production export creation
+   - Bundle size analysis
+
+5. **Automated Releases**
+   - Semantic versioning with conventional commits
+   - Automated CHANGELOG generation
+   - GitHub release creation
+
+### Branch Protection
+
+The main branch is protected with required status checks. All CI jobs must pass before merging.
+
+**Documentation**: See [CI_CD_SETUP.md](./CI_CD_SETUP.md) for detailed pipeline configuration and troubleshooting.
 
 ## Project Structure
 
 ```
 chat-app/
 ├── components/         # Reusable UI components
+│   └── __tests__/      # Component unit tests
 ├── screens/            # Main app screens (Inbox, Chat)
 ├── hooks/              # Custom React hooks
 ├── utils/              # Utility functions and helpers
 ├── services/           # External service integrations
+│   └── __tests__/      # Service unit tests
 ├── constants/          # Theme and design constants
 ├── data/               # Mock data for development
 ├── types/              # TypeScript type definitions
 ├── assets/             # Images and static resources
+├── docs/               # Additional documentation
+│   ├── AI_SETUP.md     # AI integration guide
+│   ├── AI_FLOW.md      # AI response architecture
+│   ├── APPLE_MUSIC_SETUP.md  # Apple Music integration
+│   └── BUBBLE_TYPES.md # Message bubble types system
+├── .github/            # GitHub Actions workflows and config
+│   ├── workflows/      # CI/CD pipeline definitions
+│   └── dependabot.yml  # Automated dependency updates
+├── .githooks/          # Git hooks for code quality
 ├── .rnstorybook/       # Storybook configuration and stories
-└── ios/                # Native iOS project files (development build)
+├── ios/                # Native iOS project files (development build)
+├── CI_CD_SETUP.md      # Detailed CI/CD documentation
+└── CHANGELOG.md        # Auto-generated release notes
 ```
 
 ## Storybook Integration

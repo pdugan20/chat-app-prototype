@@ -25,6 +25,24 @@ npm run format      # Format code with Prettier
 npm run format:check # Check code formatting
 ```
 
+### Testing
+
+```bash
+npm test              # Run test suite
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+npm run test:ci       # Run tests in CI mode
+```
+
+### Git Hooks
+
+```bash
+npm run setup-hooks  # Setup pre-commit and pre-push hooks
+```
+
+Pre-commit runs: Prettier, ESLint, TypeScript, Expo checks, Gitleaks (if installed)
+Pre-push runs: Full test suite
+
 ### Building
 
 ```bash
@@ -67,11 +85,14 @@ interface Message {
 
 ### Development Notes
 
-- Uses Expo SDK ~53.0.20 with React Native 0.79.5
+- Uses Expo SDK ~54.0.16 with React Native 0.81.4
 - TypeScript strict mode enabled
 - iOS-only platform target with new architecture enabled
 - SafeAreaView used for proper iPhone notch/home indicator handling
 - StyleSheet-based styling with iOS design system colors (#0078ff blue, #e9e9eb gray)
+- Jest + React Native Testing Library for testing
+- Comprehensive CI/CD pipeline with GitHub Actions
+- Automated semantic versioning and releases
 
 ### AI Integration
 
@@ -83,3 +104,57 @@ interface Message {
 - Fallback to preset responses if API unavailable
 - Music detection and Apple Music integration for music-related queries
 - See `docs/AI_FLOW.md` for detailed AI response flow and decision logic
+
+## Testing
+
+### Test Framework
+
+- **Jest** with `jest-expo` preset for React Native compatibility
+- **React Native Testing Library** for component testing
+- Test files located in `__tests__` directories alongside components
+- Coverage tracking with Codecov integration
+
+### Testing Patterns
+
+- Component tests focus on behavior, not implementation details
+- Mock external dependencies (expo-blur, expo-symbols, AI services)
+- Use `fireEvent` for simulating user interactions
+- Test both happy paths and edge cases
+- Include tests for accessibility and error states
+
+### Running Tests
+
+Tests run automatically in:
+
+- **Pre-push hook**: Full test suite must pass before pushing
+- **CI/CD pipeline**: Tests run on every push and PR
+- **Local development**: Use watch mode for TDD workflow
+
+## CI/CD Pipeline
+
+### Overview
+
+Comprehensive GitHub Actions pipeline with 5 main jobs:
+
+1. **Security Scanning** - Gitleaks + dependency review
+2. **Code Quality** - ESLint, Prettier, TypeScript checks
+3. **Unit Tests** - Jest suite + coverage reporting
+4. **Build Validation** - Expo checks, iOS prebuild, bundle analysis
+5. **Automated Releases** - Semantic versioning + CHANGELOG generation
+
+### Branch Protection
+
+Main branch requires:
+
+- All CI checks passing
+- No merge conflicts
+- Up-to-date with base branch
+
+### Semantic Versioning
+
+- Uses conventional commits (feat:, fix:, chore:, etc.)
+- Automatic version bumping on merge to main
+- Auto-generated CHANGELOG.md
+- GitHub releases with release notes
+
+See `CI_CD_SETUP.md` for detailed pipeline documentation.
