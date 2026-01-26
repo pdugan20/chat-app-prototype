@@ -38,7 +38,7 @@ fi
 
 # Run tests
 echo -e "${YELLOW}Running test suite...${NC}"
-if ! npm test -- --bail --findRelatedTests 2>&1; then
+if ! npm test -- --bail 2>&1; then
     echo -e "${RED}[ERROR] Tests failed. Fix failing tests before pushing.${NC}"
     echo -e "${YELLOW}Run 'npm test' to see detailed results${NC}"
     exit 1
