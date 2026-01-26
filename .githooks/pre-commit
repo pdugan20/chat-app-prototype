@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}🔍 Running pre-commit checks...${NC}"
+echo -e "${YELLOW}Running pre-commit checks...${NC}"
 
 # Add common node paths to PATH
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -26,7 +26,7 @@ fi
 
 # Check if npm is available
 if ! command -v npm >/dev/null 2>&1; then
-    echo -e "${RED}❌ npm is not available in PATH${NC}"
+    echo -e "${RED}[ERROR] npm is not available in PATH${NC}"
     exit 1
 fi
 
@@ -36,35 +36,48 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
+# Run Gitleaks secret scanning
+echo -e "${YELLOW}🔐 Running secret scanning...${NC}"
+if command -v gitleaks >/dev/null 2>&1; then
+    if ! gitleaks protect --staged --no-banner --redact 2>&1; then
+        echo -e "${RED}[ERROR] Gitleaks found secrets in your staged files${NC}"
+        echo -e "${YELLOW}If you're certain these aren't real secrets, run: git commit --no-verify${NC}"
+        exit 1
+    fi
+else
+    echo -e "${YELLOW}[WARNING] Gitleaks not installed. Install with: brew install gitleaks${NC}"
+    echo -e "${YELLOW}Skipping secret scanning...${NC}"
+fi
+
 # Run Prettier formatting check
-echo -e "${YELLOW}🎨 Running Prettier format check...${NC}"
+echo -e "${YELLOW}Running Prettier format check...${NC}"
 if ! npm run format:check; then
-    echo -e "${RED}❌ Prettier formatting issues found. Run 'npm run format' to fix them.${NC}"
+    echo -e "${RED}[ERROR] Prettier formatting issues found. Run 'npm run format' to fix them.${NC}"
     exit 1
 fi
 
 # Run ESLint
-echo -e "${YELLOW}🔍 Running ESLint...${NC}"
+echo -e "${YELLOW}Running ESLint...${NC}"
 if ! npm run lint; then
-    echo -e "${RED}❌ ESLint issues found. Run 'npm run lint:fix' to fix them.${NC}"
+    echo -e "${RED}[ERROR] ESLint issues found. Run 'npm run lint:fix' to fix them.${NC}"
     exit 1
 fi
 
 # Run TypeScript type check
-echo -e "${YELLOW}🔧 Running TypeScript type check...${NC}"
+echo -e "${YELLOW}Running TypeScript type check...${NC}"
 if ! npx tsc --noEmit --skipLibCheck; then
-    echo -e "${RED}❌ TypeScript type errors found. Please fix them before committing.${NC}"
+    echo -e "${RED}[ERROR] TypeScript type errors found. Please fix them before committing.${NC}"
     exit 1
 fi
 
 # Check if Expo dependencies are compatible (if expo is available)
 if command -v npx >/dev/null 2>&1; then
-    echo -e "${YELLOW}📱 Checking Expo compatibility...${NC}"
+    echo -e "${YELLOW}Checking Expo compatibility...${NC}"
     if ! npx expo install --check >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠️  Expo dependency compatibility issues detected. Consider running 'npx expo install --fix'${NC}"
+        echo -e "${YELLOW}[WARNING] Expo dependency compatibility issues detected. Consider running 'npx expo install --fix'${NC}"
         # Don't fail the commit for this, just warn
     fi
 fi
 
-echo -e "${GREEN}✅ All pre-commit checks passed!${NC}"
+echo -e "${GREEN}[SUCCESS] All pre-commit checks passed${NC}"
 exit 0
