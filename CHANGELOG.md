@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.0...v1.0.1) (2026-02-08)
+
+### Bug Fixes
+
+* **ci:** make knip non-blocking until existing dead code is cleaned up ([4269671](https://github.com/pdugan20/chat-app-prototype/commit/42696713f24d979a2be298696f73b3bb07703b49))
+
 ## 1.0.0 (2026-01-26)
 
 ### Features
