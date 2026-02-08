@@ -11,7 +11,7 @@ interface ConfirmationOptions {
   destructive?: boolean;
 }
 
-export const showConfirmation = ({
+const showConfirmation = ({
   title,
   message,
   confirmText,

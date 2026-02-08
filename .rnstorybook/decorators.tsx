@@ -13,11 +13,6 @@ const decoratorStyles = StyleSheet.create({
   darkBackground: {
     backgroundColor: Colors.black,
   },
-  flexStartContainer: {
-    alignItems: 'flex-start',
-    flex: 1,
-    padding: 20,
-  },
   lightBackground: {
     backgroundColor: Colors.white,
   },
@@ -69,28 +64,5 @@ export const CenteredDecorator = (
         <Stack.Screen name='Story' component={StoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-  );
-};
-
-// Simple flex-start decorator for buttons and other controls
-export const FlexStartDecorator = (
-  Story: React.ComponentType,
-  context: StoryContext
-) => {
-  const isDarkMode = context.globals.theme === 'dark';
-
-  return (
-    <View
-      style={[
-        decoratorStyles.flexStartContainer,
-        isDarkMode
-          ? decoratorStyles.darkBackground
-          : decoratorStyles.lightBackground,
-      ]}
-    >
-      <PositionControlWrapper>
-        <Story />
-      </PositionControlWrapper>
-    </View>
   );
 };

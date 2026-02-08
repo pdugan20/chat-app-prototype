@@ -1,6 +1,6 @@
 import { AI_RESPONSE_FORMATS, MUSIC_RESPONSE_FORMATS } from './constants';
 
-export interface BubbleTypeConfig {
+interface BubbleTypeConfig {
   type: string;
   formatKey: string;
   triggers: string[];
@@ -101,39 +101,3 @@ ${MUSIC_RESPONSE_FORMATS.queryPrefix}search:anti hero taylor swift`,
   //   ],
   // },
 };
-
-// Helper to get bubble type by format key
-export function getBubbleTypeByFormat(
-  formatKey: string
-): BubbleTypeConfig | null {
-  return (
-    Object.values(BUBBLE_TYPES).find(type => type.formatKey === formatKey) ||
-    null
-  );
-}
-
-// Helper to detect which bubble type to use based on message
-export function detectBubbleType(message: string): string {
-  const lowerMessage = message.toLowerCase();
-
-  // Check each non-default bubble type
-  for (const [key, config] of Object.entries(BUBBLE_TYPES)) {
-    if (key === 'TEXT') continue; // Skip default
-
-    // Check negative context first
-    const hasNegativeContext = config.negativeContext.some(neg =>
-      lowerMessage.includes(neg)
-    );
-    if (hasNegativeContext) continue;
-
-    // Check positive triggers
-    const hasTrigger = config.triggers.some(trigger => {
-      const regex = new RegExp(trigger, 'i');
-      return regex.test(lowerMessage);
-    });
-
-    if (hasTrigger) return key;
-  }
-
-  return 'TEXT'; // Default
-}

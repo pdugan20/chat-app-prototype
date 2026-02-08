@@ -14,7 +14,7 @@ interface AppleMusicUrlParams {
 /**
  * Builds Apple Music URL from various ID sources
  */
-export const buildAppleMusicUrl = ({
+const buildAppleMusicUrl = ({
   propAppleMusicId,
   propPlayParams,
   songData,
@@ -51,7 +51,7 @@ export const buildAppleMusicUrl = ({
 /**
  * Opens Apple Music with fallback URL schemes
  */
-export const openAppleMusic = async (url: string): Promise<boolean> => {
+const openAppleMusic = async (url: string): Promise<boolean> => {
   // Try multiple URL schemes for better compatibility
   const urlSchemes = [
     url,

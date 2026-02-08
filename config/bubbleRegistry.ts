@@ -4,14 +4,6 @@ import MessageBubble from '../components/bubbles/MessageBubble';
 import AppleMusicBubble from '../components/bubbles/AppleMusicBubble';
 import VinylRecordBubble from '../components/bubbles/VinylRecordBubble';
 
-// Define the props that all bubble components should accept
-export interface BaseBubbleProps {
-  isSender: boolean;
-  hasReaction?: boolean;
-  reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
-  isLastInGroup?: boolean;
-}
-
 // Registry type
 type BubbleRegistry = {
   [K in MessageType]?: {
@@ -21,7 +13,7 @@ type BubbleRegistry = {
 };
 
 // Bubble component registry
-export const bubbleRegistry: BubbleRegistry = {
+const bubbleRegistry: BubbleRegistry = {
   text: {
     component: MessageBubble,
     extractProps: message => ({
@@ -61,18 +53,6 @@ export const bubbleRegistry: BubbleRegistry = {
   //   }),
   // },
 };
-
-// Function to register a new bubble type
-export function registerBubbleType<T extends MessageType>(
-  type: T,
-  component: ComponentType<any>,
-  extractProps: (message: any) => any
-) {
-  bubbleRegistry[type] = {
-    component,
-    extractProps,
-  };
-}
 
 // Function to get bubble component and props
 export function getBubbleComponent(type: MessageType) {

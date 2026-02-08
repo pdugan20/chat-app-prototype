@@ -22,7 +22,7 @@ interface PreloadedMusicData {
   };
 }
 
-export class MusicPreloader {
+class MusicPreloader {
   private preloadedData: Map<string, PreloadedMusicData> = new Map();
   private isPreloading = false;
 

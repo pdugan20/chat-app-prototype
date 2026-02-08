@@ -5,7 +5,7 @@
 // Global fetch is available in React Native
 declare const fetch: any;
 
-export interface AppleMusicSong {
+interface AppleMusicSong {
   id: string;
   type: 'songs';
   attributes: {
@@ -33,7 +33,7 @@ export interface AppleMusicSong {
   };
 }
 
-export interface AppleMusicApiResponse {
+interface AppleMusicApiResponse {
   data: AppleMusicSong[];
 }
 

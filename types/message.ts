@@ -9,7 +9,7 @@ export type MessageType =
   | 'location'
   | 'contact';
 
-export interface BaseMessage {
+interface BaseMessage {
   id: string;
   isSender: boolean;
   timestamp: string;
@@ -116,25 +116,3 @@ export type Message =
   | VideoMessage
   | LocationMessage
   | ContactMessage;
-
-export type ReactionType = 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';
-
-export interface MessageBubbleProps {
-  text: string;
-  isSender: boolean;
-  hasReaction?: boolean;
-  reactionType?: ReactionType;
-  isLastInGroup?: boolean;
-  isFirstInGroup?: boolean;
-}
-
-export interface NavigationBarProps {
-  contactName: string;
-  onBackPress?: () => void;
-  onContactPress?: () => void;
-}
-
-export interface InputBarProps {
-  onSendMessage: (message: string) => void;
-  keyboardVisible?: boolean;
-}

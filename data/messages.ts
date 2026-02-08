@@ -5,7 +5,7 @@ import {
 } from '../types/message';
 
 // Ruth conversation about horror movie
-export const conversation1: Message[] = [
+const conversation1: Message[] = [
   {
     id: '1',
     text: 'Yo! Have you seen the trailer for that new horror movie Sinners? It looks insane!',
@@ -122,7 +122,7 @@ export const conversation1: Message[] = [
 ];
 
 // Will Fleming conversation about Beastie Boys
-export const conversation2: Message[] = [
+const conversation2: Message[] = [
   {
     id: '1',
     text: 'Dude, have you heard the new Beastie Boys documentary on Apple TV+?',
@@ -245,7 +245,7 @@ export const conversation2: Message[] = [
 ];
 
 // Tina conversation about Sabrina Carpenter's new album
-export const conversation3: Message[] = [
+const conversation3: Message[] = [
   {
     id: '1',
     text: "Have you listened to Sabrina Carpenter's new album yet?",

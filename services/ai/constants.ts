@@ -107,9 +107,3 @@ export const MOCK_MUSIC_QUERIES = [
   "search:don't stop believin journey",
   'search:mr brightside the killers',
 ] as const;
-
-export { AI_MODELS } from './models';
-export type { AIProvider, AnthropicModel, OpenAIModel } from './models';
-
-export type ResponseType = (typeof RESPONSE_TYPES)[keyof typeof RESPONSE_TYPES];
-export type ProviderName = (typeof PROVIDER_NAMES)[keyof typeof PROVIDER_NAMES];

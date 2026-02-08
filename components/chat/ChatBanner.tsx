@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Typography, Spacing } from '../../constants/theme';
 
-export type ChatBannerType = 'timestamp' | 'date' | 'notification' | 'system';
+type ChatBannerType = 'timestamp' | 'date' | 'notification' | 'system';
 
 interface ChatBannerProps {
   type?: ChatBannerType;

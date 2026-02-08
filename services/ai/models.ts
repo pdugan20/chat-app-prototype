@@ -34,7 +34,3 @@ export const AI_MODELS = {
     },
   },
 } as const;
-
-export type AIProvider = keyof typeof AI_MODELS;
-export type AnthropicModel = keyof typeof AI_MODELS.anthropic.models;
-export type OpenAIModel = keyof typeof AI_MODELS.openai.models;

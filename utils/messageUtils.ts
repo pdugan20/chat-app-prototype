@@ -88,7 +88,7 @@ export const isFirstInGroup = (
 /**
  * Create a new text message with current timestamp
  */
-export const createTextMessage = (
+const createTextMessage = (
   text: string,
   isSender: boolean = true
 ): TextMessage => {
@@ -140,16 +140,4 @@ export const createMessage = (
   isSender: boolean = true
 ): Message => {
   return createTextMessage(text, isSender);
-};
-
-/**
- * Mark a message as delivered
- */
-export const markMessageAsDelivered = (
-  messages: Message[],
-  messageId: string
-): Message[] => {
-  return messages.map(msg =>
-    msg.id === messageId ? { ...msg, showDelivered: true } : msg
-  );
 };

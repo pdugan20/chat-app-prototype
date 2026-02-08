@@ -1,5 +1,5 @@
 // Album art dimensions used throughout the app
-export const ALBUM_ART_SIZE = 200;
+const ALBUM_ART_SIZE = 200;
 
 /**
  * Formats an Apple Music artwork URL with the correct dimensions

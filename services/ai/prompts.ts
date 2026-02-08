@@ -1,6 +1,6 @@
 import { BUBBLE_TYPES } from './bubbleTypes';
 
-export const createMentionedSongsContext = (songs: string[]): string =>
+const createMentionedSongsContext = (songs: string[]): string =>
   songs.length > 0
     ? `\n\nIMPORTANT: You have already mentioned these songs in this conversation, DO NOT repeat them:\n- ${songs.join(
         '\n- '

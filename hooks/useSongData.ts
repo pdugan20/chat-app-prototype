@@ -6,7 +6,7 @@ import { formatArtworkUrl } from '../constants/music';
 const songDataCache = new Map<string, { data: SongData; timestamp: number }>();
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
-export interface SongData {
+interface SongData {
   title: string;
   artist: string;
   albumArt: string | null;

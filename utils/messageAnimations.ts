@@ -1,7 +1,7 @@
 import { Animated } from 'react-native';
 
 // Animation constants
-export const ANIMATION_DURATIONS = {
+const ANIMATION_DURATIONS = {
   DELIVERED_FADE: 300,
   TYPING_INDICATOR: 300,
   CHAT_SLIDE: 300,
@@ -9,7 +9,7 @@ export const ANIMATION_DURATIONS = {
 } as const;
 
 // Animation offsets
-export const ANIMATION_OFFSETS = {
+const ANIMATION_OFFSETS = {
   USER_MESSAGE_SLIDE: 20,
   AI_MESSAGE_SLIDE: 0,
   CHAT_SLIDE: 30,
@@ -23,7 +23,7 @@ export const ANIMATION_DELAYS = {
   MESSAGE_RENDER: 150, // Increased for longer AI responses
 } as const;
 
-export const SPRING_CONFIG = {
+const SPRING_CONFIG = {
   MESSAGE_SLIDE: {
     velocity: 2,
     tension: 120,
@@ -112,7 +112,7 @@ export const animateTypingIndicatorIn = (opacity: Animated.Value) => {
 /**
  * Animate typing indicator fade out
  */
-export const animateTypingIndicatorOut = (opacity: Animated.Value) => {
+const animateTypingIndicatorOut = (opacity: Animated.Value) => {
   return Animated.timing(opacity, {
     toValue: 0,
     duration: ANIMATION_DURATIONS.TYPING_INDICATOR,
@@ -123,7 +123,7 @@ export const animateTypingIndicatorOut = (opacity: Animated.Value) => {
 /**
  * Animate chat sliding down to hide typing indicator space
  */
-export const animateChatSlideDown = (slideValue: Animated.Value) => {
+const animateChatSlideDown = (slideValue: Animated.Value) => {
   return Animated.timing(slideValue, {
     toValue: 1,
     duration: ANIMATION_DURATIONS.CHAT_SLIDE,

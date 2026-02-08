@@ -71,7 +71,6 @@ jobs:
 
       - name: Knip (dead code detection)
         run: npm run knip
-        continue-on-error: true
 
   test:
     name: Unit Tests

@@ -3,7 +3,7 @@ import { Colors } from '../constants/theme';
 /**
  * Formats a color string by adding # prefix if needed
  */
-export const formatColor = (color?: string): string | undefined => {
+const formatColor = (color?: string): string | undefined => {
   if (!color) return undefined;
   return color.startsWith('#') ? color : `#${color}`;
 };
@@ -11,7 +11,7 @@ export const formatColor = (color?: string): string | undefined => {
 /**
  * Checks if a background color is white or very close to white
  */
-export const isWhiteBackground = (bgColor?: string): boolean => {
+const isWhiteBackground = (bgColor?: string): boolean => {
   if (!bgColor) return false;
 
   const color = formatColor(bgColor);
