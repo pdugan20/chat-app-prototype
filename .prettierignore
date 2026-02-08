@@ -43,6 +43,7 @@ yarn-error.*
 
 # Generated files
 *.generated.*
+CHANGELOG.md
 
 # Storybook auto-generated files
 .rnstorybook/storybook.requires.ts 
