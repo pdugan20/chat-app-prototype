@@ -50,7 +50,7 @@ graph TB
 
 The AI service analyzes incoming messages to determine the appropriate response type:
 
-```
+```text
 User Message
     |
     ├─ Contains special intent keywords? → SPECIAL_RESPONSE
@@ -76,7 +76,7 @@ User Message
 
 #### Anthropic (Claude)
 
-```
+```text
 createStructuredPrompt
     |
     ├─ Includes special intent detection
@@ -90,7 +90,7 @@ createStructuredPrompt
 
 #### OpenAI (GPT)
 
-```
+```text
 createStructuredPrompt
     |
     ├─ Uses same prompt structure as Anthropic
@@ -100,7 +100,7 @@ createStructuredPrompt
 
 #### Mock Service
 
-```
+```text
 detectSpecialIntent (keyword-based)
     |
     ├─ Scans for special intent keywords
@@ -112,7 +112,7 @@ detectSpecialIntent (keyword-based)
 
 ### Text Response Flow
 
-```
+```text
 1. AI generates text response
 2. Create Message object with animation values
 3. Show typing indicator (fade in)
@@ -123,7 +123,7 @@ detectSpecialIntent (keyword-based)
 
 ### Special Response Flow - Music
 
-```
+```text
 1. AI generates special response (text + metadata)
 2. Show typing indicator
 3. Display text message first
@@ -194,7 +194,7 @@ The architecture supports adding:
 
 ## Animation Timing
 
-```
+```text
 Text Messages:
 - AI response delay: 500-800ms
 - Typing indicator: 1500ms minimum
@@ -227,7 +227,7 @@ APPLE_MUSIC_API_KEY=...       # Music data
 
 ## Error Handling
 
-```
+```text
 API Failure
     |
     ├─ Log error to console

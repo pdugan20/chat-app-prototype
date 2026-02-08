@@ -11,7 +11,6 @@ interface MessageBubbleProps {
   hasReaction?: boolean;
   reactionType?: ReactionType;
   isLastInGroup?: boolean;
-  _isFirstInGroup?: boolean;
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -20,7 +19,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   hasReaction = false,
   reactionType,
   isLastInGroup = false,
-  _isFirstInGroup = false,
 }) => {
   return (
     <View

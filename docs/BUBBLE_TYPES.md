@@ -15,7 +15,7 @@ The bubble types system provides an extensible way to add new special response t
 
 ### How It Works
 
-```
+```text
 User Message → AI Provider → Structured Prompt (generated from configs)
 → AI Response → Universal Parser → Typed Response
 ```

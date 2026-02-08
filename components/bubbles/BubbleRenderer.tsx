@@ -13,7 +13,7 @@ interface BubbleRendererProps {
 const BubbleRenderer: React.FC<BubbleRendererProps> = ({
   message,
   isLastInGroup,
-  isFirstInGroup,
+  isFirstInGroup: _isFirstInGroup,
   hasReaction,
 }) => {
   const bubbleConfig = getBubbleComponent(message.type);
@@ -27,7 +27,6 @@ const BubbleRenderer: React.FC<BubbleRendererProps> = ({
         hasReaction={hasReaction}
         reactionType={message.reactionType}
         isLastInGroup={isLastInGroup}
-        _isFirstInGroup={isFirstInGroup}
       />
     );
   }
@@ -44,7 +43,6 @@ const BubbleRenderer: React.FC<BubbleRendererProps> = ({
     hasReaction,
     reactionType: message.reactionType,
     isLastInGroup,
-    _isFirstInGroup: isFirstInGroup,
   };
 
   return <BubbleComponent {...bubbleProps} />;

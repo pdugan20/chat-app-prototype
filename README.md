@@ -198,7 +198,7 @@ The main branch is protected with required status checks. All CI jobs must pass 
 
 ## Project Structure
 
-```
+```text
 chat-app/
 ├── components/         # Reusable UI components
 ├── screens/            # Main app screens (Inbox, Chat)

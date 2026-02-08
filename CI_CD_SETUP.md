@@ -225,13 +225,13 @@ See `components/__tests__/example.test.tsx` for a basic example.
 ### For CI/CD
 
 - `EXPO_TOKEN` - Expo access token for EAS/prebuild
-  - Get from: https://expo.dev/settings/access-tokens
+  - Get from: <https://expo.dev/settings/access-tokens>
   - Required for: Build validation workflow
 
 ### For Codecov (Optional)
 
 - `CODECOV_TOKEN` - Codecov upload token
-  - Get from: https://codecov.io/
+  - Get from: <https://codecov.io/>
   - Optional: Uploads work without token for public repos
 
 ### For Semantic Release (Auto-provided)
@@ -247,13 +247,13 @@ See `components/__tests__/example.test.tsx` for a basic example.
 npm install
 ```
 
-2. **Set Up Git Hooks**
+1. **Set Up Git Hooks**
 
 ```bash
 npm run setup-hooks
 ```
 
-3. **Install Gitleaks (for secret scanning)**
+1. **Install Gitleaks (for secret scanning)**
 
 ```bash
 # macOS
@@ -266,13 +266,13 @@ choco install gitleaks
 https://github.com/gitleaks/gitleaks#installing
 ```
 
-4. **Configure GitHub Secrets**
+1. **Configure GitHub Secrets**
 
 Go to repository Settings → Secrets and variables → Actions
 
 Add required secrets (see above).
 
-5. **Enable Workflows**
+1. **Enable Workflows**
 
 Workflows are automatically enabled when merged to main branch.
 

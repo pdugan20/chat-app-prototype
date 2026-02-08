@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Pre-commit hook for React Native iMessage Prototype
-# Runs code quality checks before allowing commits
+# Runs code quality checks on staged files before allowing commits
 
 set -e
 
@@ -32,12 +32,12 @@ fi
 
 # Install dependencies if node_modules doesn't exist
 if [ ! -d "node_modules" ]; then
-    echo -e "${YELLOW}📦 Installing dependencies...${NC}"
+    echo -e "${YELLOW}[INFO] Installing dependencies...${NC}"
     npm install
 fi
 
 # Run Gitleaks secret scanning
-echo -e "${YELLOW}🔐 Running secret scanning...${NC}"
+echo -e "${YELLOW}[INFO] Running secret scanning...${NC}"
 if command -v gitleaks >/dev/null 2>&1; then
     if ! gitleaks protect --staged --no-banner --redact 2>&1; then
         echo -e "${RED}[ERROR] Gitleaks found secrets in your staged files${NC}"
@@ -49,22 +49,15 @@ else
     echo -e "${YELLOW}Skipping secret scanning...${NC}"
 fi
 
-# Run Prettier formatting check
-echo -e "${YELLOW}Running Prettier format check...${NC}"
-if ! npm run format:check; then
-    echo -e "${RED}[ERROR] Prettier formatting issues found. Run 'npm run format' to fix them.${NC}"
-    exit 1
-fi
-
-# Run ESLint
-echo -e "${YELLOW}Running ESLint...${NC}"
-if ! npm run lint; then
-    echo -e "${RED}[ERROR] ESLint issues found. Run 'npm run lint:fix' to fix them.${NC}"
+# Run lint-staged (Prettier + ESLint + markdownlint on staged files only)
+echo -e "${YELLOW}[INFO] Running lint-staged...${NC}"
+if ! npx lint-staged; then
+    echo -e "${RED}[ERROR] lint-staged found issues. Please fix them before committing.${NC}"
     exit 1
 fi
 
 # Run TypeScript type check
-echo -e "${YELLOW}Running TypeScript type check...${NC}"
+echo -e "${YELLOW}[INFO] Running TypeScript type check...${NC}"
 if ! npx tsc --noEmit --skipLibCheck; then
     echo -e "${RED}[ERROR] TypeScript type errors found. Please fix them before committing.${NC}"
     exit 1
@@ -72,7 +65,7 @@ fi
 
 # Check if Expo dependencies are compatible (if expo is available)
 if command -v npx >/dev/null 2>&1; then
-    echo -e "${YELLOW}Checking Expo compatibility...${NC}"
+    echo -e "${YELLOW}[INFO] Checking Expo compatibility...${NC}"
     if ! npx expo install --check >/dev/null 2>&1; then
         echo -e "${YELLOW}[WARNING] Expo dependency compatibility issues detected. Consider running 'npx expo install --fix'${NC}"
         # Don't fail the commit for this, just warn

@@ -8,14 +8,14 @@ The app supports AI-powered contextual responses using either Anthropic's Claude
 
 **For Anthropic (Claude):**
 
-- Sign up at https://console.anthropic.com/
+- Sign up at <https://console.anthropic.com/>
 - Navigate to API Keys section
 - Create a new API key
 - Copy the key (starts with `sk-ant-`)
 
 **For OpenAI (GPT):**
 
-- Sign up at https://platform.openai.com/
+- Sign up at <https://platform.openai.com/>
 - Navigate to API Keys section
 - Create a new API key
 - Copy the key (starts with `sk-`)
