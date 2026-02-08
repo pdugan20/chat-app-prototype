@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.2...v1.0.3) (2026-02-08)
+
+### Code Refactoring
+
+* remove dead code - unused exports, files, and dependencies ([2e4392a](https://github.com/pdugan20/chat-app-prototype/commit/2e4392a5577df6e5de5ec9991c96b94bde51cebf))
+
 ## [1.0.2](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.1...v1.0.2) (2026-02-08)
 
 ### Bug Fixes
