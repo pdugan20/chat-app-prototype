@@ -46,20 +46,21 @@ Pre-push runs: Full test suite
 ### Building
 
 ```bash
-npm run build:ios   # Production iOS build
+npx expo export --platform ios   # Production iOS export
 ```
 
 ## Architecture
 
 ### Component Structure
 
-- `App.tsx` - Root component that renders ChatScreen with StatusBar
-- `components/ChatScreen.tsx` - Main chat interface with message state management
-- `components/MessageBubble.tsx` - Individual message bubbles with reactions
-- `components/InputBar.tsx` - Message input with send functionality
-- `components/NavigationBar.tsx` - Top navigation with contact info
-- `components/StatusBar.tsx` - Custom iOS-style status bar
-- `components/HomeIndicator.tsx` - iPhone home indicator
+- `App.tsx` - Root component with navigation setup
+- `screens/ChatScreen.tsx` - Main chat interface with message state management
+- `screens/InboxScreen.tsx` - Inbox list view with conversations
+- `components/bubbles/` - Message bubble components with reactions
+- `components/chat/` - Chat-related UI components (input bar, typing indicator)
+- `components/inbox/` - Inbox UI components (chat items, search)
+- `components/navigation/` - Navigation bar components
+- `components/avatars/` - Profile photo components
 
 ### Key Features
 

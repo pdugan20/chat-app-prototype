@@ -41,3 +41,6 @@ yarn-error.*
 
 # test coverage
 coverage/
+
+# claudelint
+.claudelint-cache/
