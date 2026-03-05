@@ -15,7 +15,9 @@ updates:
       - 'dependencies'
       - 'automated'
     reviewers:
-      - 'patdugan'
+      - 'pdugan20'
+    assignees:
+      - 'pdugan20'
     # Group minor and patch updates together
     groups:
       expo:
