@@ -158,4 +158,4 @@ Main branch requires:
 - Auto-generated CHANGELOG.md
 - GitHub releases with release notes
 
-See `CI_CD_SETUP.md` for detailed pipeline documentation.
+See `docs/CI_CD_SETUP.md` for detailed pipeline documentation.

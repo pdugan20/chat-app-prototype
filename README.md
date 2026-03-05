@@ -74,7 +74,7 @@ data/             Mock data for development
 - [AI Setup](docs/AI_SETUP.md) - Configure Claude or OpenAI responses
 - [Apple Music Setup](docs/APPLE_MUSIC_SETUP.md) - Music integration
 - [AI Flow](docs/AI_FLOW.md) - AI response decision logic
-- [CI/CD Setup](CI_CD_SETUP.md) - Pipeline configuration
+- [CI/CD Setup](docs/CI_CD_SETUP.md) - Pipeline configuration
 
 ## Related
 
