@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Keyboard, Animated, FlatList } from 'react-native';
+import { default as ReanimatedAnimated } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -35,7 +36,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     route.params;
 
   // Hooks
-  const { keyboardVisible, keyboardHeight } = useKeyboard();
+  const { keyboardVisible, keyboardAnimatedStyle } = useKeyboard();
   const { updateChat } = useChatUpdates();
   const { setPendingChatUpdate } = useAppStore();
 
@@ -183,17 +184,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     }
   }, [showTypingIndicator]);
 
-  // Scroll to bottom when keyboard appears
+  // Scroll to bottom immediately when keyboard appears — messages jump up first,
+  // then the keyboard/input bar animate up to meet them (matching native iMessage)
   useEffect(() => {
     if (keyboardVisible) {
-      setTimeout(() => {
-        if (scrollViewRef.current) {
-          scrollViewRef.current.scrollToOffset({
-            offset: 999999,
-            animated: false, // Use false for immediate scroll
-          });
-        }
-      }, 50); // Reduced delay to sync better with keyboard
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToOffset({
+          offset: 999999,
+          animated: false,
+        });
+      }
     }
   }, [keyboardVisible]);
 
@@ -356,15 +356,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         </Animated.View>
       </SafeAreaView>
 
-      <Animated.View
-        style={[styles.inputBarContainer, { bottom: keyboardHeight }]}
+      <ReanimatedAnimated.View
+        style={[styles.inputBarContainer, keyboardAnimatedStyle]}
       >
         <InputBar
           onSendMessage={handleSendMessage}
           keyboardVisible={keyboardVisible}
           disabled={isSending}
         />
-      </Animated.View>
+      </ReanimatedAnimated.View>
 
       <View style={styles.navigationBarContainer}>
         <NavigationBar
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   messagesContentKeyboardVisible: {
-    paddingBottom: 60, // Extra space for typing indicator and delivered indicator when keyboard is visible
+    paddingBottom: 60,
   },
   messagesList: {
     backgroundColor: Colors.screenBackground,

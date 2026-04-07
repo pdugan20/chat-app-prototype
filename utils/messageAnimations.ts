@@ -29,11 +29,6 @@ const SPRING_CONFIG = {
     tension: 120,
     friction: 8,
   },
-  KEYBOARD: {
-    velocity: 12,
-    tension: 150,
-    friction: 20,
-  },
 } as const;
 
 /**
@@ -155,19 +150,6 @@ export const createCrossfadeAnimation = (
   ]);
 };
 
-/**
- * Animate keyboard height changes
- */
-export const animateKeyboard = (
-  keyboardHeight: Animated.Value,
-  height: number
-) => {
-  return Animated.spring(keyboardHeight, {
-    toValue: height,
-    useNativeDriver: false,
-    ...SPRING_CONFIG.KEYBOARD,
-  });
-};
 
 /**
  * Get transform styles for message slide animation
