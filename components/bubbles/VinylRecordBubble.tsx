@@ -1,13 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableWithoutFeedback,
   Animated,
   Easing,
   Dimensions,
 } from 'react-native';
+import {
+  Gesture,
+  GestureDetector,
+} from 'react-native-gesture-handler';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -221,6 +224,94 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
     }
   };
 
+  // --- Drag-to-scrub gesture ---
+  const lastAngle = useRef(0);
+  const scrubPosition = useRef(0); // tracks seek position locally during drag
+  const lastSeekTime = useRef(0);
+  const dragStarted = useRef(false);
+  const DRAG_THRESHOLD = 5; // px before entering scrub mode
+  // One full 360° drag = 5 seconds of audio
+  const SECONDS_PER_ROTATION = 5;
+
+  const getAngle = useCallback((touchX: number, touchY: number) => {
+    const dx = touchX - VINYL_SIZE / 2;
+    const dy = touchY - VINYL_SIZE / 2;
+    return Math.atan2(dy, dx) * (180 / Math.PI);
+  }, []);
+
+  // Normalize angle delta to handle wrap-around at ±180°
+  const normalizeAngleDelta = useCallback((delta: number) => {
+    while (delta > 180) delta -= 360;
+    while (delta < -180) delta += 360;
+    return delta;
+  }, []);
+
+  const panGesture = Gesture.Pan()
+    .runOnJS(true)
+    .minDistance(DRAG_THRESHOLD)
+    .onStart((e) => {
+      // Pan activated (finger moved past threshold) — enter scrub mode
+      scrubPosition.current = player ? player.currentTime : 0;
+      setWasPlayingBeforeScrub(isPlaying);
+      setIsScrubbing(true);
+      if (player && isPlaying) {
+        player.pause();
+        setIsPlaying(false);
+      }
+      lastAngle.current = getAngle(e.x, e.y);
+    })
+    .onUpdate((e) => {
+      const currentAngle = getAngle(e.x, e.y);
+      const angleDelta = normalizeAngleDelta(currentAngle - lastAngle.current);
+      lastAngle.current = currentAngle;
+
+      // Update vinyl rotation directly
+      // @ts-expect-error - accessing private _value for direct manipulation
+      const currentSpin = spinValue._value || 0;
+      spinValue.setValue(currentSpin + angleDelta);
+
+      // Map rotation to time: clockwise = forward
+      if (player && player.duration > 0) {
+        const timeDeltaSec = (angleDelta / 360) * SECONDS_PER_ROTATION;
+        scrubPosition.current = Math.max(
+          0,
+          Math.min(player.duration, scrubPosition.current + timeDeltaSec)
+        );
+
+        const newProgress = scrubPosition.current / player.duration;
+        progressValue.setValue(newProgress);
+        progressAnimatedValue.setValue(newProgress);
+        setPosition(scrubPosition.current * 1000);
+
+        // Throttle actual audio seeks to every 50ms
+        const now = Date.now();
+        if (now - lastSeekTime.current > 50) {
+          player.seekTo(scrubPosition.current).catch(() => {});
+          lastSeekTime.current = now;
+        }
+      }
+    })
+    .onEnd(() => {
+      // Seek to final position and resume if was playing
+      if (player && player.duration > 0) {
+        player.seekTo(scrubPosition.current).catch(() => {});
+      }
+      setIsScrubbing(false);
+      if (wasPlayingBeforeScrub && player) {
+        player.play();
+        setIsPlaying(true);
+      }
+    });
+
+  const tapGesture = Gesture.Tap()
+    .runOnJS(true)
+    .onEnd(() => {
+      handlePlayPause();
+    });
+
+  // Pan takes priority over tap — if finger moves past threshold, tap is cancelled
+  const composedGesture = Gesture.Exclusive(panGesture, tapGesture);
+
   const spin = spinValue.interpolate({
     inputRange: [0, 360],
     outputRange: ['0deg', '360deg'],
@@ -282,25 +373,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
           </View>
 
           {/* Vinyl Record */}
-          <TouchableWithoutFeedback
-            onPressIn={() => {
-              setIsScrubbing(true);
-              setWasPlayingBeforeScrub(isPlaying);
-
-              if (player && isPlaying) {
-                player.pause();
-                setIsPlaying(false);
-              }
-            }}
-            onPressOut={() => {
-              setIsScrubbing(false);
-
-              if (player && wasPlayingBeforeScrub) {
-                player.play();
-                setIsPlaying(true);
-              }
-            }}
-          >
+          <GestureDetector gesture={composedGesture}>
             <View style={[styles.vinylContainer, styles.contentAbove]}>
               <Animated.View
                 style={[styles.vinyl, { transform: [{ rotate: spin }] }]}
@@ -346,7 +419,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
                 />
               </Animated.View>
             </View>
-          </TouchableWithoutFeedback>
+          </GestureDetector>
 
           {/* Bottom section with song info and controls */}
           <View style={[styles.bottomSection, styles.contentAbove]}>

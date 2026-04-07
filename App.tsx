@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -64,7 +65,7 @@ export default function App() {
     showResetConfirmation(clearAllChats, resetApp, setPendingChatUpdate);
   };
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style='dark' />
       <ChatUpdateProvider>
         <NavigationContainer>
@@ -189,7 +190,7 @@ export default function App() {
           </Stack.Navigator>
         </NavigationContainer>
       </ChatUpdateProvider>
-    </>
+    </GestureHandlerRootView>
   );
 }
 
