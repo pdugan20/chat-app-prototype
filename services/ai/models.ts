@@ -1,23 +1,23 @@
 export const AI_MODELS = {
   anthropic: {
-    default: 'claude-3-5-sonnet-20241022',
+    default: 'claude-sonnet-4-6',
     models: {
-      'claude-3-5-haiku-20241022': {
-        name: 'Claude 3.5 Haiku',
+      'claude-haiku-4-5-20251001': {
+        name: 'Claude 4.5 Haiku',
         description: 'Fastest, most affordable',
       },
-      'claude-3-5-sonnet-20241022': {
-        name: 'Claude 3.5 Sonnet',
-        description: 'Best balance of speed and capability',
+      'claude-sonnet-4-6': {
+        name: 'Claude 4.6 Sonnet',
+        description: 'Best balance of speed and intelligence',
       },
-      'claude-3-opus-20240229': {
-        name: 'Claude 3 Opus',
-        description: 'Most capable for complex tasks',
+      'claude-opus-4-6': {
+        name: 'Claude 4.6 Opus',
+        description: 'Most intelligent for complex tasks',
       },
     },
   },
   openai: {
-    default: 'gpt-4-turbo',
+    default: 'gpt-4o',
     models: {
       'gpt-4o-mini': {
         name: 'GPT-4o Mini',
