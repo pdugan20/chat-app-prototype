@@ -100,16 +100,14 @@ export default function App() {
                         <ContextMenu.Items>
                           <Button
                             systemImage='gear'
+                            label='Settings'
                             onPress={() => console.log('Settings pressed')}
-                          >
-                            Settings
-                          </Button>
+                          />
                           <Button
                             systemImage='arrow.clockwise'
+                            label='Reset'
                             onPress={handleResetPress}
-                          >
-                            Reset
-                          </Button>
+                          />
                         </ContextMenu.Items>
                         <ContextMenu.Trigger>
                           <TouchableOpacity
