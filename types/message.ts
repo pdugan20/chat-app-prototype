@@ -30,6 +30,7 @@ export interface TextMessage extends BaseMessage {
 export interface AppleMusicMessage extends BaseMessage {
   type: 'appleMusic';
   text: string; // fallback text
+  caption?: string; // optional user-typed text sent alongside the song
   songId: string;
   songTitle?: string;
   artistName?: string;

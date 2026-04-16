@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SymbolView } from 'expo-symbols';
-import { ContextMenu, Button, Host } from '@expo/ui/swift-ui';
+import { Menu, Button, Host } from '@expo/ui/swift-ui';
 import { RootStackParamList } from './types/navigation';
 import { Colors } from './constants/theme';
 import InboxScreen from './screens/InboxScreen';
@@ -96,41 +96,29 @@ export default function App() {
                 ),
                 headerRight: () => (
                   <View style={headerStyles.rightButtonContainer}>
-                    <Host>
-                      <ContextMenu>
-                        <ContextMenu.Items>
-                          <Button
-                            systemImage='gear'
-                            label='Settings'
-                            onPress={() => console.log('Settings pressed')}
+                    <Host matchContents>
+                      <Menu
+                        label={
+                          <SymbolView
+                            name='ellipsis.circle'
+                            size={24}
+                            type='monochrome'
+                            tintColor={Colors.systemBlue}
+                            weight='regular'
                           />
-                          <Button
-                            systemImage='arrow.clockwise'
-                            label='Reset'
-                            onPress={handleResetPress}
-                          />
-                        </ContextMenu.Items>
-                        <ContextMenu.Trigger>
-                          <TouchableOpacity
-                            style={headerStyles.iconButton}
-                            activeOpacity={0.6}
-                            hitSlop={{
-                              top: 10,
-                              bottom: 10,
-                              left: 10,
-                              right: 10,
-                            }}
-                          >
-                            <SymbolView
-                              name='ellipsis.circle'
-                              size={24}
-                              type='monochrome'
-                              tintColor={Colors.systemBlue}
-                              weight='regular'
-                            />
-                          </TouchableOpacity>
-                        </ContextMenu.Trigger>
-                      </ContextMenu>
+                        }
+                      >
+                        <Button
+                          systemImage='gear'
+                          label='Settings'
+                          onPress={() => console.log('Settings pressed')}
+                        />
+                        <Button
+                          systemImage='arrow.clockwise'
+                          label='Reset'
+                          onPress={handleResetPress}
+                        />
+                      </Menu>
                     </Host>
                     <TouchableOpacity style={headerStyles.composeButton}>
                       <SymbolView

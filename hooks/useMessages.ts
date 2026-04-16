@@ -50,7 +50,11 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
     };
   }, []);
 
-  const addMessage = (text: string, isSender: boolean = true) => {
+  const addMessage = (
+    text: string,
+    isSender: boolean = true,
+    caption?: string
+  ) => {
     const animationValues = createMessageAnimationValues();
     let newMessage: Message;
 
@@ -65,7 +69,8 @@ export const useMessages = (chatId: string, initialMessages: Message[]) => {
             artistName: '',
             albumArtUrl: '',
           },
-          isSender
+          isSender,
+          caption
         ),
         ...animationValues,
       };

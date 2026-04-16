@@ -42,7 +42,7 @@ const InputPreviewContainer: React.FC<InputPreviewContainerProps> = ({
               name='xmark'
               size={10}
               type='hierarchical'
-              tintColor={Colors.white}
+              tintColor={Colors.inputIcon}
               weight='bold'
             />
           </View>

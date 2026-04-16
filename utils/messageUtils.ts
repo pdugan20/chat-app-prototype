@@ -116,7 +116,8 @@ export const createAppleMusicMessage = (
     albumArtUrl: string;
     duration?: number;
   },
-  isSender: boolean = true
+  isSender: boolean = true,
+  caption?: string
 ): AppleMusicMessage => {
   return {
     id: Date.now().toString(),
@@ -128,6 +129,7 @@ export const createAppleMusicMessage = (
     showDelivered: false,
     type: 'appleMusic',
     text: `${songData.songTitle} by ${songData.artistName}`, // fallback text
+    ...(caption ? { caption } : {}),
     ...songData,
   };
 };

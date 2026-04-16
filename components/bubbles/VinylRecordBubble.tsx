@@ -98,12 +98,13 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
         progressValue.setValue(progress);
         progressAnimatedValue.setValue(progress);
 
-        // Handle track end
+        // Handle track end — seek back to start so a replay begins from 0
         if (player.currentTime >= player.duration) {
           setIsPlaying(false);
           setPosition(0);
           progressValue.setValue(0);
           progressAnimatedValue.setValue(0);
+          player.seekTo(0).catch(() => {});
         }
       }
     }, 100); // Update every 100ms
@@ -210,8 +211,17 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
         progressValue.stopAnimation();
         progressAnimatedValue.stopAnimation();
       } else {
-        // Update progress values before playing
-        if (player.duration > 0) {
+        // If the track is at (or past) the end, restart from the beginning
+        if (
+          player.duration > 0 &&
+          player.currentTime >= player.duration - 0.05
+        ) {
+          await player.seekTo(0).catch(() => {});
+          setPosition(0);
+          progressValue.setValue(0);
+          progressAnimatedValue.setValue(0);
+        } else if (player.duration > 0) {
+          // Update progress values before playing
           const currentProgress = player.currentTime / player.duration;
           progressValue.setValue(currentProgress);
           progressAnimatedValue.setValue(currentProgress);

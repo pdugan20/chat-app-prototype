@@ -40,6 +40,7 @@ interface AppleMusicBubbleProps {
   playDisabled?: boolean;
   onPlay?: () => void;
   onPause?: () => void;
+  caption?: string;
 }
 
 const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
@@ -61,6 +62,7 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
   playDisabled = false,
   onPlay,
   onPause,
+  caption,
 }) => {
   // Use custom hooks for data fetching and audio playback
   const { songData, isLoading } = useSongData({
@@ -205,6 +207,24 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         </View>
       </TouchableOpacity>
 
+      {caption ? (
+        <View
+          style={[
+            styles.captionBubble,
+            isSender ? styles.captionBubbleSender : styles.captionBubbleRecipient,
+          ]}
+        >
+          <Text
+            style={[
+              styles.captionText,
+              isSender ? styles.captionTextSender : styles.captionTextRecipient,
+            ]}
+          >
+            {caption}
+          </Text>
+        </View>
+      ) : null}
+
       {hasReaction && reactionType && (
         <Reaction reactionType={reactionType} isSender={isSender} />
       )}
@@ -212,7 +232,13 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
       {isLastInGroup && (
         <View style={isSender ? styles.senderTail : styles.recipientTail}>
           <BubbleTail
-            color={dynamicStyles.bubbleBackground}
+            color={
+              caption
+                ? isSender
+                  ? Colors.messageBubbleBlue
+                  : Colors.messageBubbleGray
+                : dynamicStyles.bubbleBackground
+            }
             size={16}
             flipped={!isSender}
           />
@@ -247,6 +273,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
     paddingVertical: 9,
   },
+  captionBubble: {
+    borderRadius: Spacing.messageBorderRadius,
+    marginTop: 1,
+    paddingHorizontal: Spacing.messagePadding,
+    paddingVertical: Spacing.messagePaddingVertical,
+  },
+  captionBubbleRecipient: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.messageBubbleGray,
+  },
+  captionBubbleSender: {
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.messageBubbleBlue,
+  },
+  captionText: {
+    fontFamily: Typography.fontFamily,
+    fontSize: Typography.message,
+    fontWeight: Typography.regular,
+    letterSpacing: -0.15,
+    lineHeight: Typography.messageLineHeight,
+  },
+  captionTextRecipient: {
+    color: Colors.black,
+  },
+  captionTextSender: {
+    color: Colors.white,
+    opacity: 0.9,
+  },
   container: {
     marginVertical: 0.5,
     maxWidth: Layout.maxMessageWidth,
@@ -268,6 +322,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   recipientBubble: {
+    alignSelf: 'flex-start',
     backgroundColor: Colors.messageBubbleGray,
   },
   recipientContainer: {
@@ -285,6 +340,7 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   senderBubble: {
+    alignSelf: 'flex-end',
     backgroundColor: Colors.messageBubbleBlue,
   },
   senderContainer: {

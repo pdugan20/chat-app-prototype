@@ -72,8 +72,8 @@ const meta: Meta<AppleMusicBubbleStoryArgs> = {
 export default meta;
 type Story = StoryObj<AppleMusicBubbleStoryArgs>;
 
-// Beastie Boys - Hello Nasty (Search Query)
-export const HelloNasty: Story = {
+// Beastie Boys - Intergalactic (Search Query)
+export const Intergalactic: Story = {
   args: {
     songId: 'search:intergalactic beastie boys',
     songTitle: 'Intergalactic',
@@ -106,8 +106,8 @@ This shows the basic AppleMusicBubble component as a received message (gray bubb
   },
 };
 
-// Weezer - Blue Album (Search Query)
-export const WeezerBlueAlbum: Story = {
+// Weezer - Buddy Holly (Search Query)
+export const BuddyHolly: Story = {
   args: {
     songId: 'search:buddy holly weezer',
     songTitle: 'Buddy Holly',
@@ -134,8 +134,8 @@ This shows the AppleMusicBubble as a sent message (blue bubble) demonstrating:
   },
 };
 
-// With Reaction (Search Query) - Shows thumbsUp by default
-export const WithReaction: Story = {
+// Radiohead - Paranoid Android (with thumbsUp reaction)
+export const ParanoidAndroid: Story = {
   args: {
     songId: 'search:paranoid android radiohead',
     songTitle: 'Paranoid Android',
@@ -162,14 +162,12 @@ Demonstrates the AppleMusicBubble with a reaction attachment:
   },
 };
 
-// Loading State (Invalid ID to trigger loading/fallback)
-export const LoadingState: Story = {
+// Kendrick Lamar - Not Like Us
+export const NotLikeUs: Story = {
   args: {
-    songId: 'invalid-song-id',
-    songTitle: 'Loading Song...',
-    artistName: 'Loading Artist...',
-    albumArtUrl:
-      'https://via.placeholder.com/100x100/f2f2f2/8e8e93?text=Loading', // Using Colors.gray200/gray900 hex values
+    songId: 'search:not like us kendrick lamar',
+    songTitle: 'Not Like Us',
+    artistName: 'Kendrick Lamar',
     isSender: false,
     hasReaction: false,
     isLastInGroup: true,
@@ -181,20 +179,18 @@ export const LoadingState: Story = {
   },
   parameters: {
     notes: `
-**Loading/Error State**
+**Kendrick Lamar - Not Like Us**
 
-Shows the component behavior when API calls fail or data is unavailable:
-- Invalid songId triggers API error/fallback behavior  
-- Loading text displayed while fetching data
-- Placeholder album art shown when image fails to load
-- Play button disabled during loading state
-- Useful for testing error handling and loading states
+Contemporary hip-hop variant:
+- Received message (gray bubble)
+- Real Apple Music data fetched from search query
+- Demonstrates album art + color extraction on modern release
     `,
   },
 };
 
-// With Heart Reaction (Different reaction type)
-export const WithHeartReaction: Story = {
+// Taylor Swift - Shake It Off (with heart reaction)
+export const ShakeItOff: Story = {
   args: {
     songId: 'search:shake it off taylor swift',
     songTitle: 'Shake It Off',
@@ -221,8 +217,8 @@ Combines sender styling with different reaction type:
   },
 };
 
-// Group Message (Search Query)
-export const GroupMessage: Story = {
+// Nirvana - Smells Like Teen Spirit (grouped message, no tail)
+export const SmellsLikeTeenSpirit: Story = {
   args: {
     songId: 'search:smells like teen spirit nirvana',
     songTitle: 'Smells Like Teen Spirit',

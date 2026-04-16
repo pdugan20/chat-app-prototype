@@ -33,6 +33,7 @@ const bubbleRegistry: BubbleRegistry = {
       appleMusicId: message.appleMusicId,
       playParams: message.playParams,
       colors: message.colors,
+      caption: message.caption,
       useDynamicColors: true,
     }),
   },

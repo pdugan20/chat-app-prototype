@@ -40,6 +40,51 @@ interface UseSongDataReturn {
   isLoading: boolean;
 }
 
+// Build an optimistic SongData for the first render. Prefers prop-supplied
+// values, then falls back to the module-level cache (fills in albumArt/colors
+// across component remounts), so the UI paints the real artwork immediately
+// instead of flashing a blank placeholder while the effect re-fetches.
+const buildOptimisticSongData = (
+  props: Pick<
+    UseSongDataProps,
+    | 'propSongTitle'
+    | 'propArtistName'
+    | 'propAlbumArtUrl'
+    | 'propPreviewUrl'
+    | 'propDuration'
+  >,
+  songId?: string
+): SongData | null => {
+  const {
+    propSongTitle,
+    propArtistName,
+    propAlbumArtUrl,
+    propPreviewUrl,
+    propDuration,
+  } = props;
+
+  const cachedEntry = songId ? songDataCache.get(songId) : undefined;
+  const cached =
+    cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_DURATION
+      ? cachedEntry.data
+      : null;
+
+  if (!propSongTitle && !propArtistName && !propAlbumArtUrl && !cached) {
+    return null;
+  }
+
+  return {
+    title: propSongTitle || cached?.title || '',
+    artist: propArtistName || cached?.artist || '',
+    albumArt: propAlbumArtUrl || cached?.albumArt || null,
+    previewUrl: propPreviewUrl || cached?.previewUrl || null,
+    duration: propDuration || cached?.duration || 30,
+    id: cached?.id,
+    playParams: cached?.playParams,
+    colors: cached?.colors,
+  };
+};
+
 export const useSongData = ({
   songId,
   propSongTitle,
@@ -49,7 +94,18 @@ export const useSongData = ({
   propDuration,
 }: UseSongDataProps): UseSongDataReturn => {
   const [isLoading, setIsLoading] = useState(false);
-  const [songData, setSongData] = useState<SongData | null>(null);
+  const [songData, setSongData] = useState<SongData | null>(() =>
+    buildOptimisticSongData(
+      {
+        propSongTitle,
+        propArtistName,
+        propAlbumArtUrl,
+        propPreviewUrl,
+        propDuration,
+      },
+      songId
+    )
+  );
   const previousSongId = useRef<string>('');
 
   useEffect(() => {
@@ -58,6 +114,28 @@ export const useSongData = ({
       return;
     }
     previousSongId.current = songId;
+
+    // When songId changes, swap in optimistic prop-derived data immediately so
+    // the UI paints real text instead of "Unknown Song" while the API resolves.
+    // Preserve the previous albumArt (and colors) until the new API data
+    // arrives — a brief "wrong" image is far less jarring than a blank gap.
+    const optimistic = buildOptimisticSongData(
+      {
+        propSongTitle,
+        propArtistName,
+        propAlbumArtUrl,
+        propPreviewUrl,
+        propDuration,
+      },
+      songId
+    );
+    if (optimistic) {
+      setSongData(prev => ({
+        ...optimistic,
+        albumArt: optimistic.albumArt ?? prev?.albumArt ?? null,
+        colors: prev?.colors,
+      }));
+    }
 
     const loadSongData = async () => {
       // If all required props are provided, use them immediately without API call
@@ -94,7 +172,11 @@ export const useSongData = ({
         return;
       }
 
-      setIsLoading(true);
+      // Only surface the "Loading..." UI if we have nothing to show yet.
+      // When we have optimistic prop-derived data, fetch silently in the background.
+      if (!optimistic) {
+        setIsLoading(true);
+      }
       let apiData: SongData | null = null;
 
       try {
