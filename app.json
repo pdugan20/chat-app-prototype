@@ -7,9 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",

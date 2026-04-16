@@ -317,9 +317,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     // Update chat preview immediately via context
     updateChat(chatId, {
       id: chatId,
-      lastMessage: appleMusicUrl
-        ? `You: ${sharedSongPreview}`
-        : `You: ${text}`,
+      lastMessage: appleMusicUrl ? `You: ${sharedSongPreview}` : `You: ${text}`,
       timestamp: currentTime,
       unread: false,
     });

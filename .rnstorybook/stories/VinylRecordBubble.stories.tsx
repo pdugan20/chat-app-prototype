@@ -293,4 +293,3 @@ Contemporary pop on vinyl format:
     `,
   },
 };
-

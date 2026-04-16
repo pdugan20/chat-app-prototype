@@ -1,8 +1,21 @@
 import React from 'react';
-import { Text, View, useColorScheme } from 'react-native';
+import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { darkTheme, theme as lightTheme } from '@storybook/react-native';
 import { view } from './storybook.requires';
+
+const brandStyles = StyleSheet.create({
+  text: {
+    fontSize: 15,
+    fontWeight: '500',
+    letterSpacing: -0.2,
+  },
+  wrapper: {
+    alignItems: 'center',
+    marginLeft: -16,
+    width: '100%',
+  },
+});
 
 // `brand.image` accepts a ReactElement (see StorybookLogo.tsx) — wrapping
 // a functional component in JSX lets us use hooks so the label color
@@ -18,23 +31,8 @@ const BrandHeaderInner: React.FC = () => {
       ? darkTheme.color.defaultText
       : lightTheme.color.defaultText;
   return (
-    <View
-      style={{
-        alignItems: 'center',
-        marginLeft: -16,
-        width: '100%',
-      }}
-    >
-      <Text
-        style={{
-          color,
-          fontSize: 15,
-          fontWeight: '500',
-          letterSpacing: -0.2,
-        }}
-      >
-        Bubble UI Kit
-      </Text>
+    <View style={brandStyles.wrapper}>
+      <Text style={[brandStyles.text, { color }]}>Bubble UI Kit</Text>
     </View>
   );
 };

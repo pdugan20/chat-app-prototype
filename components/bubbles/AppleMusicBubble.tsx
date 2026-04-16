@@ -211,7 +211,9 @@ const AppleMusicBubble: React.FC<AppleMusicBubbleProps> = ({
         <View
           style={[
             styles.captionBubble,
-            isSender ? styles.captionBubbleSender : styles.captionBubbleRecipient,
+            isSender
+              ? styles.captionBubbleSender
+              : styles.captionBubbleRecipient,
           ]}
         >
           <Text

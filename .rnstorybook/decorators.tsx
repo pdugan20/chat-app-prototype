@@ -97,7 +97,9 @@ const DecoratorBody: React.FC<{
         </View>
         <View
           style={
-            isDarkMode ? decoratorStyles.canvasDark : decoratorStyles.canvasLight
+            isDarkMode
+              ? decoratorStyles.canvasDark
+              : decoratorStyles.canvasLight
           }
         >
           <PositionControlWrapper>
@@ -113,7 +115,6 @@ export const CenteredDecorator = (
   Story: React.ComponentType<Record<string, unknown>>,
   context: StoryContext
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { darkMode, ...storyArgs } = context.args;
   const componentName = context.title.split('/').pop() || 'Component';
   const storyName = context.name;

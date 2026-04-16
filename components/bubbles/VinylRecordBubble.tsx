@@ -7,10 +7,7 @@ import {
   Easing,
   Dimensions,
 } from 'react-native';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -238,7 +235,6 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
   const lastAngle = useRef(0);
   const scrubPosition = useRef(0); // tracks seek position locally during drag
   const lastSeekTime = useRef(0);
-  const dragStarted = useRef(false);
   const DRAG_THRESHOLD = 5; // px before entering scrub mode
   // One full 360° drag = 5 seconds of audio
   const SECONDS_PER_ROTATION = 5;
@@ -259,7 +255,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
   const panGesture = Gesture.Pan()
     .runOnJS(true)
     .minDistance(DRAG_THRESHOLD)
-    .onStart((e) => {
+    .onStart(e => {
       // Pan activated (finger moved past threshold) — enter scrub mode
       scrubPosition.current = player ? player.currentTime : 0;
       setWasPlayingBeforeScrub(isPlaying);
@@ -270,7 +266,7 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
       }
       lastAngle.current = getAngle(e.x, e.y);
     })
-    .onUpdate((e) => {
+    .onUpdate(e => {
       const currentAngle = getAngle(e.x, e.y);
       const angleDelta = normalizeAngleDelta(currentAngle - lastAngle.current);
       lastAngle.current = currentAngle;

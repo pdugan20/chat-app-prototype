@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Keyboard, Platform } from 'react-native';
-import {
-  useAnimatedKeyboard,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 
 interface UseKeyboardReturn {
   keyboardVisible: boolean;
