@@ -1,12 +1,32 @@
 import React from 'react';
-import { SafeAreaView, Text, View, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  Text,
+  View,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native';
 import type { StoryContext } from '@storybook/react';
 import { Colors, Typography } from '../constants/theme';
 import { PositionControlWrapper } from './components/PositionControlWrapper';
 
+// Match Storybook's dark-theme chrome color (the layer that paints behind
+// the status bar via insets.top). Value comes from
+// @storybook/react-native-theming's darkTheme.background.content.
+const STORYBOOK_DARK_BG = '#1B1C1D';
+const STORYBOOK_DARK_BORDER = 'rgba(255,255,255,0.1)';
+
 const decoratorStyles = StyleSheet.create({
-  darkBackground: {
+  canvasDark: {
     backgroundColor: Colors.black,
+    flex: 1,
+  },
+  canvasLight: {
+    backgroundColor: Colors.white,
+    flex: 1,
+  },
+  darkBackground: {
+    backgroundColor: STORYBOOK_DARK_BG,
   },
   header: {
     alignItems: 'center',
@@ -18,7 +38,8 @@ const decoratorStyles = StyleSheet.create({
     paddingTop: 6,
   },
   headerDark: {
-    borderBottomColor: Colors.dividerGray,
+    backgroundColor: STORYBOOK_DARK_BG,
+    borderBottomColor: STORYBOOK_DARK_BORDER,
   },
   headerTitle: {
     color: Colors.black,
@@ -37,21 +58,19 @@ const decoratorStyles = StyleSheet.create({
   },
 });
 
-export const CenteredDecorator = (
-  Story: React.ComponentType<Record<string, unknown>>,
-  context: StoryContext
-) => {
-  const isDarkMode = context.args.darkMode || context.globals.theme === 'dark';
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { darkMode, ...storyArgs } = context.args;
-
-  const componentName = context.title.split('/').pop() || 'Component';
-  const storyName = context.name;
-  const title = `${componentName} | ${storyName}`;
+// Hooks must live in a component — decorators themselves are plain
+// functions that Storybook invokes, so we read useColorScheme here.
+const DecoratorBody: React.FC<{
+  Story: React.ComponentType<Record<string, unknown>>;
+  storyArgs: Record<string, unknown>;
+  title: string;
+  darkModeOverride: boolean;
+}> = ({ Story, storyArgs, title, darkModeOverride }) => {
+  const scheme = useColorScheme();
+  const isDarkMode = darkModeOverride || scheme === 'dark';
 
   return (
-    <SafeAreaView
+    <View
       style={[
         decoratorStyles.screenContainer,
         isDarkMode
@@ -59,25 +78,53 @@ export const CenteredDecorator = (
           : decoratorStyles.lightBackground,
       ]}
     >
-      <View
-        style={[
-          decoratorStyles.header,
-          isDarkMode && decoratorStyles.headerDark,
-        ]}
-      >
-        <Text
+      <SafeAreaView style={decoratorStyles.screenContainer}>
+        <View
           style={[
-            decoratorStyles.headerTitle,
-            isDarkMode && decoratorStyles.headerTitleDark,
+            decoratorStyles.header,
+            isDarkMode && decoratorStyles.headerDark,
           ]}
-          numberOfLines={1}
         >
-          {title}
-        </Text>
-      </View>
-      <PositionControlWrapper>
-        <Story {...storyArgs} />
-      </PositionControlWrapper>
-    </SafeAreaView>
+          <Text
+            style={[
+              decoratorStyles.headerTitle,
+              isDarkMode && decoratorStyles.headerTitleDark,
+            ]}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+        </View>
+        <View
+          style={
+            isDarkMode ? decoratorStyles.canvasDark : decoratorStyles.canvasLight
+          }
+        >
+          <PositionControlWrapper>
+            <Story {...storyArgs} />
+          </PositionControlWrapper>
+        </View>
+      </SafeAreaView>
+    </View>
+  );
+};
+
+export const CenteredDecorator = (
+  Story: React.ComponentType<Record<string, unknown>>,
+  context: StoryContext
+) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { darkMode, ...storyArgs } = context.args;
+  const componentName = context.title.split('/').pop() || 'Component';
+  const storyName = context.name;
+  const title = `${componentName} | ${storyName}`;
+
+  return (
+    <DecoratorBody
+      Story={Story}
+      storyArgs={storyArgs}
+      title={title}
+      darkModeOverride={Boolean(darkMode)}
+    />
   );
 };
