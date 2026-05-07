@@ -135,13 +135,14 @@ Tests run automatically in:
 
 ### Overview
 
-Comprehensive GitHub Actions pipeline with 5 main jobs:
+Comprehensive GitHub Actions pipeline with 4 main jobs:
 
-1. **Security Scanning** - Gitleaks + dependency review
-2. **Code Quality** - ESLint, Prettier, TypeScript checks
-3. **Unit Tests** - Jest suite + coverage reporting
-4. **Build Validation** - Expo checks, iOS prebuild, bundle analysis
-5. **Automated Releases** - Semantic versioning + CHANGELOG generation
+1. **Code Quality** - ESLint, Prettier, TypeScript checks
+2. **Unit Tests** - Jest suite + coverage reporting
+3. **Build Validation** - Expo checks, iOS prebuild, bundle analysis
+4. **Automated Releases** - Semantic versioning + CHANGELOG generation
+
+Security scanning is handled by GitHub's native features: secret scanning + push protection (repo settings), CodeQL (separate workflow), and Dependabot (config). The local pre-commit hook also runs Gitleaks before commits land.
 
 ### Branch Protection
 
