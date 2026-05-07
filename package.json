@@ -21,7 +21,9 @@
     "android": "expo run:android",
     "knip": "knip",
     "markdownlint": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android",
-    "markdownlint:fix": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android --fix"
+    "markdownlint:fix": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android --fix",
+    "lint:claude": "claudelint check-all",
+    "lint:claude:fix": "claudelint format --fix"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -59,13 +61,13 @@
     "expo-symbols": "~55.0.7",
     "openai": "^5.11.0",
     "react": "19.2.0",
-    "react-native": "0.83.4",
+    "react-native": "0.83.6",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
     "react-native-svg": "15.15.3",
-    "react-native-worklets": "0.7.2",
+    "react-native-worklets": "0.7.4",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
@@ -87,6 +89,7 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "babel-loader": "^8.4.1",
+    "claude-code-lint": "^0.2.0-beta.2",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "dotenv": "^17.2.1",
     "eslint": "^9.32.0",
