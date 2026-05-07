@@ -3,9 +3,9 @@
 [![CI](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/pdugan20/chat-app-prototype/branch/main/graph/badge.svg)](https://codecov.io/gh/pdugan20/chat-app-prototype)
 [![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2055-000020?logo=expo&logoColor=white)](https://expo.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react&logoColor=white)](https://reactnative.dev/)
+[![React Native](https://img.shields.io/badge/React_Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 
 A React Native recreation of Apple's iMessage app, featuring a complete mock inbox, chat threads, AI-powered responses, and Apple Music integration.
@@ -31,8 +31,6 @@ npm run setup-hooks    # Git hooks for code quality
 cp .env.example .env   # Configure API keys (optional)
 npm run ios            # Build and run on iOS simulator
 ```
-
-Requires Node.js v22, Xcode, and an iOS Simulator. Uses Expo Development Build (not Expo Go).
 
 ## Development
 
@@ -64,10 +62,6 @@ constants/        Theme (colors, typography, spacing)
 types/            TypeScript type definitions
 data/             Mock data for development
 ```
-
-## CI Pipeline
-
-5 jobs run on every push and PR: security scanning (Gitleaks), code quality (ESLint, Prettier, TypeScript, markdownlint, Knip), unit tests with coverage, build validation (Expo prebuild, bundle analysis), and automated releases (semantic versioning).
 
 ## Documentation
 
