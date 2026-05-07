@@ -1,25 +1,12 @@
-# iMessage Prototype
+# chat-app-prototype
 
 [![CI](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/pdugan20/chat-app-prototype/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/pdugan20/chat-app-prototype/branch/main/graph/badge.svg)](https://codecov.io/gh/pdugan20/chat-app-prototype)
-[![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Expo](https://img.shields.io/badge/Expo-SDK%2055-000020?logo=expo&logoColor=white)](https://expo.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React_Native-0.83-61DAFB?logo=react&logoColor=white)](https://reactnative.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-A React Native recreation of Apple's iMessage app, featuring a complete mock inbox, chat threads, AI-powered responses, and Apple Music integration.
-
-## Features
-
-- Pixel-perfect iMessage inbox and chat interfaces
-- Message reactions (heart, thumbs up, haha, double exclamation)
-- Smart timestamp grouping and delivered status animations
-- AI-powered contextual responses (Anthropic Claude or OpenAI)
-- Typing indicator matching native iMessage style
-- Group chat support with unread indicators
-- Apple Music integration for music recommendations
-- Storybook for component development and testing
+A React Native recreation of Apple's iMessage. Pixel-perfect inbox and chat threads with reactions, timestamp grouping, group chats, and a native-style typing indicator. AI-generated replies via Claude or OpenAI, with Apple Music recommendations woven into chat. Includes Storybook for isolated component work.
 
 ## Getting Started
 
