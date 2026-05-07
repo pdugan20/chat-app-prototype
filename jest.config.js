@@ -6,8 +6,11 @@ module.exports = {
   ],
   collectCoverageFrom: [
     'components/**/*.{ts,tsx}',
+    'hooks/**/*.{ts,tsx}',
+    'screens/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     'stores/**/*.{ts,tsx}',
+    'utils/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/__tests__/**',
