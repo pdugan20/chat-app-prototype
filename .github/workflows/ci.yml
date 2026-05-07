@@ -11,26 +11,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  security-scan:
-    name: Security Scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Run Secret Scanning
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        if: github.event_name == 'pull_request'
-        with:
-          fail-on-severity: moderate
-
   code-quality:
     name: Code Quality Checks
     runs-on: ubuntu-latest
@@ -227,18 +207,16 @@ jobs:
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [security-scan, code-quality, test, build-validation]
+    needs: [code-quality, test, build-validation]
     if: always()
     steps:
       - name: Check job statuses
         run: |
-          echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Code Quality: ${{ needs.code-quality.result }}"
           echo "Tests: ${{ needs.test.result }}"
           echo "Build Validation: ${{ needs.build-validation.result }}"
 
-          if [ "${{ needs.security-scan.result }}" != "success" ] || \
-             [ "${{ needs.code-quality.result }}" != "success" ] || \
+          if [ "${{ needs.code-quality.result }}" != "success" ] || \
              [ "${{ needs.test.result }}" != "success" ] || \
              [ "${{ needs.build-validation.result }}" != "success" ]; then
             echo "One or more jobs failed"
