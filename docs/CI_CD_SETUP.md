@@ -80,14 +80,14 @@ Main workflow that runs on all pushes and pull requests.
    - Coverage reporting to Codecov
    - Coverage artifact upload
 
-4. **Build Validation**
+3. **Build Validation**
 
    - Expo dependency check
    - iOS prebuild validation
    - Production bundle creation
    - Bundle size monitoring (warns if >50MB)
 
-5. **Summary**
+4. **Summary**
    - Aggregates all job statuses
    - Fails if any job fails
 
