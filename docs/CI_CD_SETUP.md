@@ -7,7 +7,7 @@ This document describes the comprehensive CI/CD setup implemented for the iMessa
 The project now has a robust CI/CD pipeline with:
 
 - Automated testing with Jest
-- Security scanning (Gitleaks, CodeQL, Dependabot)
+- Security scanning (GitHub-native secret scanning + push protection, CodeQL, Dependabot)
 - Code quality checks (ESLint, Prettier, TypeScript)
 - Build validation and bundle size monitoring
 - Automated versioning with semantic-release
@@ -67,19 +67,14 @@ Main workflow that runs on all pushes and pull requests.
 
 **Jobs:**
 
-1. **Security Scan**
-
-   - Gitleaks secret scanning
-   - Dependency review (PRs only)
-
-2. **Code Quality**
+1. **Code Quality**
 
    - Prettier format check
    - ESLint
    - TypeScript type check
    - TypeScript strict check (non-blocking)
 
-3. **Test**
+2. **Test**
 
    - Jest unit tests
    - Coverage reporting to Codecov
@@ -292,9 +287,10 @@ Workflows are automatically enabled when merged to main branch.
 
 ### Security Scanning
 
+- GitHub native secret scanning + push protection (configured in repo settings)
 - CodeQL results in Security tab
 - Dependabot alerts in Security tab
-- Gitleaks fails commits/CI if secrets detected
+- Local pre-commit hook runs Gitleaks before commits land
 
 ### Release History
 
