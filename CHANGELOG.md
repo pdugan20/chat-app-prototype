@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.4...v1.0.5) (2026-05-12)
+
+### Bug Fixes
+
+* **deps:** override postcss to ^8.5.10 ([a466992](https://github.com/pdugan20/chat-app-prototype/commit/a4669921b331b9822709fab00120d69c6692f6c0))
+
 ## [1.0.4](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.3...v1.0.4) (2026-05-12)
 
 ### Bug Fixes
