@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.3...v1.0.4) (2026-05-12)
+
+### Bug Fixes
+
+* **deps:** override @babel/plugin-transform-modules-systemjs to ^7.29.4 ([1e93226](https://github.com/pdugan20/chat-app-prototype/commit/1e9322647a010adcb700e7c7649db2ed8ad25d99))
+
 ## [1.0.3](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.2...v1.0.3) (2026-02-08)
 
 ### Code Refactoring
