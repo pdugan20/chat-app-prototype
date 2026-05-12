@@ -110,5 +110,8 @@
     "storybook": "^9.1.1",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "@babel/plugin-transform-modules-systemjs": "^7.29.4"
+  }
 }
