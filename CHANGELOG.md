@@ -1,3 +1,9 @@
+## [1.0.6](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.5...v1.0.6) (2026-05-12)
+
+### Bug Fixes
+
+* **deps:** override 14 packages to patched versions per Dependabot advisories ([98358c3](https://github.com/pdugan20/chat-app-prototype/commit/98358c3d579fe85619743312f67464de1ea0313d))
+
 ## [1.0.5](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.4...v1.0.5) (2026-05-12)
 
 ### Bug Fixes
