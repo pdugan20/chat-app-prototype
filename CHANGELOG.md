@@ -1,3 +1,9 @@
+## [1.0.8](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.7...v1.0.8) (2026-07-21)
+
+### Bug Fixes
+
+* **ci:** don't fail the build when the bundle-size comment can't post ([#63](https://github.com/pdugan20/chat-app-prototype/issues/63)) ([0489a35](https://github.com/pdugan20/chat-app-prototype/commit/0489a35a02195f8f9e5e62f7a346e999ed4cd814))
+
 ## [1.0.7](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.6...v1.0.7) (2026-07-21)
 
 ### Bug Fixes
