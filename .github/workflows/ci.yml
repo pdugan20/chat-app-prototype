@@ -116,8 +116,8 @@ jobs:
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
-          eas-version: latest
+          expo-version: 6.3.10
+          eas-version: 21.0.2
           token: ${{ secrets.EXPO_TOKEN }}
           expo-cache: true
 
