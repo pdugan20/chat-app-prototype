@@ -173,7 +173,12 @@ jobs:
           retention-days: 7
 
       - name: Comment Bundle Size on PR
+        # Informational only -- the size is already measured above and uploaded
+        # as an artifact. Dependabot-triggered runs receive a read-only
+        # GITHUB_TOKEN (which `permissions:` cannot elevate), so this step
+        # cannot post and must not be allowed to fail the build.
         if: github.event_name == 'pull_request'
+        continue-on-error: true
         uses: actions/github-script@v9
         with:
           script: |
