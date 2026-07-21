@@ -1,3 +1,9 @@
+## [1.0.7](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.6...v1.0.7) (2026-07-21)
+
+### Bug Fixes
+
+* **deps:** unbreak main — scope glob/minimatch overrides + realign Expo SDK ([#53](https://github.com/pdugan20/chat-app-prototype/issues/53)) ([c453a1c](https://github.com/pdugan20/chat-app-prototype/commit/c453a1c1f13a799b132b1ce175c213861a14be56)), closes [#51](https://github.com/pdugan20/chat-app-prototype/issues/51) [#51](https://github.com/pdugan20/chat-app-prototype/issues/51)
+
 ## [1.0.6](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.5...v1.0.6) (2026-05-12)
 
 ### Bug Fixes
