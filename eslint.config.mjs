@@ -75,7 +75,7 @@ export default [
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.{js,mjs}'],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
