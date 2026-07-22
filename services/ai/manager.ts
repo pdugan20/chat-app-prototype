@@ -1,37 +1,28 @@
 import { AIService, AIMessage, AIStructuredResponse } from './types';
-import anthropicService from './providers/anthropic';
-import openaiService from './providers/openai';
+import proxyService from './providers/proxy';
 import mockService from './providers/mock';
 import {
   PROVIDER_NAMES,
-  ENV_KEYS,
   WARNING_MESSAGES,
   ERROR_MESSAGES,
   MOCK_RESPONSES,
   RESPONSE_TYPES,
 } from './constants';
 
-class AIServiceManager implements AIService {
+export class AIServiceManager implements AIService {
   private service: AIService;
+  private currentProvider: string;
 
-  constructor() {
-    const aiProvider =
-      process.env[ENV_KEYS.provider] || PROVIDER_NAMES.ANTHROPIC;
-
-    // Initialize based on provider
-    switch (aiProvider) {
-      case PROVIDER_NAMES.ANTHROPIC:
-        this.service = anthropicService.isConfigured()
-          ? anthropicService
-          : mockService;
-        break;
-      case PROVIDER_NAMES.OPENAI:
-        this.service = openaiService.isConfigured()
-          ? openaiService
-          : mockService;
-        break;
-      default:
-        this.service = mockService;
+  constructor(
+    liveService: AIService = proxyService,
+    fallbackService: AIService = mockService
+  ) {
+    if (liveService.isConfigured()) {
+      this.service = liveService;
+      this.currentProvider = PROVIDER_NAMES.PROXY;
+    } else {
+      this.service = fallbackService;
+      this.currentProvider = PROVIDER_NAMES.MOCK;
     }
   }
 
@@ -71,7 +62,7 @@ class AIServiceManager implements AIService {
   }
 
   getCurrentProvider(): string {
-    return process.env[ENV_KEYS.provider] || PROVIDER_NAMES.ANTHROPIC;
+    return this.currentProvider;
   }
 
   // Song tracking methods - pass through to underlying service

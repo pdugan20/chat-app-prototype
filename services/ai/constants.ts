@@ -1,34 +1,14 @@
-export const API_CONFIG = {
-  maxTokens: 150,
-  temperature: 0.8,
-  defaultFallback: 'Hey!',
-} as const;
-
-export const PROVIDER_CONFIG = {
-  anthropic: {
-    presencePenalty: 0,
-    frequencyPenalty: 0,
-  },
-  openai: {
-    presencePenalty: 0.6,
-    frequencyPenalty: 0.5,
-  },
-} as const;
-
 export const MOCK_CONFIG = {
   minDelay: 1000,
   maxDelay: 2000,
 } as const;
 
 export const ENV_KEYS = {
-  provider: 'EXPO_PUBLIC_AI_PROVIDER',
-  anthropicApiKey: 'EXPO_PUBLIC_ANTHROPIC_API_KEY',
-  openaiApiKey: 'EXPO_PUBLIC_OPENAI_API_KEY',
+  proxyUrl: 'EXPO_PUBLIC_AI_PROXY_URL',
 } as const;
 
 export const PROVIDER_NAMES = {
-  ANTHROPIC: 'anthropic',
-  OPENAI: 'openai',
+  PROXY: 'proxy',
   MOCK: 'mock',
 } as const;
 
@@ -50,10 +30,7 @@ export const MUSIC_RESPONSE_FORMATS = {
 } as const;
 
 export const ERROR_MESSAGES = {
-  anthropicNotConfigured: 'Anthropic API key not configured',
-  openaiNotConfigured: 'OpenAI API key not configured',
-  serviceNotConfigured: 'AI service not configured',
-  apiError: 'AI service error:',
+  proxyNotConfigured: 'AI proxy URL not configured',
   structuredResponseError: 'AI structured response error:',
 } as const;
 
