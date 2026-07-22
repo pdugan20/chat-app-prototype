@@ -34,6 +34,41 @@ function count(text, pattern) {
   return [...text.matchAll(pattern)].length;
 }
 
+function assertDependabotCooldownPolicy(text) {
+  const updateHeadings = [
+    ...text.matchAll(/^  - package-ecosystem:\s*['"]?([a-z-]+)['"]?\s*$/gm),
+  ];
+  assert.deepEqual(
+    updateHeadings.map(([, ecosystem]) => ecosystem).sort(),
+    ['github-actions', 'npm'],
+    'Dependabot must contain exactly one npm updater and one github-actions updater'
+  );
+
+  for (const ecosystem of ['npm', 'github-actions']) {
+    const headingIndex = updateHeadings.findIndex(
+      ([, candidate]) => candidate === ecosystem
+    );
+    const start = updateHeadings[headingIndex].index;
+    const end = updateHeadings[headingIndex + 1]?.index ?? text.length;
+    const block = text.slice(start, end);
+    assert.match(
+      block,
+      /^    cooldown:\s*\n      default-days:\s*14\s*$/m,
+      `${ecosystem} must delay newly released versions for 14 days`
+    );
+    assert.equal(
+      count(block, /^    cooldown:\s*$/gm),
+      1,
+      `${ecosystem} must declare exactly one cooldown block`
+    );
+  }
+  assert.equal(
+    count(text, /cooldown:\s*\n\s+default-days:\s*14/g),
+    2,
+    'Dependabot must declare exactly two 14-day cooldowns'
+  );
+}
+
 function jobNames(text) {
   return [
     ...indentedBlock(text, 'jobs:\n', 0).matchAll(
@@ -165,6 +200,21 @@ test('policy guards reject alternate merge and permission bypass forms', () => {
       ),
     /merge-capable action/
   );
+  assert.throws(
+    () =>
+      assertDependabotCooldownPolicy(`
+version: 2
+updates:
+  - package-ecosystem: npm
+    cooldown:
+      default-days: 14
+  - package-ecosystem: npm
+    cooldown:
+      default-days: 14
+  - package-ecosystem: github-actions
+`),
+    /exactly one npm updater and one github-actions updater/
+  );
 });
 
 test('every external action is pinned to an immutable commit', () => {
@@ -288,6 +338,7 @@ test('Dependabot groups only patch and minor updates with bounded queues', () =>
     count(dependabot, /timezone:\s*['"]America\/Los_Angeles['"]/g),
     2
   );
+  assertDependabotCooldownPolicy(dependabot);
   assert.match(
     dependabot,
     /package-ecosystem:\s*['"]npm['"][\s\S]*?open-pull-requests-limit:\s*5/
