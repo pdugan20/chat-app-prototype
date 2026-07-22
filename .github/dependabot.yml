@@ -6,7 +6,8 @@ updates:
       interval: 'weekly'
       day: 'monday'
       time: '09:00'
-    open-pull-requests-limit: 10
+      timezone: 'America/Los_Angeles'
+    open-pull-requests-limit: 5
     versioning-strategy: increase
     commit-message:
       # `prefix: chore` + `include: scope` produces `chore(deps):` /
@@ -32,18 +33,30 @@ updates:
         patterns:
           - 'expo*'
           - '@expo/*'
+        update-types:
+          - 'minor'
+          - 'patch'
       react-native:
         patterns:
           - 'react-native*'
           - '@react-native*'
+        update-types:
+          - 'minor'
+          - 'patch'
       storybook:
         patterns:
           - '@storybook/*'
           - 'storybook'
+        update-types:
+          - 'minor'
+          - 'patch'
       ai-sdks:
         patterns:
           - '@anthropic-ai/*'
           - 'openai'
+        update-types:
+          - 'minor'
+          - 'patch'
       dev-dependencies:
         dependency-type: 'development'
         update-types:
@@ -56,7 +69,8 @@ updates:
       interval: 'weekly'
       day: 'monday'
       time: '09:00'
-    open-pull-requests-limit: 5
+      timezone: 'America/Los_Angeles'
+    open-pull-requests-limit: 2
     commit-message:
       # Same reasoning as above — avoid double-scope titles.
       prefix: 'chore'
