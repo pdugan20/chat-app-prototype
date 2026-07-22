@@ -3,7 +3,6 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { parse as parseYaml } from 'yaml';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = path => readFileSync(join(root, path), 'utf8');
@@ -36,27 +35,33 @@ function count(text, pattern) {
 }
 
 function assertDependabotCooldownPolicy(text) {
-  const config = parseYaml(text);
-  const updates = config?.updates;
-  assert.equal(
-    updates?.length,
-    2,
+  const updateHeadings = [
+    ...text.matchAll(
+      /^  - package-ecosystem:\s*['"]?([a-z-]+)['"]?\s*$/gm
+    ),
+  ];
+  assert.deepEqual(
+    updateHeadings.map(([, ecosystem]) => ecosystem).sort(),
+    ['github-actions', 'npm'],
     'Dependabot must contain exactly one npm updater and one github-actions updater'
   );
 
-  const byEcosystem = new Map(
-    updates.map(update => [update['package-ecosystem'], update])
-  );
-  assert.deepEqual(
-    [...byEcosystem.keys()].sort(),
-    ['github-actions', 'npm'],
-    'Dependabot updater ecosystems must be unique and complete'
-  );
   for (const ecosystem of ['npm', 'github-actions']) {
-    assert.equal(
-      byEcosystem.get(ecosystem)?.cooldown?.['default-days'],
-      14,
+    const headingIndex = updateHeadings.findIndex(
+      ([, candidate]) => candidate === ecosystem
+    );
+    const start = updateHeadings[headingIndex].index;
+    const end = updateHeadings[headingIndex + 1]?.index ?? text.length;
+    const block = text.slice(start, end);
+    assert.match(
+      block,
+      /^    cooldown:\s*\n      default-days:\s*14\s*$/m,
       `${ecosystem} must delay newly released versions for 14 days`
+    );
+    assert.equal(
+      count(block, /^    cooldown:\s*$/gm),
+      1,
+      `${ecosystem} must declare exactly one cooldown block`
     );
   }
   assert.equal(
