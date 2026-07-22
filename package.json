@@ -48,7 +48,7 @@
     ]
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.57.0",
+    "@anthropic-ai/sdk": "^0.112.5",
     "@expo/ui": "~55.0.17",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -65,7 +65,7 @@
     "expo-module-scripts": "^4.1.10",
     "expo-status-bar": "~55.0.5",
     "expo-symbols": "~55.0.9",
-    "openai": "^5.11.0",
+    "openai": "^5.23.2",
     "react": "19.2.0",
     "react-native": "0.83.6",
     "react-native-gesture-handler": "~2.30.0",
