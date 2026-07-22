@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   code-quality:
@@ -16,29 +19,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Validate CLAUDE.md
-        run: npx claude-code-lint@latest
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
+          node-version: '22.18.0'
           cache: 'npm'
 
-      - name: Cache Dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.npm
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Install npm 11.5.2
+        run: npm install --global npm@11.5.2
+
+      - name: Verify npm version
+        run: test "$(npm --version)" = "11.5.2"
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate automation policy
+        run: npm run test:automation-policy
+
+      - name: Validate CLAUDE.md
+        run: npm run lint:claude
 
       - name: Prettier Check
         run: npm run format:check
@@ -61,21 +63,19 @@ jobs:
     needs: code-quality
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
+          node-version: '22.18.0'
           cache: 'npm'
 
-      - name: Cache Dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.npm
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Install npm 11.5.2
+        run: npm install --global npm@11.5.2
+
+      - name: Verify npm version
+        run: test "$(npm --version)" = "11.5.2"
 
       - name: Install dependencies
         run: npm ci
@@ -84,7 +84,7 @@ jobs:
         run: npm run test:ci
 
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
         with:
           files: ./coverage/lcov.info
           flags: unittests
@@ -93,7 +93,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload Coverage Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-report
           path: coverage/
@@ -103,32 +103,31 @@ jobs:
     name: Build Validation
     runs-on: ubuntu-latest
     needs: code-quality
+    outputs:
+      bundle_size_mb: ${{ steps.bundle_size.outputs.bundle_size_mb }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '22'
+          node-version: '22.18.0'
           cache: 'npm'
 
+      - name: Install npm 11.5.2
+        run: npm install --global npm@11.5.2
+
+      - name: Verify npm version
+        run: test "$(npm --version)" = "11.5.2"
+
       - name: Setup Expo
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
         with:
           expo-version: 6.3.10
           eas-version: 21.0.2
           token: ${{ secrets.EXPO_TOKEN }}
           expo-cache: true
-
-      - name: Cache Dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.npm
-            node_modules
-            .expo
-          key: ${{ runner.os }}-expo-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci
@@ -140,7 +139,7 @@ jobs:
         run: npx expo prebuild --platform ios --no-install --clean
 
       - name: Cache Metro Bundler
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             .expo
@@ -158,31 +157,40 @@ jobs:
           SIZE=$(du -sk dist | cut -f1)
           SIZE_MB=$(echo "scale=2; $SIZE / 1024" | bc)
           echo "Bundle size: ${SIZE_MB}MB (${SIZE}KB)"
-          echo "bundle_size=${SIZE}" >> $GITHUB_OUTPUT
-          echo "bundle_size_mb=${SIZE_MB}" >> $GITHUB_OUTPUT
-          if [ $SIZE -gt 50000 ]; then
+          echo "bundle_size=${SIZE}" >> "$GITHUB_OUTPUT"
+          echo "bundle_size_mb=${SIZE_MB}" >> "$GITHUB_OUTPUT"
+          if [ "$SIZE" -gt 50000 ]; then
             echo "::warning::Bundle size exceeds 50MB (${SIZE_MB}MB)"
           fi
         id: bundle_size
 
       - name: Upload Bundle Size Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: bundle-analysis
           path: dist/
           retention-days: 7
 
+      - name: Clean up prebuild artifacts
+        run: rm -rf ios android
+
+  bundle-comment:
+    name: Bundle Size PR Comment
+    runs-on: ubuntu-latest
+    needs: build-validation
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      pull-requests: write
+    steps:
       - name: Comment Bundle Size on PR
-        # Informational only -- the size is already measured above and uploaded
-        # as an artifact. Dependabot-triggered runs receive a read-only
-        # GITHUB_TOKEN (which `permissions:` cannot elevate), so this step
-        # cannot post and must not be allowed to fail the build.
-        if: github.event_name == 'pull_request'
         continue-on-error: true
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
-            const size = '${{ steps.bundle_size.outputs.bundle_size_mb }}';
+            const size = '${{ needs.build-validation.outputs.bundle_size_mb }}';
             const body = `**Bundle Size Report**\n\niOS bundle: ${size}MB`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
@@ -205,9 +213,6 @@ jobs:
                 body,
               });
             }
-
-      - name: Clean up prebuild artifacts
-        run: rm -rf ios android
 
   summary:
     name: CI Summary

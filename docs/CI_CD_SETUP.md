@@ -12,6 +12,8 @@ The project now has a robust CI/CD pipeline with:
 - Build validation and bundle size monitoring
 - Automated versioning with semantic-release
 - Optimized caching for faster builds
+- Immutable action pins and deterministic Node/npm versions
+- Read-only permissions for ordinary CI jobs
 
 ## Local Development Hooks
 
@@ -93,10 +95,13 @@ Main workflow that runs on all pushes and pull requests.
 
 **Features:**
 
-- Concurrency groups (auto-cancels redundant runs)
+- Pull-request concurrency groups (auto-cancels redundant PR runs while preserving every push canary)
 - Dependency caching (npm, Expo, Metro)
 - Parallel job execution
 - Artifact retention (7 days)
+- Actions pinned to reviewed commit SHAs
+- Node 22.18.0 and npm 11.5.2 verified before clean installs
+- Read-only repository contents access; the optional same-repository bundle comment runs in a separate PR-write-only job without checking out contributor code
 
 ### 2. CodeQL Security Analysis (`codeql.yml`)
 
@@ -170,8 +175,8 @@ Automated dependency updates.
 
 **Schedule:**
 
-- Weekly on Mondays at 9am
-- Max 10 open PRs at once
+- Weekly on Mondays at 9am America/Los_Angeles time
+- Max 5 open npm PRs and 2 open GitHub Actions PRs at once
 
 **Grouping:**
 
@@ -186,6 +191,12 @@ Automated dependency updates.
 - Security vulnerability scanning
 - Automatic PR creation
 - Grouped updates for related packages
+- Patch and minor updates only within groups; major upgrades remain manual
+- Manual review and merge for every dependency PR
+
+Dependabot does not approve, enable auto-merge for, or merge its own pull
+requests. This ensures a normal merge triggers the required post-merge `main`
+CI canary.
 
 ## Testing Setup
 
@@ -229,10 +240,15 @@ See `components/__tests__/example.test.tsx` for a basic example.
   - Get from: <https://codecov.io/>
   - Optional: Uploads work without token for public repos
 
-### For Semantic Release (Auto-provided)
+### For Semantic Release
 
-- `GITHUB_TOKEN` - Automatically provided by GitHub Actions
-  - Used for: Creating releases and tags
+- `SEMANTIC_RELEASE_TOKEN` - Fine-grained or classic personal access token with the repository access required by the active main-branch ruleset
+  - Used only by the trusted `main`/`master` push release workflow
+  - Used for: Pushing the release commit and tag and creating the GitHub release
+
+The ordinary auto-provided `GITHUB_TOKEN` is not used for release writes or
+pull-request merging. CodeQL is the only workflow granted
+`security-events: write`.
 
 ## Setting Up a New Environment
 

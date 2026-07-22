@@ -1,6 +1,11 @@
 {
   "name": "imessage-prototype",
   "version": "1.0.8",
+  "engines": {
+    "node": "22.x",
+    "npm": "11.x"
+  },
+  "packageManager": "npm@11.5.2",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -13,6 +18,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:automation-policy": "node --test scripts/automation-policy.test.mjs",
     "generate-apple-token": "node scripts/generate-apple-music-token.js",
     "setup-hooks": "chmod +x scripts/setup-hooks.sh .githooks/pre-commit .githooks/pre-push && ./scripts/setup-hooks.sh",
     "sb": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start",
@@ -89,7 +95,7 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "babel-loader": "^8.4.1",
-    "claude-code-lint": "^0.2.0-beta.2",
+    "claude-code-lint": "0.2.0-beta.2",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "dotenv": "^17.2.1",
     "eslint": "^9.32.0",
