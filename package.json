@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:ci": "npm run test:ai-proxy && jest --ci --coverage --maxWorkers=2",
     "test:automation-policy": "node --test scripts/automation-policy.test.mjs",
     "generate-apple-token": "node scripts/generate-apple-music-token.js",
     "setup-hooks": "chmod +x scripts/setup-hooks.sh .githooks/pre-commit .githooks/pre-push && ./scripts/setup-hooks.sh",
@@ -30,7 +30,7 @@
     "markdownlint:fix": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android --fix",
     "lint:claude": "claudelint check-all",
     "lint:claude:fix": "claudelint format --fix",
-    "test:ai-proxy": "node --test server/ai-proxy/config.test.mjs server/ai-proxy/providers.test.mjs server/ai-proxy/handler.test.mjs",
+    "test:ai-proxy": "node --test server/ai-proxy/config.test.mjs server/ai-proxy/providers.test.mjs server/ai-proxy/handler.test.mjs scripts/ai-security-boundary.test.mjs",
     "ai-proxy": "node server/ai-proxy/index.mjs"
   },
   "lint-staged": {

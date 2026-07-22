@@ -560,7 +560,7 @@ const response = (body: unknown, ok = true, status = 200) =>
     ok,
     status,
     json: jest.fn().mockResolvedValue(body),
-  }) as unknown as Response;
+  } as unknown as Response);
 
 it('is configured only with a non-empty proxy URL', () => {
   const fetchMock = jest.fn() as unknown as typeof fetch;

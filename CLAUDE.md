@@ -98,8 +98,10 @@ interface Message {
 ### AI Integration
 
 - Supports both Anthropic Claude and OpenAI GPT models
-- Service layer pattern with provider abstraction in `services/ai/`
-- Environment-based configuration using react-native-dotenv
+- Mobile service layer calls a loopback proxy from `services/ai/`
+- Provider SDKs and private credentials stay under `server/ai-proxy/`
+- The app reads only the non-secret `EXPO_PUBLIC_AI_PROXY_URL`
+- Run `npm run ai-proxy` alongside the iOS Simulator during local development
 - Typing indicator shown during AI response generation
 - Contextual responses based on last 10 messages
 - Fallback to preset responses if API unavailable

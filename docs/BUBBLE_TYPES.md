@@ -201,14 +201,15 @@ response: { type: 'GAME', content: "Let's play!", gameType: 'chess' }
 ## Testing New Bubble Types
 
 1. Add the configuration to `bubbleTypes.ts`
-2. Test with both AI providers:
+2. Set `AI_PROVIDER` in `.env`, restart the local proxy, and test each
+   provider:
 
    ```bash
-   # Test with Anthropic
-   EXPO_PUBLIC_AI_PROVIDER=anthropic npm run ios
+   # Terminal 1: after setting AI_PROVIDER=anthropic or openai in .env
+   npm run ai-proxy
 
-   # Test with OpenAI
-   EXPO_PUBLIC_AI_PROVIDER=openai npm run ios
+   # Terminal 2
+   npm run ios
    ```
 
 3. Send messages that should trigger the new type

@@ -15,8 +15,9 @@ git clone https://github.com/pdugan20/chat-app-prototype
 cd chat-app-prototype
 npm install
 npm run setup-hooks    # Git hooks for code quality
-cp .env.example .env   # Configure API keys (optional)
-npm run ios            # Build and run on iOS simulator
+cp .env.example .env   # Configure the local AI proxy (optional)
+npm run ai-proxy       # Terminal 1: local AI service
+npm run ios            # Terminal 2: build and run in iOS Simulator
 ```
 
 ## Development
@@ -24,6 +25,7 @@ npm run ios            # Build and run on iOS simulator
 ```bash
 npm start              # Expo dev server
 npm run ios            # Build and run on iOS
+npm run ai-proxy       # Loopback AI proxy for Simulator
 npm run lint           # ESLint
 npm run format:check   # Prettier check
 npm test               # Jest tests
@@ -44,6 +46,7 @@ components/
   previews/       Message preview components
 hooks/            Custom React hooks
 services/         AI and external service integrations
+server/           Loopback-only provider SDK and HTTP boundary
 stores/           State management
 constants/        Theme (colors, typography, spacing)
 types/            TypeScript type definitions
