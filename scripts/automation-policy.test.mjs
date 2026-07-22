@@ -36,9 +36,7 @@ function count(text, pattern) {
 
 function assertDependabotCooldownPolicy(text) {
   const updateHeadings = [
-    ...text.matchAll(
-      /^  - package-ecosystem:\s*['"]?([a-z-]+)['"]?\s*$/gm
-    ),
+    ...text.matchAll(/^  - package-ecosystem:\s*['"]?([a-z-]+)['"]?\s*$/gm),
   ];
   assert.deepEqual(
     updateHeadings.map(([, ecosystem]) => ecosystem).sort(),
