@@ -1,6 +1,5 @@
 import { AIService, AIMessage, AIStructuredResponse } from '../types';
 import {
-  API_CONFIG,
   MUSIC_KEYWORDS,
   MOCK_MUSIC_QUERIES,
   RESPONSE_TYPES,
@@ -15,16 +14,16 @@ import { cleanAIResponseArtifacts } from '../utils';
 let mentionedSongs = new Set<string>();
 
 export abstract class BaseAIProvider implements AIService {
-  protected apiKey: string | undefined;
+  protected configurationValue: string | undefined;
   protected serviceName: string;
   protected errorMessage: string;
 
   constructor(
-    apiKey: string | undefined,
+    configurationValue: string | undefined,
     serviceName: string,
     errorMessage: string
   ) {
-    this.apiKey = apiKey?.trim();
+    this.configurationValue = configurationValue?.trim();
     this.serviceName = serviceName;
     this.errorMessage = errorMessage;
   }
@@ -49,7 +48,7 @@ export abstract class BaseAIProvider implements AIService {
   }
 
   isConfigured(): boolean {
-    return !!this.apiKey;
+    return !!this.configurationValue;
   }
 
   protected validateConfiguration(): void {
@@ -61,10 +60,6 @@ export abstract class BaseAIProvider implements AIService {
   protected handleError(error: any, errorType: string): never {
     console.error(errorType, error);
     throw error;
-  }
-
-  protected getDefaultFallback(): string {
-    return API_CONFIG.defaultFallback;
   }
 
   protected detectSpecialIntent(messages: AIMessage[]): boolean {
@@ -136,7 +131,7 @@ export abstract class BaseAIProvider implements AIService {
     if (formatIndex !== -1 && formatIndex < lines.length - 1) {
       const messageContent = lines[formatIndex + 1] || '';
       return {
-        type: config.type.toUpperCase(),
+        type: config.type,
         content: messageContent,
       };
     }

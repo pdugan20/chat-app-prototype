@@ -1,281 +1,185 @@
-# AI Response Flow Documentation
+# AI Response Flow
 
 ## Overview
 
-This document describes the AI response generation flow in the chat application, including the decision logic for determining whether to generate text-only responses or special responses (currently music with Apple Music integration, extensible for future response types).
+The prototype separates mobile presentation logic from provider credentials:
 
-## Architecture Diagram
+- the Expo app builds conversation context, owns the structured prompt, parses
+  generated text, and renders messages;
+- a loopback-only Node service owns provider selection and credentials; and
+- Anthropic and OpenAI SDKs run only inside the Node service.
+
+This boundary supports live AI in the iOS Simulator without embedding provider
+keys in the client application.
+
+## Architecture
 
 ```mermaid
-graph TB
-    Start([User sends message]) --> Hook[useAIResponse Hook]
-
-    Hook --> History[Build conversation history<br/>Last 10 messages]
-
-    History --> API[aiService.generateStructuredResponse]
-
-    API --> Provider{AI Provider}
-
-    Provider -->|Anthropic| AnthropicService[AnthropicService]
-    Provider -->|OpenAI| OpenAIService[OpenAIService]
-    Provider -->|None/Mock| MockService[MockService]
-
-    AnthropicService --> StructuredPrompt[createStructuredPrompt]
-    OpenAIService --> StructuredPrompt
-    MockService --> SpecialDetect[detectSpecialIntent]
-
-    StructuredPrompt --> Claude[Claude API]
-    StructuredPrompt --> GPT[OpenAI API]
-
-    Claude --> ParseResponse[Parse Response]
-    GPT --> ParseResponse
-    SpecialDetect --> MockResponse[Generate Mock Response]
-
-    ParseResponse --> ResponseType{Response Type?}
-    MockResponse --> ResponseType
-
-    ResponseType -->|MUSIC_RESPONSE| ShowText[Display text message]
-    ResponseType -->|TEXT_RESPONSE| ShowTextOnly[Display text message]
-
-    ShowText --> FetchMusic[Fetch Apple Music data]
-    FetchMusic --> ShowMusic[Display music bubble]
-
-    ShowMusic --> MusicEnd([AI sent text + music, awaiting reply])
-    ShowTextOnly --> TextEnd([AI sent text, awaiting reply])
+flowchart TD
+    User[User sends message] --> Hook[useAIResponse]
+    Hook --> History[Last 10 messages]
+    History --> Manager[AIServiceManager]
+    Manager -->|Proxy URL configured| MobileProxy[ProxyService]
+    Manager -->|No proxy URL| Mock[MockService]
+    MobileProxy --> Prompt[createStructuredPrompt]
+    Prompt --> LocalHTTP[POST 127.0.0.1:8787/v1/generate]
+    LocalHTTP --> Server[Loopback Node proxy]
+    Server --> Provider{AI_PROVIDER}
+    Provider --> Anthropic[Anthropic SDK]
+    Provider --> OpenAI[OpenAI SDK]
+    Anthropic --> RawText[Generated text]
+    OpenAI --> RawText
+    RawText --> Parser[Mobile structured-response parser]
+    Parser --> Response{Response type}
+    Mock --> Response
+    Response -->|text| Text[Render text bubble]
+    Response -->|music| Music[Render text and Apple Music bubble]
 ```
 
-## Decision Tree
+## Trust Boundary
 
-### 1. Message Input Analysis
+The app reads only this non-secret value:
 
-The AI service analyzes incoming messages to determine the appropriate response type:
-
-```text
-User Message
-    |
-    ├─ Contains special intent keywords? → SPECIAL_RESPONSE
-    │   ├─ Music Intent → MUSIC_RESPONSE
-    │   │   ├─ "play a song"
-    │   │   ├─ "recommend music"
-    │   │   ├─ "what should I listen to"
-    │   │   ├─ "send me a song"
-    │   │   ├─ mentions specific artist/song
-    │   │   └─ discusses music preferences
-    │   └─ [Future: Other special intents]
-    │       ├─ Location sharing
-    │       ├─ Calendar events
-    │       └─ File sharing
-    │
-    └─ No special context → TEXT_RESPONSE
-        ├─ General conversation
-        ├─ Questions about non-special topics
-        └─ Casual chat (weather, plans, feelings)
+```dotenv
+EXPO_PUBLIC_AI_PROXY_URL=http://127.0.0.1:8787
 ```
 
-### 2. Provider-Specific Logic
+The local Node process reads:
 
-#### Anthropic (Claude)
-
-```text
-createStructuredPrompt
-    |
-    ├─ Includes special intent detection
-    ├─ Returns structured format:
-    │   ├─ MUSIC_RESPONSE → content + musicQuery
-    │   ├─ [Future: LOCATION_RESPONSE → content + location]
-    │   └─ TEXT_RESPONSE → content only
-    │
-    └─ Handles context tracking (e.g., mentioned songs)
+```dotenv
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=...
+OPENAI_API_KEY=...
+AI_PROXY_PORT=8787
 ```
 
-#### OpenAI (GPT)
+Provider credentials never cross the HTTP boundary. The proxy binds to
+`127.0.0.1` and does not accept a host override.
 
-```text
-createStructuredPrompt
-    |
-    ├─ Uses same prompt structure as Anthropic
-    ├─ Parses response for special indicators
-    └─ Falls back to simple special intent detection
-```
+## Request Flow
 
-#### Mock Service
+1. `useAIResponse` takes the last ten messages and adds the new user message.
+2. `AIServiceManager` selects `ProxyService` when the proxy URL is configured;
+   otherwise it selects `MockService`.
+3. `ProxyService` combines the contact name, mentioned-song history, and bubble
+   formats through `createStructuredPrompt`.
+4. The app sends `POST /v1/generate`:
 
-```text
-detectSpecialIntent (keyword-based)
-    |
-    ├─ Scans for special intent keywords
-    ├─ Returns appropriate mock response
-    └─ Falls back to random text
-```
+   ```json
+   {
+     "systemPrompt": "You are Ruth, having a casual text conversation...",
+     "messages": [
+       {
+         "role": "user",
+         "content": "Recommend a song"
+       }
+     ]
+   }
+   ```
 
-## Response Processing Flow
+5. The Node proxy validates the media type, 64 KiB size limit, system prompt,
+   message roles, and message content.
+6. The proxy calls the server-selected provider and returns raw text:
 
-### Text Response Flow
+   ```json
+   {
+     "content": "TEXT_RESPONSE\nYou should try this one!"
+   }
+   ```
 
-```text
-1. AI generates text response
-2. Create Message object with animation values
-3. Show typing indicator (fade in)
-4. Crossfade animation (typing → message)
-5. Display text message
-6. Update inbox preview
-```
+7. `BaseAIProvider` parses that text into `AIStructuredResponse`.
+8. `useAIResponse` renders the existing typing and message animations.
 
-### Special Response Flow - Music
+## Server Components
 
-```text
-1. AI generates special response (text + metadata)
-2. Show typing indicator
-3. Display text message first
-4. Fetch special data - Apple Music:
-   ├─ Search by query
-   ├─ Get song metadata
-   ├─ Prefetch album artwork
-   └─ Extract dynamic colors
-5. Create special message object - AppleMusicMessage
-6. Display special bubble
-7. Update inbox preview with special info
-```
+| Component         | File                            | Responsibility                                    |
+| ----------------- | ------------------------------- | ------------------------------------------------- |
+| Configuration     | `server/ai-proxy/config.mjs`    | Validate provider, matching key, and port         |
+| Provider adapters | `server/ai-proxy/providers.mjs` | Translate neutral requests into SDK calls         |
+| HTTP handler      | `server/ai-proxy/handler.mjs`   | Route, validate, limit, and sanitize HTTP traffic |
+| Entrypoint        | `server/ai-proxy/index.mjs`     | Load `.env` and listen on IPv4 loopback           |
 
-## Key Components
+## Mobile Components
 
-### Services
+| Component     | File                             | Responsibility                                      |
+| ------------- | -------------------------------- | --------------------------------------------------- |
+| AI manager    | `services/ai/manager.ts`         | Select proxy or mock and provide fallback responses |
+| Proxy service | `services/ai/providers/proxy.ts` | Build prompts, call loopback, and parse text        |
+| Base provider | `services/ai/providers/base.ts`  | Parse text/music formats and track songs            |
+| Mock service  | `services/ai/providers/mock.ts`  | Provide offline prototype responses                 |
+| Response hook | `hooks/useAIResponse.ts`         | Build context and render the response flow          |
 
-| Service          | File                                 | Purpose                           |
-| ---------------- | ------------------------------------ | --------------------------------- |
-| AIServiceManager | `services/ai/manager.ts`             | Routes to appropriate AI provider |
-| AnthropicService | `services/ai/providers/anthropic.ts` | Claude API integration            |
-| OpenAIService    | `services/ai/providers/openai.ts`    | OpenAI API integration            |
-| MockService      | `services/ai/providers/mock.ts`      | Fallback when no API configured   |
+The mobile source tree does not import either provider SDK.
 
-### Core Functions
-
-| Function                  | Purpose                                                     | Used By       |
-| ------------------------- | ----------------------------------------------------------- | ------------- |
-| `createStructuredPrompt`  | Detects special intents and generates appropriate responses | All providers |
-| `detectSpecialIntent`     | Keyword-based detection for special response types          | Mock/fallback |
-| `parseStructuredResponse` | Parses AI response into appropriate type                    | Anthropic     |
-| `parseMusicResponse`      | Extracts music metadata from response                       | Anthropic     |
-| `buildSpecialResponse`    | Constructs special response objects                         | Base class    |
-
-### Response Types
+## Response Types
 
 ```typescript
 interface AIStructuredResponse {
-  type: 'text' | 'music'; // Extensible for future types
-  content: string; // Message text
-  musicQuery?: string; // Apple Music search query (music type only)
-  // Future additions:
-  // location?: LocationData;
-  // calendarEvent?: EventData;
-  // fileInfo?: FileData;
+  type: 'text' | 'music';
+  content: string;
+  musicQuery?: string;
 }
 ```
 
-## Special Intent Detection
+### Text Response
 
-### Currently Implemented: Music
+1. The parser removes `TEXT_RESPONSE` artifacts.
+2. The typing indicator crossfades into a text message.
+3. The inbox preview updates with the response.
 
-The system detects music intent when messages contain:
+### Music Response
 
-- Direct requests: "play", "song", "music", "listen"
-- Artist/song mentions: specific names
-- Music questions: "favorite song", "recommend", "what should I play"
-- Context words: "album", "track", "artist", "band"
-
-### Future Special Intents
-
-The architecture supports adding:
-
-- **Location sharing**: "where are you", "send location", "meet at"
-- **Calendar events**: "schedule", "meeting", "appointment"
-- **File sharing**: "send file", "document", "photo"
-- **Contact sharing**: "contact info", "phone number"
-
-## Animation Timing
-
-```text
-Text Messages:
-- AI response delay: 500-800ms
-- Typing indicator: 1500ms minimum
-- Crossfade: 300ms
-- Message slide up: 200ms
-
-Special Messages (Music):
-- Text message first (same as above)
-- Pause: 1000ms
-- Special bubble fetch & display
-- Total: ~3-4 seconds
-```
-
-## Configuration
-
-### Environment Variables
-
-```bash
-AI_PROVIDER=anthropic|openai  # Select provider
-ANTHROPIC_API_KEY=...         # Claude API
-OPENAI_API_KEY=...            # OpenAI API
-APPLE_MUSIC_API_KEY=...       # Music data
-```
-
-### Provider Selection Priority
-
-1. Check AI_PROVIDER env variable
-2. Use provider if API key configured
-3. Fall back to MockService
+1. The parser recognizes `MUSIC_RESPONSE` and extracts `MUSIC_QUERY`.
+2. The text reaction appears first.
+3. The app searches Apple Music, preloads artwork, and creates the music bubble.
+4. The song query is tracked to discourage duplicate suggestions.
 
 ## Error Handling
 
 ```text
-API Failure
-    |
-    ├─ Log error to console
-    ├─ Return fallback response
-    └─ Continue conversation flow
+Invalid client request
+    -> Proxy returns 400 or 413
+    -> Mobile provider throws
+    -> Manager returns preset fallback
 
-Special Data Fetch Failure (e.g., Music)
-    |
-    ├─ Check preloaded data cache
-    ├─ Display basic special bubble
-    └─ Use text-only fallback
+Provider SDK failure
+    -> Proxy logs provider identity only
+    -> Proxy returns sanitized 502
+    -> Mobile provider throws
+    -> Manager returns preset fallback
+
+Proxy offline, invalid JSON, or 30-second timeout
+    -> Mobile provider throws
+    -> Manager returns preset fallback
 ```
 
-## Performance Optimizations
+The server never returns provider errors, stack traces, request headers, or
+credentials. Apple Music lookup failures continue to use the existing preloaded
+data or basic music-bubble fallback.
 
-1. **Conversation Context**: Only last 10 messages sent to AI
-2. **Data Preloading**: Special content (e.g., album art) prefetched before display
-3. **Animation Overlap**: Typing indicator crossfades with message
-4. **Parallel Processing**: Special data (e.g., music) fetched while showing text
-5. **Extensible parsing**: `parseStructuredResponse` method ready for new response types
+## Provider Selection
 
-## Adding New Special Response Types
+Set `AI_PROVIDER=anthropic` or `AI_PROVIDER=openai` in `.env` and restart
+`npm run ai-proxy`. The app does not select providers. The matching private key
+must be present when the proxy starts.
 
-To add a new special response type:
+Current server defaults are:
 
-1. **Update constants** (`services/ai/constants.ts`):
+| Provider  | Model               | Maximum tokens | Temperature |
+| --------- | ------------------- | -------------: | ----------: |
+| Anthropic | `claude-sonnet-4-6` |            150 |         0.8 |
+| OpenAI    | `gpt-4o`            |            150 |         0.8 |
 
-   - Add new response type to `RESPONSE_TYPES`
-   - Add detection keywords if needed
+OpenAI also retains presence penalty `0.6` and frequency penalty `0.5`.
 
-2. **Update prompt** (`services/ai/prompts.ts`):
+## Testing
 
-   - Add detection rules to `createStructuredPrompt`
-   - Include examples for the new type
+- Node tests inject fake SDK clients and exercise configuration and HTTP
+  behavior without paid calls.
+- Jest injects `fetch` into `ProxyService` and verifies parsing, errors, and
+  timeout behavior.
+- A static regression test rejects provider keys or SDK imports in production
+  mobile source.
+- `GET /health` verifies loopback startup without calling a provider.
 
-3. **Update parser** (`services/ai/providers/anthropic.ts`):
-
-   - Add new parsing method (e.g., `parseLocationResponse`)
-   - Update `parseStructuredResponse` to handle new type
-
-4. **Update UI** (`hooks/useAIResponse.ts`):
-   - Add handling for new response type
-   - Create appropriate message bubble component
-
-## Testing Considerations
-
-- Mock service always available (no API key required)
-- Special intent detection testable via keywords
-- Animation timings configurable via constants
-- Response types verifiable in console logs
-- Extensible architecture allows easy addition of new response types
+See [AI Integration Setup](./AI_SETUP.md) for commands.

@@ -26,6 +26,12 @@ export default [
         setInterval: 'readonly',
         clearTimeout: 'readonly',
         clearInterval: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
+        RequestInfo: 'readonly',
+        RequestInit: 'readonly',
+        AbortController: 'readonly',
+        URL: 'readonly',
         console: 'readonly',
         require: 'readonly',
         process: 'readonly',
@@ -75,7 +81,7 @@ export default [
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.{js,mjs}'],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',

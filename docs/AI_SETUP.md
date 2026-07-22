@@ -1,61 +1,99 @@
 # AI Integration Setup
 
-The app supports AI-powered contextual responses using either Anthropic's Claude or OpenAI's GPT models. When enabled, the AI will automatically respond to your messages with natural, conversational replies.
+The app can generate contextual replies with Anthropic Claude or OpenAI while
+running in the iOS Simulator. A loopback-only Node proxy keeps provider
+credentials out of the Expo bundle.
 
-## Setup Instructions
+> Never place an Anthropic or OpenAI key in an `EXPO_PUBLIC_` variable. Expo
+> embeds public variables in the client application, where they are not secret.
 
-### 1. Get an API Key
+## Requirements
 
-**For Anthropic (Claude):**
+- Node.js 22 and npm 11
+- The iOS Simulator on the same Mac as the development server
+- An Anthropic or OpenAI API key
 
-- Sign up at <https://console.anthropic.com/>
-- Navigate to API Keys section
-- Create a new API key
-- Copy the key (starts with `sk-ant-`)
+## Configure the Environment
 
-**For OpenAI (GPT):**
-
-- Sign up at <https://platform.openai.com/>
-- Navigate to API Keys section
-- Create a new API key
-- Copy the key (starts with `sk-`)
-
-### 2. Configure Environment
+Copy the example file:
 
 ```bash
-# Copy the example environment file
 cp .env.example .env
-
-# Edit the .env file and add your configuration:
-
-# For Anthropic:
-EXPO_PUBLIC_AI_PROVIDER=anthropic
-EXPO_PUBLIC_ANTHROPIC_API_KEY=sk-ant-your-key-here
-
-# For OpenAI:
-EXPO_PUBLIC_AI_PROVIDER=openai
-EXPO_PUBLIC_OPENAI_API_KEY=sk-your-key-here
 ```
 
-### 3. Restart the App
+For Anthropic, set:
+
+```dotenv
+EXPO_PUBLIC_AI_PROXY_URL=http://127.0.0.1:8787
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+OPENAI_API_KEY=
+AI_PROXY_PORT=8787
+```
+
+For OpenAI, set:
+
+```dotenv
+EXPO_PUBLIC_AI_PROXY_URL=http://127.0.0.1:8787
+AI_PROVIDER=openai
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=sk-your-key-here
+AI_PROXY_PORT=8787
+```
+
+Only `EXPO_PUBLIC_AI_PROXY_URL` is read by the mobile app. Provider selection
+and credentials are read by the local Node process.
+
+## Run the Prototype
+
+Start the proxy in the first terminal:
 
 ```bash
-# Stop the server (Ctrl+C) and restart
-npm start
+npm run ai-proxy
 ```
 
-## How It Works
+The ready message should name the provider and
+`http://127.0.0.1:8787`. Keep this process running.
 
-- Send a message in any chat
-- The typing indicator appears while the AI processes
-- A contextual response is generated based on the conversation
-- Falls back to preset responses if API is unavailable
+Start the iOS app in a second terminal:
 
-## Features
+```bash
+npm run ios
+```
 
-- **Contextual Responses**: Based on last 10 messages for context
-- **Music Detection**: AI can detect music mentions and respond with Apple Music bubbles
-- **Error Handling**: Graceful fallback to preset responses if API fails
-- **Provider Flexibility**: Easy switching between Anthropic and OpenAI
+Send a message in any chat. The app sends the last ten messages and its
+structured response prompt to the local proxy. The proxy returns generated
+text, which the app parses into a normal text or Apple Music response.
 
-For more details on AI response flow, see [AI_FLOW.md](./AI_FLOW.md).
+## Troubleshooting
+
+Check that the proxy is reachable:
+
+```bash
+curl http://127.0.0.1:8787/health
+```
+
+A configured Anthropic proxy returns:
+
+```json
+{ "status": "ok", "provider": "anthropic" }
+```
+
+If startup reports a missing key, set the credential matching `AI_PROVIDER`.
+If the port is already in use, set `AI_PROXY_PORT` and update
+`EXPO_PUBLIC_AI_PROXY_URL` to the same port, then restart both processes.
+
+When the proxy is missing or unavailable, the existing mock/fallback behavior
+keeps chat usable.
+
+## Simulator-Only Boundary
+
+The proxy always binds to `127.0.0.1`, which the iOS Simulator can reach on the
+host Mac. It is not a production server and cannot be opened to the LAN through
+configuration.
+
+A physical device or distributed tester requires a separately deployed HTTPS
+service with authentication, rate limiting, and abuse protection. Do not change
+this prototype's bind address to expose an unauthenticated AI relay.
+
+For the response pipeline, see [AI Flow](./AI_FLOW.md).
