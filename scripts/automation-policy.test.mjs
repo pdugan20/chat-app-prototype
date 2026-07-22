@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { parse as parseYaml } from 'yaml';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = path => readFileSync(join(root, path), 'utf8');
@@ -32,6 +33,37 @@ function indentedBlock(text, heading, nextIndent) {
 
 function count(text, pattern) {
   return [...text.matchAll(pattern)].length;
+}
+
+function assertDependabotCooldownPolicy(text) {
+  const config = parseYaml(text);
+  const updates = config?.updates;
+  assert.equal(
+    updates?.length,
+    2,
+    'Dependabot must contain exactly one npm updater and one github-actions updater'
+  );
+
+  const byEcosystem = new Map(
+    updates.map(update => [update['package-ecosystem'], update])
+  );
+  assert.deepEqual(
+    [...byEcosystem.keys()].sort(),
+    ['github-actions', 'npm'],
+    'Dependabot updater ecosystems must be unique and complete'
+  );
+  for (const ecosystem of ['npm', 'github-actions']) {
+    assert.equal(
+      byEcosystem.get(ecosystem)?.cooldown?.['default-days'],
+      14,
+      `${ecosystem} must delay newly released versions for 14 days`
+    );
+  }
+  assert.equal(
+    count(text, /cooldown:\s*\n\s+default-days:\s*14/g),
+    2,
+    'Dependabot must declare exactly two 14-day cooldowns'
+  );
 }
 
 function jobNames(text) {
@@ -165,6 +197,21 @@ test('policy guards reject alternate merge and permission bypass forms', () => {
       ),
     /merge-capable action/
   );
+  assert.throws(
+    () =>
+      assertDependabotCooldownPolicy(`
+version: 2
+updates:
+  - package-ecosystem: npm
+    cooldown:
+      default-days: 14
+  - package-ecosystem: npm
+    cooldown:
+      default-days: 14
+  - package-ecosystem: github-actions
+`),
+    /exactly one npm updater and one github-actions updater/
+  );
 });
 
 test('every external action is pinned to an immutable commit', () => {
@@ -288,11 +335,7 @@ test('Dependabot groups only patch and minor updates with bounded queues', () =>
     count(dependabot, /timezone:\s*['"]America\/Los_Angeles['"]/g),
     2
   );
-  assert.equal(
-    count(dependabot, /cooldown:\s*\n\s+default-days:\s*14/g),
-    2,
-    'both ecosystems must delay newly released versions for 14 days'
-  );
+  assertDependabotCooldownPolicy(dependabot);
   assert.match(
     dependabot,
     /package-ecosystem:\s*['"]npm['"][\s\S]*?open-pull-requests-limit:\s*5/
