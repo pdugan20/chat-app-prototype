@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["App.tsx", "scripts/*.{js,ts}"],
-  "ignore": [".rnstorybook/storybook.requires.ts"],
+  "entry": ["App.tsx", "metro.config.js", "scripts/*.{js,ts}"],
   "ignoreDependencies": [
     "expo-module-scripts",
     "babel-loader",
@@ -16,9 +15,7 @@
     "@storybook/react",
     "expo-updates",
     "@eslint/js",
-    "@expo/metro-config",
     "babel-preset-expo",
-    "metro-minify-terser",
     "lint-staged"
   ]
 }

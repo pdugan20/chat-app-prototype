@@ -65,7 +65,7 @@ export default function App() {
     showResetConfirmation(clearAllChats, resetApp, setPendingChatUpdate);
   };
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={headerStyles.root}>
       <StatusBar style='dark' />
       <ChatUpdateProvider>
         <NavigationContainer>
@@ -232,5 +232,8 @@ const headerStyles = StyleSheet.create({
     gap: 16,
     height: 26,
     marginTop: -4,
+  },
+  root: {
+    flex: 1,
   },
 });
