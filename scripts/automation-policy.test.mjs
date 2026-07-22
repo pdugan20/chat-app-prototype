@@ -288,6 +288,11 @@ test('Dependabot groups only patch and minor updates with bounded queues', () =>
     count(dependabot, /timezone:\s*['"]America\/Los_Angeles['"]/g),
     2
   );
+  assert.equal(
+    count(dependabot, /cooldown:\s*\n\s+default-days:\s*14/g),
+    2,
+    'both ecosystems must delay newly released versions for 14 days'
+  );
   assert.match(
     dependabot,
     /package-ecosystem:\s*['"]npm['"][\s\S]*?open-pull-requests-limit:\s*5/
