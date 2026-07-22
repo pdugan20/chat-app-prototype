@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["App.tsx", "scripts/*.{js,ts}"],
+  "entry": ["App.tsx", "scripts/*.{js,ts}", "server/ai-proxy/index.mjs"],
   "ignore": [".rnstorybook/storybook.requires.ts"],
   "ignoreDependencies": [
     "expo-module-scripts",

@@ -30,14 +30,15 @@
     "markdownlint:fix": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android --fix",
     "lint:claude": "claudelint check-all",
     "lint:claude:fix": "claudelint format --fix",
-    "test:ai-proxy": "node --test server/ai-proxy/config.test.mjs server/ai-proxy/providers.test.mjs server/ai-proxy/handler.test.mjs"
+    "test:ai-proxy": "node --test server/ai-proxy/config.test.mjs server/ai-proxy/providers.test.mjs server/ai-proxy/handler.test.mjs",
+    "ai-proxy": "node server/ai-proxy/index.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "*.{js,jsx}": [
+    "*.{js,jsx,mjs}": [
       "prettier --write"
     ],
     "*.{json,css}": [
