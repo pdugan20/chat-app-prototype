@@ -1,3 +1,9 @@
+## [1.0.9](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.8...v1.0.9) (2026-07-22)
+
+### Bug Fixes
+
+* keep AI provider keys out of Expo bundle ([#76](https://github.com/pdugan20/chat-app-prototype/issues/76)) ([6679216](https://github.com/pdugan20/chat-app-prototype/commit/6679216dc09f3c22a11b0df60c3812f37d6137bf))
+
 ## [1.0.8](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.7...v1.0.8) (2026-07-21)
 
 ### Bug Fixes
