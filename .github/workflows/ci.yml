@@ -39,7 +39,7 @@ jobs:
       - name: Validate automation policy
         run: npm run test:automation-policy
 
-      - name: Validate CLAUDE.md
+      - name: Validate Claude configuration
         run: npm run lint:claude
 
       - name: Prettier Check
