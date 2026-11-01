@@ -115,7 +115,7 @@
     "prettier": "^3.6.2",
     "react-dom": "19.2.0",
     "semantic-release": "^25.0.8",
-    "storybook": "^9.1.20",
+    "storybook": "^9.1.21",
     "typescript": "~5.9.2"
   },
   "private": true,
