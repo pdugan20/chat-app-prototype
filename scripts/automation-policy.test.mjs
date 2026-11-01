@@ -241,10 +241,12 @@ test('every external action is pinned to an immutable commit', () => {
         `${file} contains an auto-merge action: ${actionRef}`
       );
       assertNoMergeAction(actionRef, file);
-      const versionComment = rawAction.match(/^\S+\s+#\s*(v\d+)\s*$/)?.[1];
+      const versionComment = rawAction.match(
+        /^\S+\s+#\s*(v\d+(?:\.\d+){0,2})\s*$/
+      )?.[1];
       assert.match(
         versionComment ?? '',
-        /^v\d+$/,
+        /^v\d+(?:\.\d+){0,2}$/,
         `${file} must document the reviewed major for ${actionRef}`
       );
     }
@@ -255,7 +257,7 @@ test('the Node, npm, and local lint toolchain is deterministic', () => {
   assert.equal(pkg.packageManager, 'npm@11.5.2');
   assert.equal(pkg.engines?.node, '22.x');
   assert.equal(pkg.engines?.npm, '11.x');
-  assert.equal(pkg.devDependencies['claude-code-lint'], '0.2.0-beta.2');
+  assert.equal(pkg.devDependencies['claude-code-lint'], undefined);
 
   for (const [file, text] of workflows) {
     const installs = [...text.matchAll(/^\s*run:\s*npm ci\s*$/gm)];
@@ -303,18 +305,18 @@ test('the Node, npm, and local lint toolchain is deterministic', () => {
     }
   }
 
-  assert.match(ci, /run:\s*npm run lint:claude/);
+  assert.doesNotMatch(ci, /run:\s*npm run lint:claude/);
   assert.doesNotMatch(ci, /npx\s+claude-code-lint(?:@latest)?/);
   const codeQualityBlock = indentedBlock(ci, '  code-quality:\n', 2);
   const installIndex = codeQualityBlock.indexOf('run: npm ci');
   const policyIndex = codeQualityBlock.indexOf(
     'run: npm run test:automation-policy'
   );
-  const claudeIndex = codeQualityBlock.indexOf('run: npm run lint:claude');
+  const formatIndex = codeQualityBlock.indexOf('run: npm run format:check');
   assert.ok(
     installIndex >= 0 &&
       installIndex < policyIndex &&
-      policyIndex < claudeIndex,
+      policyIndex < formatIndex,
     'Code Quality Checks must enforce policy immediately after install and before application validation'
   );
   assert.equal(
@@ -491,7 +493,7 @@ test('privileged workflows keep narrow event and credential boundaries', () => {
   assert.deepEqual(jobNames(codeql), ['analyze']);
   assert.deepEqual(jobNames(prLint), ['validate-title']);
   assert.deepEqual(jobNames(release), ['release']);
-  assert.equal(count(codeql, /^\s*permissions\s*:/gm), 1);
+  assert.equal(count(codeql, /^\s*permissions\s*:/gm), 2);
   assert.equal(count(prLint, /^\s*permissions\s*:/gm), 1);
   assert.equal(count(release, /^\s*permissions\s*:/gm), 1);
   const codeqlJob = indentedBlock(codeql, '  analyze:\n', 2);
@@ -502,7 +504,8 @@ test('privileged workflows keep narrow event and credential boundaries', () => {
   );
   assert.equal(count(codeql, /^\s+[a-z-]+:\s*write\s*$/gm), 1);
 
-  assert.match(prLint, /^\s*pull_request_target:\s*$/m);
+  assert.match(prLint, /^\s*pull_request:\s*$/m);
+  assert.doesNotMatch(prLint, /pull_request_target:/);
   assert.equal(
     indentedBlock(prLint, 'permissions:\n', 0).trim(),
     'pull-requests: read',

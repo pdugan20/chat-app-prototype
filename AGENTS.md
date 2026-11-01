@@ -23,11 +23,16 @@ npm run ios         # Run on iOS simulator
 ### Code Quality
 
 ```bash
+npm run verify      # Run hygiene and CI checks, including iOS prebuild/export
 npm run lint        # Run ESLint with modern flat config
 npm run lint:fix    # Auto-fix ESLint issues
 npm run format      # Format code with Prettier
 npm run format:check # Check code formatting
 ```
+
+Install `actionlint` and `zizmor` on your PATH before running `npm run verify`.
+
+`npm run verify` regenerates ignored native iOS files and writes the export to `dist/`. `npm run doctor` runs Expo Doctor offline; it currently reports existing configuration issues and isn't part of `verify` or CI.
 
 ### Testing
 
