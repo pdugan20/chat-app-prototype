@@ -9,6 +9,9 @@ on:
     # Run weekly on Mondays at 6am UTC
     - cron: '0 6 * * 1'
 
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: Analyze Code for Security Issues
@@ -26,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4

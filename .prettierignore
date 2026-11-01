@@ -45,7 +45,6 @@ yarn-error.*
 *.generated.*
 CHANGELOG.md
 coverage/
-.claudelint-cache/
 
 # Storybook auto-generated files
 .rnstorybook/storybook.requires.ts 

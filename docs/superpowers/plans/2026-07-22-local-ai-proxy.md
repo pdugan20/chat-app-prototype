@@ -886,7 +886,6 @@ Run from a clean dependency state:
 ```bash
 npm ci
 npm run test:automation-policy
-npm run lint:claude
 npm run format:check
 npm run lint
 npx tsc --noEmit --skipLibCheck

@@ -1,0 +1,5 @@
+rules:
+  artipacked:
+    ignore:
+      # semantic-release pushes its release commit and tag using the checkout PAT.
+      - release.yml:18

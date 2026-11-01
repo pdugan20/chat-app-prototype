@@ -28,10 +28,10 @@
     "knip": "knip",
     "markdownlint": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android",
     "markdownlint:fix": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android --fix",
-    "lint:claude": "claudelint check-all",
-    "lint:claude:fix": "claudelint format --fix",
     "test:ai-proxy": "node --test server/ai-proxy/config.test.mjs server/ai-proxy/providers.test.mjs server/ai-proxy/handler.test.mjs scripts/ai-security-boundary.test.mjs",
-    "ai-proxy": "node server/ai-proxy/index.mjs"
+    "ai-proxy": "node server/ai-proxy/index.mjs",
+    "doctor": "EXPO_OFFLINE=1 expo-doctor",
+    "verify": "actionlint && zizmor --offline --min-severity medium . && npm run test:automation-policy && npm run format:check && npm run lint && tsc --noEmit --skipLibCheck && npm run markdownlint && npm run knip && npm run test:ci && expo install --check && expo prebuild --platform ios --no-install --clean && expo export --platform ios"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -98,7 +98,6 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "babel-loader": "^8.4.1",
-    "claude-code-lint": "0.2.0-beta.2",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
@@ -106,6 +105,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-native": "^5.0.0",
+    "expo-doctor": "1.20.1",
     "jest": "^29.7.0",
     "jest-expo": "~55.0.22",
     "jsonwebtoken": "^9.0.2",

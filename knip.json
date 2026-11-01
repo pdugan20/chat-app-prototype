@@ -20,5 +20,6 @@
     "babel-preset-expo",
     "metro-minify-terser",
     "lint-staged"
-  ]
+  ],
+  "ignoreBinaries": ["actionlint", "zizmor"]
 }
