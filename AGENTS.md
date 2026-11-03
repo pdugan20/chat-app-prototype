@@ -171,3 +171,12 @@ Main branch requires:
 - GitHub releases with release notes
 
 See `docs/CI_CD_SETUP.md` for detailed pipeline documentation.
+
+## Code Review Rules
+
+- Flag provider SDKs or private AI credentials in the mobile bundle, any secret using an
+  `EXPO_PUBLIC_*` name, or proxy routes that accept unvalidated provider/model/input data.
+- Flag conversation content, provider credentials, or raw model responses in logs,
+  fixtures, analytics, crash reports, or user-visible error details.
+- Flag message-state or async-response changes that can apply a stale response to a
+  different conversation or continue updating state after cancellation/unmount.
