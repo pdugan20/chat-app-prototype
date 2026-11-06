@@ -1,4 +1,5 @@
 import React from 'react';
+import { registerRootComponent } from 'expo';
 import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { darkTheme, theme as lightTheme } from '@storybook/react-native';
@@ -48,5 +49,7 @@ const StorybookUIRoot = view.getStorybookUI({
     },
   },
 });
+
+registerRootComponent(StorybookUIRoot);
 
 export default StorybookUIRoot;

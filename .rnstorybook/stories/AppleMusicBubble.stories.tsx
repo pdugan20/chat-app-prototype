@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-native';
-import { fn } from 'storybook/test';
 import React from 'react';
 import AppleMusicBubble from '../../components/bubbles/AppleMusicBubble';
 import { CenteredDecorator } from '../decorators';
+import { appleMusicStoryFixtures } from '../fixtures/appleMusic';
 
 // Extend the component props with story-specific controls
 type AppleMusicBubbleStoryArgs = React.ComponentProps<
@@ -75,24 +75,20 @@ type Story = StoryObj<AppleMusicBubbleStoryArgs>;
 // Beastie Boys - Intergalactic (Search Query)
 export const Intergalactic: Story = {
   args: {
-    songId: 'search:intergalactic beastie boys',
-    songTitle: 'Intergalactic',
-    artistName: 'Beastie Boys',
+    ...appleMusicStoryFixtures.intergalactic,
     isSender: false,
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
     useDynamicColors: false,
     reactionType: 'thumbsUp',
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `
 **Default AppleMusicBubble State**
 
 This shows the basic AppleMusicBubble component as a received message (gray bubble) with:
-- Real Apple Music API data fetched from search query
+- Captured Apple Music metadata with no catalog request
 - Album art loaded from Apple Music
 - Play button starts in red filled state (unplayed)
 - Message tail shown (isLastInGroup: true)
@@ -109,17 +105,13 @@ This shows the basic AppleMusicBubble component as a received message (gray bubb
 // Weezer - Buddy Holly (Search Query)
 export const BuddyHolly: Story = {
   args: {
-    songId: 'search:buddy holly weezer',
-    songTitle: 'Buddy Holly',
-    artistName: 'Weezer',
+    ...appleMusicStoryFixtures.buddyHolly,
     isSender: true,
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
     useDynamicColors: false,
     reactionType: 'thumbsUp',
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `
@@ -137,17 +129,13 @@ This shows the AppleMusicBubble as a sent message (blue bubble) demonstrating:
 // Radiohead - Paranoid Android (with thumbsUp reaction)
 export const ParanoidAndroid: Story = {
   args: {
-    songId: 'search:paranoid android radiohead',
-    songTitle: 'Paranoid Android',
-    artistName: 'Radiohead',
+    ...appleMusicStoryFixtures.paranoidAndroid,
     isSender: false,
     hasReaction: true,
     isLastInGroup: true,
     darkMode: false,
     useDynamicColors: false,
     reactionType: 'thumbsUp',
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `
@@ -165,17 +153,13 @@ Demonstrates the AppleMusicBubble with a reaction attachment:
 // Kendrick Lamar - Not Like Us
 export const NotLikeUs: Story = {
   args: {
-    songId: 'search:not like us kendrick lamar',
-    songTitle: 'Not Like Us',
-    artistName: 'Kendrick Lamar',
+    ...appleMusicStoryFixtures.notLikeUs,
     isSender: false,
     hasReaction: false,
     isLastInGroup: true,
     darkMode: false,
     useDynamicColors: false,
     reactionType: 'thumbsUp',
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `
@@ -183,7 +167,7 @@ export const NotLikeUs: Story = {
 
 Contemporary hip-hop variant:
 - Received message (gray bubble)
-- Real Apple Music data fetched from search query
+- Captured Apple Music metadata with no catalog request
 - Demonstrates album art + color extraction on modern release
     `,
   },
@@ -192,17 +176,13 @@ Contemporary hip-hop variant:
 // Taylor Swift - Shake It Off (with heart reaction)
 export const ShakeItOff: Story = {
   args: {
-    songId: 'search:shake it off taylor swift',
-    songTitle: 'Shake It Off',
-    artistName: 'Taylor Swift',
+    ...appleMusicStoryFixtures.shakeItOff,
     isSender: true,
     hasReaction: true,
     reactionType: 'heart',
     isLastInGroup: false,
     darkMode: false,
     useDynamicColors: false,
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `
@@ -220,17 +200,13 @@ Combines sender styling with different reaction type:
 // Nirvana - Smells Like Teen Spirit (grouped message, no tail)
 export const SmellsLikeTeenSpirit: Story = {
   args: {
-    songId: 'search:smells like teen spirit nirvana',
-    songTitle: 'Smells Like Teen Spirit',
-    artistName: 'Nirvana',
+    ...appleMusicStoryFixtures.smellsLikeTeenSpirit,
     isSender: false,
     hasReaction: false,
     isLastInGroup: false,
     darkMode: false,
     useDynamicColors: false,
     reactionType: 'thumbsUp',
-    onPlay: fn(),
-    onPause: fn(),
   },
   parameters: {
     notes: `

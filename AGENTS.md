@@ -15,6 +15,7 @@ This is a comprehensive iMessage prototype built with React Native and Expo, fea
 ### Starting Development
 
 ```bash
+nvm use              # Select the pinned Node 22 toolchain
 npm install          # Install dependencies
 npm start           # Start Expo development server
 npm run ios         # Run on iOS simulator
@@ -95,7 +96,7 @@ interface Message {
 
 ### Development Notes
 
-- Uses Expo SDK ~54.0.16 with React Native 0.81.4
+- Uses Expo SDK 57 with React Native 0.86.3
 - TypeScript strict mode enabled
 - iOS-only platform target with new architecture enabled
 - SafeAreaView used for proper iPhone notch/home indicator handling
