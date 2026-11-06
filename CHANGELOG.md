@@ -1,3 +1,14 @@
+## [1.1.0](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.9...v1.1.0) (2026-11-06)
+
+### Features
+
+* restore iMessage group chat and layout improvements ([06b9e1d](https://github.com/pdugan20/chat-app-prototype/commit/06b9e1dbe141b1f356fab84448193dc6244f82df))
+
+### Bug Fixes
+
+* refresh local AI and Apple Music integration ([b94eec4](https://github.com/pdugan20/chat-app-prototype/commit/b94eec48d95383ccbbaa43183a679a1a96fc1055))
+* write Apple Music tokens through a protected file descriptor ([6ee9bdb](https://github.com/pdugan20/chat-app-prototype/commit/6ee9bdb0eada67c83977f74696a51bd8d3d8fd1b))
+
 ## [1.0.9](https://github.com/pdugan20/chat-app-prototype/compare/v1.0.8...v1.0.9) (2026-07-22)
 
 ### Bug Fixes

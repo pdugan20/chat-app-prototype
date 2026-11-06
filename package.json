@@ -1,6 +1,6 @@
 {
   "name": "imessage-prototype",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "engines": {
     "node": ">=22.22.2 <23",
     "npm": "11.x"
