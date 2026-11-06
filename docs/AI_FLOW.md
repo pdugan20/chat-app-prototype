@@ -48,9 +48,12 @@ The local Node process reads:
 
 ```dotenv
 AI_PROVIDER=anthropic
+AI_OPENAI_MODEL=gpt-5.6-luna
+AI_ANTHROPIC_MODEL=claude-sonnet-5
 ANTHROPIC_API_KEY=...
 OPENAI_API_KEY=...
 AI_PROXY_PORT=8787
+AI_PROXY_TIMEOUT_MS=20000
 ```
 
 Provider credentials never cross the HTTP boundary. The proxy binds to
@@ -159,18 +162,19 @@ data or basic music-bubble fallback.
 
 ## Provider Selection
 
-Set `AI_PROVIDER=anthropic` or `AI_PROVIDER=openai` in `.env` and restart
-`npm run ai-proxy`. The app does not select providers. The matching private key
-must be present when the proxy starts.
+Set `AI_PROVIDER=anthropic` or `AI_PROVIDER=openai` in `.env`, configure its
+matching model and private key, and restart `npm run ai-proxy`. The app does not
+select providers.
 
-Current server defaults are:
+The checked-in example configuration uses:
 
-| Provider  | Model               | Maximum tokens | Temperature |
-| --------- | ------------------- | -------------: | ----------: |
-| Anthropic | `claude-sonnet-4-6` |            150 |         0.8 |
-| OpenAI    | `gpt-4o`            |            150 |         0.8 |
+| Provider  | Model             | Maximum output tokens | Reasoning/temperature |
+| --------- | ----------------- | --------------------: | --------------------- |
+| Anthropic | `claude-sonnet-5` |                   220 | provider default      |
+| OpenAI    | `gpt-5.6-luna`    |                   220 | reasoning `none`      |
 
-OpenAI also retains presence penalty `0.6` and frequency penalty `0.5`.
+The OpenAI route uses the Responses API with response storage disabled and preserves the existing plain-text
+marker contract consumed by the mobile parser.
 
 ## Testing
 

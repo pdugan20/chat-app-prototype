@@ -12,6 +12,9 @@ export type MessageType =
 interface BaseMessage {
   id: string;
   isSender: boolean;
+  /** Identity for incoming messages in a group conversation. */
+  senderName?: string;
+  senderAvatar?: number;
   timestamp: string;
   hasReaction?: boolean;
   reactionType?: 'heart' | 'thumbsUp' | 'haha' | 'doubleExclamation';

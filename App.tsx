@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SymbolView } from 'expo-symbols';
@@ -21,6 +23,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   const { resetApp, setPendingChatUpdate } = useAppStore();
   const { clearAllChats } = useChatStore();
+
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
 
   // Preload music data for all conversations on app startup
   useEffect(() => {
@@ -65,119 +71,126 @@ export default function App() {
     showResetConfirmation(clearAllChats, resetApp, setPendingChatUpdate);
   };
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style='dark' />
-      <ChatUpdateProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName='Inbox'
-            screenOptions={{
-              presentation: 'card',
-              animation: 'default',
-              animationDuration: 350,
-            }}
-          >
-            <Stack.Screen
-              name='Inbox'
-              component={InboxScreen}
-              options={{
-                headerLargeTitle: true,
-                headerLargeTitleShadowVisible: false,
-                headerBlurEffect: 'light',
-                headerSearchBarOptions: {
-                  placeholder: 'Search',
-                  placement: 'stacked',
-                  hideWhenScrolling: true,
-                },
-                headerLeft: () => (
-                  <TouchableOpacity style={headerStyles.editButton}>
-                    <Text style={headerStyles.editText}>Edit</Text>
-                  </TouchableOpacity>
-                ),
-                headerRight: () => (
-                  <View style={headerStyles.rightButtonContainer}>
-                    <Host matchContents>
-                      <Menu
-                        label={
-                          <SymbolView
-                            name='ellipsis.circle'
-                            size={24}
-                            type='monochrome'
-                            tintColor={Colors.systemBlue}
-                            weight='regular'
-                          />
-                        }
+    <GestureHandlerRootView style={headerStyles.root}>
+      <SafeAreaProvider>
+        <StatusBar style='dark' />
+        <ChatUpdateProvider>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName='Inbox'
+              screenOptions={{
+                presentation: 'card',
+                animation: 'default',
+                animationDuration: 350,
+              }}
+            >
+              <Stack.Screen
+                name='Inbox'
+                component={InboxScreen}
+                options={{
+                  headerLargeTitle: true,
+                  headerLargeTitleShadowVisible: false,
+                  headerBlurEffect: 'light',
+                  headerSearchBarOptions: {
+                    placeholder: 'Search',
+                    placement: 'stacked',
+                    hideWhenScrolling: true,
+                  },
+                  headerLeft: () => (
+                    <TouchableOpacity style={headerStyles.editButton}>
+                      <Text style={headerStyles.editText}>Edit</Text>
+                    </TouchableOpacity>
+                  ),
+                  headerRight: () => (
+                    <View style={headerStyles.rightButtonContainer}>
+                      <Host
+                        ignoreSafeArea='all'
+                        style={headerStyles.menuButton}
                       >
-                        <Button
-                          systemImage='gear'
-                          label='Settings'
-                          onPress={() => console.log('Settings pressed')}
+                        <Menu
+                          label={
+                            <SymbolView
+                              name='ellipsis.circle'
+                              size={24}
+                              type='monochrome'
+                              tintColor={Colors.systemBlue}
+                              weight='regular'
+                            />
+                          }
+                        >
+                          <Button
+                            systemImage='gear'
+                            label='Settings'
+                            onPress={() => console.log('Settings pressed')}
+                          />
+                          <Button
+                            systemImage='arrow.clockwise'
+                            label='Reset'
+                            onPress={handleResetPress}
+                          />
+                        </Menu>
+                      </Host>
+                      <TouchableOpacity style={headerStyles.composeButton}>
+                        <SymbolView
+                          name='square.and.pencil'
+                          size={24}
+                          type='monochrome'
+                          tintColor={Colors.systemBlue}
+                          weight='regular'
                         />
-                        <Button
-                          systemImage='arrow.clockwise'
-                          label='Reset'
-                          onPress={handleResetPress}
+                      </TouchableOpacity>
+                    </View>
+                  ),
+                  title: 'Messages',
+                }}
+              />
+              <Stack.Screen
+                name='Chat'
+                component={ChatScreen}
+                options={{
+                  headerShown: true,
+                  headerTransparent: true,
+                  headerTitle: '',
+                  headerBackTitle: '',
+                  headerStyle: {
+                    backgroundColor: 'transparent',
+                  },
+                  headerLeft: () => (
+                    <TouchableOpacity style={headerStyles.hiddenEditButton}>
+                      <Text style={headerStyles.hiddenEditText}>Edit</Text>
+                    </TouchableOpacity>
+                  ),
+                  headerRight: () => (
+                    <View style={headerStyles.hiddenRightButtonContainer}>
+                      <TouchableOpacity style={headerStyles.iconButton}>
+                        <SymbolView
+                          name='ellipsis.circle'
+                          size={24}
+                          type='monochrome'
+                          tintColor={Colors.systemBlue}
+                          weight='regular'
                         />
-                      </Menu>
-                    </Host>
-                    <TouchableOpacity style={headerStyles.composeButton}>
-                      <SymbolView
-                        name='square.and.pencil'
-                        size={24}
-                        type='monochrome'
-                        tintColor={Colors.systemBlue}
-                        weight='regular'
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ),
-                title: 'Messages',
-              }}
-            />
-            <Stack.Screen
-              name='Chat'
-              component={ChatScreen}
-              options={{
-                headerShown: true,
-                headerTransparent: true,
-                headerTitle: '',
-                headerBackTitle: '',
-                headerStyle: {
-                  backgroundColor: 'transparent',
-                },
-                headerLeft: () => (
-                  <TouchableOpacity style={headerStyles.hiddenEditButton}>
-                    <Text style={headerStyles.hiddenEditText}>Edit</Text>
-                  </TouchableOpacity>
-                ),
-                headerRight: () => (
-                  <View style={headerStyles.hiddenRightButtonContainer}>
-                    <TouchableOpacity style={headerStyles.iconButton}>
-                      <SymbolView
-                        name='ellipsis.circle'
-                        size={24}
-                        type='monochrome'
-                        tintColor={Colors.systemBlue}
-                        weight='regular'
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={headerStyles.hiddenComposeButton}>
-                      <SymbolView
-                        name='square.and.pencil'
-                        size={24}
-                        type='monochrome'
-                        tintColor={Colors.systemBlue}
-                        weight='regular'
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ),
-                animationTypeForReplace: 'push',
-              }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ChatUpdateProvider>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={headerStyles.hiddenComposeButton}
+                      >
+                        <SymbolView
+                          name='square.and.pencil'
+                          size={24}
+                          type='monochrome'
+                          tintColor={Colors.systemBlue}
+                          weight='regular'
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ),
+                  animationTypeForReplace: 'push',
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ChatUpdateProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
@@ -226,11 +239,18 @@ const headerStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  menuButton: {
+    height: 24,
+    width: 24,
+  },
   rightButtonContainer: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: 16,
     height: 26,
     marginTop: -4,
+  },
+  root: {
+    flex: 1,
   },
 });

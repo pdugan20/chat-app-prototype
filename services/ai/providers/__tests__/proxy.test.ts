@@ -5,7 +5,7 @@ const response = (body: unknown, ok = true, status = 200) =>
     ok,
     status,
     json: jest.fn().mockResolvedValue(body),
-  } as unknown as Response);
+  }) as unknown as Response;
 
 const fetchMockFor = (value: Response): typeof fetch =>
   jest.fn().mockResolvedValue(value) as unknown as typeof fetch;

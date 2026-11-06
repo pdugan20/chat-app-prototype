@@ -70,20 +70,17 @@ Main workflow that runs on all pushes and pull requests.
 **Jobs:**
 
 1. **Code Quality**
-
    - Prettier format check
    - ESLint
    - TypeScript type check
    - TypeScript strict check (non-blocking)
 
 2. **Test**
-
    - Jest unit tests
    - Coverage reporting to Codecov
    - Coverage artifact upload
 
 3. **Build Validation**
-
    - Expo dependency check
    - iOS prebuild validation
    - Production bundle creation

@@ -14,7 +14,6 @@ interface ChatListItemProps {
 const ChatListItem: React.FC<ChatListItemProps> = ({ item, onPress }) => {
   return (
     <View style={styles.inboxRow}>
-      <View style={styles.divider} />
       {item.unread && <View style={styles.unreadIndicator} />}
       <TouchableOpacity
         style={styles.messageContainer}
@@ -62,19 +61,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 10,
   },
-  divider: {
-    backgroundColor: Colors.border,
-    height: StyleSheet.hairlineWidth,
-    width: '100%',
-  },
   inboxRow: {
     backgroundColor: Colors.chatItemBackground,
     flexDirection: 'column',
-    gap: Spacing.chatItemRowGap,
     paddingBottom: Spacing.chatItemRowPaddingBottom,
     paddingLeft: Spacing.chatItemRowPaddingLeft,
     paddingRight: 0,
-    paddingTop: 0,
+    paddingTop: Spacing.chatItemRowGap,
     position: 'relative',
   },
   inboxRowPhoto: {

@@ -178,6 +178,7 @@ const InboxScreen: React.FC<InboxScreenProps> = ({ navigation }) => {
       style={styles.listStyle}
       contentInsetAdjustmentBehavior='automatic'
       automaticallyAdjustContentInsets={true}
+      showsVerticalScrollIndicator={false}
     />
   );
 };
@@ -193,7 +194,10 @@ const styles = StyleSheet.create({
   separator: {
     backgroundColor: Colors.dividerGray,
     height: StyleSheet.hairlineWidth,
-    marginLeft: Spacing.separatorMarginLeft,
+    marginLeft:
+      Spacing.chatItemRowPaddingLeft +
+      Spacing.avatarSize +
+      Spacing.chatItemContainerGap,
   },
 });
 

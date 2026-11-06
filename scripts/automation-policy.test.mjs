@@ -255,7 +255,8 @@ test('every external action is pinned to an immutable commit', () => {
 
 test('the Node, npm, and local lint toolchain is deterministic', () => {
   assert.equal(pkg.packageManager, 'npm@11.5.2');
-  assert.equal(pkg.engines?.node, '22.x');
+  assert.equal(read('.nvmrc').trim(), '22.23.2');
+  assert.equal(pkg.engines?.node, '>=22.22.2 <23');
   assert.equal(pkg.engines?.npm, '11.x');
   assert.equal(pkg.devDependencies['claude-code-lint'], undefined);
 
@@ -270,9 +271,9 @@ test('the Node, npm, and local lint toolchain is deterministic', () => {
     if (installCount === 0) continue;
 
     assert.equal(
-      count(text, /node-version:\s*['"]?22\.18\.0['"]?/g),
+      count(text, /node-version:\s*['"]?22\.23\.2['"]?/g),
       installCount,
-      `${file} must select Node 22.18.0 before every npm ci`
+      `${file} must select Node 22.23.2 before every npm ci`
     );
     assert.equal(
       count(text, /run:\s*npm install --global npm@11\.5\.2/g),
@@ -290,7 +291,7 @@ test('the Node, npm, and local lint toolchain is deterministic', () => {
       const jobStarts = [...prefix.matchAll(/^ {2}[a-z0-9-]+:\s*$/gm)];
       const jobStart = jobStarts.at(-1)?.index ?? 0;
       const jobPrefix = prefix.slice(jobStart);
-      const nodeIndex = jobPrefix.lastIndexOf("node-version: '22.18.0'");
+      const nodeIndex = jobPrefix.lastIndexOf("node-version: '22.23.2'");
       const npmIndex = jobPrefix.lastIndexOf(
         'run: npm install --global npm@11.5.2'
       );

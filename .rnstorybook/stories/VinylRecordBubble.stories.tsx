@@ -3,6 +3,7 @@ import React from 'react';
 import VinylRecordBubble from '../../components/bubbles/VinylRecordBubble';
 import { CenteredDecorator } from '../decorators';
 import { VinylRecordMessage } from '../../types/message';
+import { appleMusicStoryFixtures } from '../fixtures/appleMusic';
 
 // Extend the component props with story-specific controls
 type VinylRecordBubbleStoryArgs = {
@@ -138,9 +139,7 @@ type Story = StoryObj<VinylRecordBubbleStoryArgs>;
 // Olivia Rodrigo - Love is Embarrassing
 export const LoveIsEmbarrassing: Story = {
   args: {
-    songId: 'search:love is embarrassing olivia rodrigo',
-    songTitle: 'love is embarrassing',
-    artistName: 'Olivia Rodrigo',
+    ...appleMusicStoryFixtures.loveIsEmbarrassing,
     isSender: false,
     hasReaction: false,
     reactionType: 'heart',
@@ -152,7 +151,7 @@ export const LoveIsEmbarrassing: Story = {
 **Olivia Rodrigo - Love is Embarrassing**
 
 This shows the VinylRecordBubble component as a received message with:
-- Real Apple Music API data fetched from search query
+- Captured Apple Music metadata with no catalog request
 - Album art displayed as vinyl record label
 - Spinning animation when playing
 - Scrubbing capability by dragging the vinyl
@@ -171,9 +170,7 @@ This shows the VinylRecordBubble component as a received message with:
 // The Beatles - Hey Jude (Classic Vinyl)
 export const HeyJude: Story = {
   args: {
-    songId: 'search:hey jude beatles',
-    songTitle: 'Hey Jude',
-    artistName: 'The Beatles',
+    ...appleMusicStoryFixtures.heyJude,
     isSender: true,
     hasReaction: false,
     reactionType: 'heart',
@@ -197,9 +194,7 @@ Shows the VinylRecordBubble as a sent message (blue bubble) demonstrating:
 // Pink Floyd - Wish You Were Here
 export const WishYouWereHere: Story = {
   args: {
-    songId: 'search:wish you were here pink floyd',
-    songTitle: 'Wish You Were Here',
-    artistName: 'Pink Floyd',
+    ...appleMusicStoryFixtures.wishYouWereHere,
     isSender: false,
     hasReaction: true,
     reactionType: 'heart',
@@ -222,9 +217,7 @@ Demonstrates the VinylRecordBubble with a reaction attachment:
 // Fleetwood Mac - Dreams
 export const Dreams: Story = {
   args: {
-    songId: 'search:dreams fleetwood mac',
-    songTitle: 'Dreams',
-    artistName: 'Fleetwood Mac',
+    ...appleMusicStoryFixtures.dreams,
     isSender: true,
     hasReaction: true,
     reactionType: 'thumbsUp',
@@ -247,9 +240,7 @@ Combines sender styling with reaction:
 // Daft Punk - Get Lucky
 export const GetLucky: Story = {
   args: {
-    songId: 'search:get lucky daft punk',
-    songTitle: 'Get Lucky',
-    artistName: 'Daft Punk',
+    ...appleMusicStoryFixtures.getLucky,
     isSender: false,
     hasReaction: false,
     reactionType: 'heart',
@@ -272,9 +263,7 @@ Shows vinyl bubble with modern electronic music:
 // Taylor Swift - Anti-Hero
 export const AntiHero: Story = {
   args: {
-    songId: 'search:anti hero taylor swift',
-    songTitle: 'Anti-Hero',
-    artistName: 'Taylor Swift',
+    ...appleMusicStoryFixtures.antiHero,
     isSender: false,
     hasReaction: true,
     reactionType: 'haha',

@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES, ENV_KEYS } from '../constants';
+import { ERROR_MESSAGES } from '../constants';
 import { createStructuredPrompt } from '../prompts';
 import { AIMessage, AIStructuredResponse } from '../types';
 import { BaseAIProvider } from './base';
@@ -25,7 +25,7 @@ export class ProxyService extends BaseAIProvider {
   private readonly proxyUrl?: string;
 
   constructor(
-    proxyUrl = process.env[ENV_KEYS.proxyUrl],
+    proxyUrl = process.env.EXPO_PUBLIC_AI_PROXY_URL,
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly timeoutMs = 30_000
   ) {

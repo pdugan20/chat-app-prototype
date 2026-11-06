@@ -126,7 +126,6 @@ export const Spacing = {
   chevronSize: 13,
   nameMaxWidth: 200,
   timeContainerWidth: 110,
-  separatorMarginLeft: 78,
 
   // Border radius
   messageBorderRadius: 16,
@@ -147,7 +146,9 @@ export const Layout = {
   deliveredDelay: 1500,
 
   // Message constraints
-  maxMessageWidth: '75%',
+  // A definite width keeps React Native's text measurer wrapping bubble copy
+  // instead of clipping it after a percentage-based max-width clamp.
+  maxMessageWidth: 300,
   messageMarginSide: '0%',
 
   // Navigation

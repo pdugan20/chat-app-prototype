@@ -13,6 +13,7 @@ const fixture = async (t, options = {}) => {
   const calls = [];
   const handler = createHandler({
     provider: 'anthropic',
+    model: 'claude-test',
     generate:
       options.generate ??
       (async request => {
@@ -49,6 +50,7 @@ test('reports loopback proxy health without credentials', async t => {
   assert.deepEqual(await response.json(), {
     status: 'ok',
     provider: 'anthropic',
+    model: 'claude-test',
   });
 });
 

@@ -10,11 +10,13 @@ Apple Music recommendations. Storybook stories cover individual UI components.
 
 ## Getting Started
 
-Requires Node.js 22, npm 11, and a Mac with Xcode and an iOS Simulator installed.
+Requires Node.js 22.22.2 or newer within Node 22, npm 11, and a Mac with Xcode
+and an iOS Simulator installed. Run `nvm use` to select the pinned Node version.
 
 ```bash
 git clone https://github.com/pdugan20/chat-app-prototype.git
 cd chat-app-prototype
+nvm use
 npm install
 npm run setup-hooks
 npm run ios
