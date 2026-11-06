@@ -74,13 +74,32 @@ function generateAppleMusicToken() {
 
     // Save without ever printing the credential to stdout.
     const envPath = path.resolve('.env');
-    const envContent = fs.existsSync(envPath)
-      ? fs.readFileSync(envPath, 'utf8')
-      : '';
-    const updatedContent = upsertEnvValue(envContent, TOKEN_ENV_NAME, token);
-
-    fs.writeFileSync(envPath, updatedContent, { mode: 0o600 });
-    fs.chmodSync(envPath, 0o600);
+    const envFile = fs.openSync(
+      envPath,
+      fs.constants.O_CREAT | fs.constants.O_RDWR | fs.constants.O_NOFOLLOW,
+      0o600
+    );
+    try {
+      fs.fchmodSync(envFile, 0o600);
+      const envContent = fs.readFileSync(envFile, 'utf8');
+      const updatedContent = Buffer.from(
+        upsertEnvValue(envContent, TOKEN_ENV_NAME, token),
+        'utf8'
+      );
+      let offset = 0;
+      while (offset < updatedContent.length) {
+        offset += fs.writeSync(
+          envFile,
+          updatedContent,
+          offset,
+          updatedContent.length - offset,
+          offset
+        );
+      }
+      fs.ftruncateSync(envFile, updatedContent.length);
+    } finally {
+      fs.closeSync(envFile);
+    }
 
     console.log('✅ Apple Music JWT token generated and saved to .env');
     console.log(

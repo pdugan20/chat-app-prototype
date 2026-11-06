@@ -23,7 +23,7 @@ const script = fileURLToPath(
 for (const existing of [
   undefined,
   'OTHER_SETTING=keep\n',
-  'OTHER_SETTING=keep\nEXPO_PUBLIC_APPLE_MUSIC_TOKEN=old\n',
+  `OTHER_SETTING=keep\nEXPO_PUBLIC_APPLE_MUSIC_TOKEN=${'old'.repeat(300)}\n`,
 ]) {
   test(`saves a private token file with ${existing === undefined ? 'no' : existing.includes('=old') ? 'an existing token in' : 'other settings in'} .env`, () => {
     const directory = mkdtempSync(join(tmpdir(), 'apple-token-test-'));
