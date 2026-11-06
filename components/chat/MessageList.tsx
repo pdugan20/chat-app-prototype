@@ -1,5 +1,12 @@
 import React, { useMemo } from 'react';
-import { Animated, StyleSheet, View, FlatList } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  View,
+  FlatList,
+  Image,
+  Text,
+} from 'react-native';
 import BubbleRenderer from '../bubbles/BubbleRenderer';
 import ChatBanner from './ChatBanner';
 import { Message } from '../../types/message';
@@ -53,6 +60,7 @@ interface MessageListProps {
   scrollViewRef?: React.RefObject<FlatList | null>;
   ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
   disableKeyboardHandling?: boolean;
+  isGroup?: boolean;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -65,6 +73,7 @@ const MessageList: React.FC<MessageListProps> = ({
   onContentSizeChange,
   scrollViewRef,
   ListFooterComponent,
+  isGroup = false,
 }) => {
   // Create flattened data structure for FlatList
   const flatListData = useMemo((): FlatListItem[] => {
@@ -124,26 +133,50 @@ const MessageList: React.FC<MessageListProps> = ({
 
       case 'message': {
         const { message, messageIndex } = item;
-        const messageAlignSelf = message.isSender ? 'flex-end' : 'flex-start';
+        const firstInGroup = isFirstInGroup(messages, messageIndex);
+        const lastInGroup = isLastInGroup(messages, messageIndex);
+        const isGroupRecipient = isGroup && !message.isSender;
+        const hasReaction = !!message.hasReaction && firstInGroup;
 
         return (
           <Animated.View
-            style={{
-              transform: getMessageSlideTransform(
-                message.animationValue,
-                message.isSender
-              ),
-              alignSelf: messageAlignSelf,
-            }}
+            style={[
+              styles.messageRow,
+              {
+                transform: getMessageSlideTransform(
+                  message.animationValue,
+                  message.isSender
+                ),
+              },
+            ]}
           >
-            <BubbleRenderer
-              message={message}
-              isLastInGroup={isLastInGroup(messages, messageIndex)}
-              isFirstInGroup={isFirstInGroup(messages, messageIndex)}
-              hasReaction={
-                !!message.hasReaction && isFirstInGroup(messages, messageIndex)
-              }
-            />
+            <View style={isGroupRecipient && styles.groupRecipientRow}>
+              {isGroupRecipient && firstInGroup && message.senderName ? (
+                <Text
+                  style={[
+                    styles.groupSenderName,
+                    hasReaction && styles.groupSenderNameWithReaction,
+                  ]}
+                >
+                  {message.senderName}
+                </Text>
+              ) : null}
+              <View style={isGroupRecipient && styles.groupBubbleContainer}>
+                <BubbleRenderer
+                  message={message}
+                  isLastInGroup={lastInGroup}
+                  isFirstInGroup={firstInGroup}
+                  hasReaction={hasReaction}
+                />
+              </View>
+              {isGroupRecipient && lastInGroup && message.senderAvatar ? (
+                <Image
+                  source={message.senderAvatar}
+                  style={styles.groupSenderAvatar}
+                  resizeMode='cover'
+                />
+              ) : null}
+            </View>
           </Animated.View>
         );
       }
@@ -237,8 +270,42 @@ const styles = StyleSheet.create({
     fontWeight: Typography.medium,
     paddingRight: 4,
   },
+  groupBubbleContainer: {
+    marginLeft: 36,
+  },
+  groupRecipientRow: {
+    position: 'relative',
+    width: '100%',
+  },
+  groupSenderAvatar: {
+    borderRadius: 15,
+    bottom: 0,
+    height: 30,
+    left: 0,
+    position: 'absolute',
+    width: 30,
+  },
+  groupSenderName: {
+    color: Colors.textTertiary,
+    fontFamily: Typography.fontFamily,
+    fontSize: 11,
+    fontWeight: Typography.medium,
+    lineHeight: 14,
+    marginBottom: 2,
+    marginLeft: 48,
+  },
+  groupSenderNameWithReaction: {
+    // The bubble reserves this band for its reaction. Let the sender label
+    // share the empty left side so it stays anchored to the bubble text.
+    transform: [{ translateY: 20 }],
+  },
   groupSpacing: {
     height: Spacing.groupSpacing,
+  },
+  messageRow: {
+    // A definite row width avoids a circular max-width measurement that clips
+    // text instead of wrapping it on current React Native.
+    alignSelf: 'stretch',
   },
 });
 

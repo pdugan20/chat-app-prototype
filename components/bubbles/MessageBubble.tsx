@@ -62,12 +62,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
 const styles = StyleSheet.create({
   bubble: {
     borderRadius: Spacing.messageBorderRadius,
+    flexShrink: 1,
+    maxWidth: Layout.maxMessageWidth,
     paddingHorizontal: Spacing.messagePadding,
     paddingVertical: Spacing.messagePaddingVertical,
   },
   container: {
     marginVertical: 0.5,
-    maxWidth: Layout.maxMessageWidth,
+    maxWidth: '100%',
     position: 'relative',
   },
   containerWithReaction: {

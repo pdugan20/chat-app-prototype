@@ -8,12 +8,18 @@ import {
   createAppleMusicMessage,
 } from '../messageUtils';
 
-const text = (id: string, isSender: boolean, timestamp: string): Message => ({
+const text = (
+  id: string,
+  isSender: boolean,
+  timestamp: string,
+  senderName?: string
+): Message => ({
   id,
   text: 'msg',
   isSender,
   timestamp,
   type: 'text',
+  ...(senderName ? { senderName } : {}),
 });
 
 describe('messageUtils', () => {
@@ -77,6 +83,14 @@ describe('messageUtils', () => {
       ];
       expect(isFirstInGroup(messages, 1)).toBe(true);
     });
+
+    it('starts a new group when a different group participant replies', () => {
+      const messages = [
+        text('1', false, '10:00 AM', 'Loraine'),
+        text('2', false, '10:01 AM', 'Gus'),
+      ];
+      expect(isFirstInGroup(messages, 1)).toBe(true);
+    });
   });
 
   describe('isLastInGroup', () => {
@@ -114,6 +128,14 @@ describe('messageUtils', () => {
       ];
       expect(isLastInGroup(messages, 0)).toBe(true);
     });
+
+    it('ends a group before a different group participant replies', () => {
+      const messages = [
+        text('1', false, '10:00 AM', 'Loraine'),
+        text('2', false, '10:01 AM', 'Gus'),
+      ];
+      expect(isLastInGroup(messages, 0)).toBe(true);
+    });
   });
 
   describe('shouldAddGroupSpacing', () => {
@@ -142,6 +164,14 @@ describe('messageUtils', () => {
       const messages = [
         text('1', true, '10:00 AM'),
         text('2', true, '10:30 AM'),
+      ];
+      expect(shouldAddGroupSpacing(messages, 1)).toBe(true);
+    });
+
+    it('adds spacing when the incoming group participant changes', () => {
+      const messages = [
+        text('1', false, '10:00 AM', 'Loraine'),
+        text('2', false, '10:01 AM', 'Gus'),
       ];
       expect(shouldAddGroupSpacing(messages, 1)).toBe(true);
     });

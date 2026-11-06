@@ -9,7 +9,7 @@ import NavigationBar from '../components/navigation/NavigationBar';
 import MessageList from '../components/chat/MessageList';
 import TypingSection from '../components/chat/TypingSection';
 import { allConversations } from '../data/messages';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Layout, Spacing } from '../constants/theme';
 import { RootStackParamList } from '../types/navigation';
 import { useKeyboard } from '../hooks/useKeyboard';
 import { useMessages } from '../hooks/useMessages';
@@ -48,6 +48,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     );
     return conversation ? conversation.messages : [];
   })();
+  const replyParticipant = isGroup
+    ? initialMessages.find(message => !message.isSender && message.senderName)
+    : undefined;
 
   const { messages, addMessage, showDeliveredIndicator } = useMessages(
     chatId,
@@ -57,6 +60,12 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   // State
   const [aiEnabled] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [navigationBarHeight, setNavigationBarHeight] = useState(
+    Layout.navigationPaddingTop +
+      Layout.navigationButtonSize +
+      Layout.navigationPaddingBottom +
+      1
+  );
 
   // Refs
   const scrollViewRef = useRef<FlatList>(null);
@@ -76,11 +85,20 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     generateAIResponse,
   } = useAIResponse({
     messages,
-    contactName,
+    contactName: replyParticipant?.senderName ?? contactName,
     aiEnabled,
     onAddMessage: message => {
       const { addMessage: addToStore } = useChatStore.getState();
-      addToStore(chatId, message);
+      addToStore(
+        chatId,
+        replyParticipant && !message.isSender
+          ? {
+              ...message,
+              senderName: replyParticipant.senderName,
+              senderAvatar: replyParticipant.senderAvatar,
+            }
+          : message
+      );
     },
     onUpdateLastSentMessage: (text, timestamp, isUserMessage) => {
       lastSentMessageRef.current = { text, timestamp, isUserMessage };
@@ -333,7 +351,10 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   return (
     <View style={styles.fullContainer}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        edges={['left', 'right', 'bottom']}
+        style={styles.container}
+      >
         <Animated.View
           style={[
             styles.messagesContainer,
@@ -344,12 +365,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         >
           <MessageList
             messages={messages}
+            isGroup={isGroup}
             deliveredOpacity={deliveredOpacity}
             deliveredScale={deliveredScale}
             scrollViewRef={scrollViewRef}
             style={styles.messagesList}
             contentContainerStyle={[
               styles.messagesContent,
+              { paddingTop: navigationBarHeight },
               keyboardVisible && styles.messagesContentKeyboardVisible,
             ]}
             onLayout={handleScrollViewLayout}
@@ -375,7 +398,12 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         />
       </ReanimatedAnimated.View>
 
-      <View style={styles.navigationBarContainer}>
+      <View
+        style={styles.navigationBarContainer}
+        onLayout={({ nativeEvent }) =>
+          setNavigationBarHeight(nativeEvent.layout.height)
+        }
+      >
         <NavigationBar
           contactName={contactName}
           contactAvatar={contactAvatar ? parseInt(contactAvatar) : undefined}
@@ -415,7 +443,6 @@ const styles = StyleSheet.create({
     paddingBottom: 48, // Account for input bar height
     paddingLeft: Spacing.containerPadding,
     paddingRight: Spacing.inputPadding,
-    paddingTop: 40,
   },
   messagesContentKeyboardVisible: {
     paddingBottom: 60,

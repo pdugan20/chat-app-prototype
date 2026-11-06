@@ -1,5 +1,17 @@
 import { Message, TextMessage, AppleMusicMessage } from '../types/message';
 
+const isSameAuthor = (first: Message, second: Message): boolean => {
+  if (first.isSender !== second.isSender) return false;
+
+  // Direct-message recipients do not carry senderName, so they still group as
+  // before. Group recipients split whenever the participant changes.
+  if (!first.isSender && (first.senderName || second.senderName)) {
+    return first.senderName === second.senderName;
+  }
+
+  return true;
+};
+
 /**
  * Check if we should show timestamp between messages
  * Shows timestamp for first message or if messages are 15+ minutes apart
@@ -38,7 +50,7 @@ export const isLastInGroup = (
   if (!nextMessage) return true;
 
   // If next message is from different sender, current is last in group
-  if (currentMessage.isSender !== nextMessage.isSender) return true;
+  if (!isSameAuthor(currentMessage, nextMessage)) return true;
 
   // If there's a timestamp between current and next, current is last in group
   return shouldShowTimestamp(messages, currentIndex + 1);
@@ -58,7 +70,7 @@ export const shouldAddGroupSpacing = (
   const previousMessage = messages[currentIndex - 1];
 
   // Add spacing if sender changes (new conversation group)
-  if (currentMessage.isSender !== previousMessage.isSender) return true;
+  if (!isSameAuthor(currentMessage, previousMessage)) return true;
 
   // Add spacing if there's a timestamp between messages
   return shouldShowTimestamp(messages, currentIndex);
@@ -79,7 +91,7 @@ export const isFirstInGroup = (
   if (!previousMessage) return true;
 
   // If previous message is from different sender, current is first in group
-  if (currentMessage.isSender !== previousMessage.isSender) return true;
+  if (!isSameAuthor(currentMessage, previousMessage)) return true;
 
   // If there's a timestamp between previous and current, current is first in group
   return shouldShowTimestamp(messages, currentIndex);

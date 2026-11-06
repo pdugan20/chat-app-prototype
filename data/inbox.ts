@@ -106,7 +106,7 @@ export const mockChats: ChatItem[] = [
     id: '11',
     name: 'August James',
     lastMessage:
-      "My last Flight Flight was delayed a bit but I'm finally here. Will grab my luggage and see y...",
+      "My flight was delayed a bit, but I'm finally here. Will grab my luggage and see you soon.",
     timestamp: 'Friday',
     unread: false,
     avatar: require('../assets/profile-photos/August.png'),
