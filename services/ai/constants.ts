@@ -3,10 +3,6 @@ export const MOCK_CONFIG = {
   maxDelay: 2000,
 } as const;
 
-export const ENV_KEYS = {
-  proxyUrl: 'EXPO_PUBLIC_AI_PROXY_URL',
-} as const;
-
 export const PROVIDER_NAMES = {
   PROXY: 'proxy',
   MOCK: 'mock',
@@ -52,7 +48,7 @@ export const MOCK_RESPONSES = {
     'I totally get that',
   ],
   musicReactions: [
-    "Perfect classic! You're gonna love this one 🎵",
+    "Perfect classic! You're gonna love this one.",
     'This track is absolutely infectious!',
     'Great choice - pure nostalgia and fun!',
     'This one always makes me smile!',

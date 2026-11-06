@@ -371,8 +371,8 @@ const VinylRecordBubble: React.FC<VinylRecordBubbleProps> = ({ message }) => {
                   backgroundColor: shouldUseApiColors
                     ? dynamicStyles.bubbleBackground
                     : message.isSender
-                    ? Colors.messageBubbleBlue
-                    : Colors.messageBubbleGray,
+                      ? Colors.messageBubbleBlue
+                      : Colors.messageBubbleGray,
                 },
               ]}
             />

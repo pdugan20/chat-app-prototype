@@ -16,9 +16,9 @@ Add the following to your `.env` file:
 
 ```bash
 # Apple Music API Configuration
-APPLE_MUSIC_KEY_ID=YOUR_KEY_ID        # e.g., 99C4QGLP3J
+APPLE_MUSIC_KEY_ID=YOUR_KEY_ID        # 10-character key ID
 APPLE_MUSIC_TEAM_ID=YOUR_TEAM_ID      # Your 10-character Team ID from Apple Developer
-APPLE_MUSIC_KEY_FILE=path/to/AuthKey_XXXXX.p8  # Path to your .p8 key file
+APPLE_MUSIC_KEY_FILE=/Users/you/.config/apple/AuthKey_XXXXX.p8
 ```
 
 **Where to find these values:**
@@ -26,6 +26,12 @@ APPLE_MUSIC_KEY_FILE=path/to/AuthKey_XXXXX.p8  # Path to your .p8 key file
 - **Key ID**: Found in your Apple Developer account under Keys
 - **Team ID**: Found in Apple Developer account under Membership
 - **Key File**: The .p8 private key file downloaded from Apple Developer Portal
+
+Keep the private key outside the repository and restrict it to your user account:
+
+```bash
+chmod 600 /Users/you/.config/apple/AuthKey_XXXXX.p8
+```
 
 ### 2. Generate Apple Music JWT Token
 
@@ -40,6 +46,7 @@ This will:
 - Generate a JWT token valid for 6 months
 - Automatically save it to your `.env` file as `EXPO_PUBLIC_APPLE_MUSIC_TOKEN`
 - Display a success message with expiration date
+- Never print the token to the terminal
 
 ### 3. Restart Development Server
 

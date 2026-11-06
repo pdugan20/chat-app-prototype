@@ -17,6 +17,19 @@ const config = {
   teamId: process.env.APPLE_MUSIC_TEAM_ID,
 };
 
+const TOKEN_ENV_NAME = 'EXPO_PUBLIC_APPLE_MUSIC_TOKEN';
+
+function upsertEnvValue(content, name, value) {
+  const entry = `${name}=${value}`;
+  const pattern = new RegExp(`^${name}=.*$`, 'm');
+
+  if (pattern.test(content)) {
+    return content.replace(pattern, entry);
+  }
+
+  return `${content.trimEnd()}\n${entry}\n`;
+}
+
 function generateAppleMusicToken() {
   try {
     // Validate required environment variables
@@ -24,6 +37,18 @@ function generateAppleMusicToken() {
       throw new Error(
         'Missing required environment variables in .env file:\n' +
           '  APPLE_MUSIC_KEY_FILE, APPLE_MUSIC_KEY_ID, APPLE_MUSIC_TEAM_ID'
+      );
+    }
+
+    if (!/^[A-Z0-9]{10}$/.test(config.keyId)) {
+      throw new Error(
+        'APPLE_MUSIC_KEY_ID must be 10 uppercase letters or digits'
+      );
+    }
+
+    if (!/^[A-Z0-9]{10}$/.test(config.teamId)) {
+      throw new Error(
+        'APPLE_MUSIC_TEAM_ID must be 10 uppercase letters or digits'
       );
     }
 
@@ -47,21 +72,20 @@ function generateAppleMusicToken() {
       keyid: config.keyId,
     });
 
-    // Automatically save to .env file
+    // Save without ever printing the credential to stdout.
     const envPath = path.resolve('.env');
-    if (fs.existsSync(envPath)) {
-      const envContent = fs.readFileSync(envPath, 'utf8');
-      const updatedContent = envContent.replace(
-        /EXPO_PUBLIC_APPLE_MUSIC_TOKEN=.*/,
-        `EXPO_PUBLIC_APPLE_MUSIC_TOKEN=${token}`
-      );
-      fs.writeFileSync(envPath, updatedContent);
-      console.log('✅ Apple Music JWT token generated and saved to .env');
-      console.log('⏰ Token expires in 6 months');
-    } else {
-      console.log('✅ Token generated. Add this to your .env file:');
-      console.log(`EXPO_PUBLIC_APPLE_MUSIC_TOKEN=${token}`);
-    }
+    const envContent = fs.existsSync(envPath)
+      ? fs.readFileSync(envPath, 'utf8')
+      : '';
+    const updatedContent = upsertEnvValue(envContent, TOKEN_ENV_NAME, token);
+
+    fs.writeFileSync(envPath, updatedContent, { mode: 0o600 });
+    fs.chmodSync(envPath, 0o600);
+
+    console.log('✅ Apple Music JWT token generated and saved to .env');
+    console.log(
+      `⏰ Token expires ${new Date(payload.exp * 1000).toISOString()}`
+    );
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);

@@ -17,7 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "npm run test:storybook-boundary && npm run test:ai-proxy && jest --ci --coverage --maxWorkers=2",
+    "test:ci": "npm run test:storybook-boundary && npm run test:ai-proxy && npm run test:apple-token && jest --ci --coverage --maxWorkers=2",
     "test:automation-policy": "node --test scripts/automation-policy.test.mjs",
     "generate-apple-token": "node scripts/generate-apple-music-token.js",
     "setup-hooks": "chmod +x scripts/setup-hooks.sh .githooks/pre-commit .githooks/pre-push && ./scripts/setup-hooks.sh",
@@ -32,7 +32,8 @@
     "markdownlint": "markdownlint '**/*.md' --ignore node_modules --ignore CHANGELOG.md --ignore ios --ignore android",
     "doctor": "EXPO_OFFLINE=1 expo-doctor",
     "verify": "actionlint && zizmor --offline --min-severity medium . && npm run test:automation-policy && npm run format:check && npm run lint && tsc --noEmit --skipLibCheck && npm run markdownlint && npm run knip && npm run test:ci && expo install --check && expo prebuild --platform ios --no-install --clean && expo export --platform ios",
-    "test:storybook-boundary": "node --test scripts/storybook-boundary.test.mjs"
+    "test:storybook-boundary": "node --test scripts/storybook-boundary.test.mjs",
+    "test:apple-token": "node --test scripts/generate-apple-music-token.test.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

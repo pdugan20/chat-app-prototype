@@ -8,9 +8,9 @@ requests, deep links, and external media metadata are untrusted.
 
 `server/ai-proxy/index.mjs` binds only to `127.0.0.1`. The proxy trusts the local
 user session; `handler.mjs` validates JSON shape/roles, caps the request body at
-64 KiB, and returns generic provider errors. `providers.mjs` selects fixed server
-models and output-token limits. There is no application authentication or rate
-limiter, and the adapter sets no explicit provider-request deadline. Loopback
+64 KiB, and returns generic provider errors. `providers.mjs` uses server-configured
+models, fixed output-token limits, and a bounded request deadline with retries
+disabled. There is no application authentication or rate limiter. Loopback
 is not caller authentication. Do not expose or tunnel this service to untrusted
 callers without adding and verifying those controls. Requirements below are
 review targets, not claims that all are implemented.

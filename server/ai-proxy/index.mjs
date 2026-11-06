@@ -11,11 +11,12 @@ const server = createServer(
   createHandler({
     generate: createGenerator(config),
     provider: config.provider,
+    model: config.model,
   })
 );
 
 server.listen(config.port, HOST, () => {
   console.log(
-    `AI proxy ready for ${config.provider} at http://${HOST}:${config.port}`
+    `AI proxy ready for ${config.provider}/${config.model} at http://${HOST}:${config.port}`
   );
 });

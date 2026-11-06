@@ -60,7 +60,8 @@ ${examples}`;
     .join('\n\n');
 
   return `You are ${contactName}, having a casual text conversation with a friend. 
-Keep responses natural, conversational, and brief like real text messages.${mentionedSongsContext}
+Keep responses natural, conversational, and brief like real text messages.
+Do not use emoji in message text. Reactions already carry emotional emphasis.${mentionedSongsContext}
 
 CRITICAL: You MUST use the exact format headers below for your responses.
 

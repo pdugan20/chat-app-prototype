@@ -91,7 +91,7 @@ const readAndValidateRequest = async request => {
   return validateBody(body);
 };
 
-export function createHandler({ generate, provider, logger = console }) {
+export function createHandler({ generate, provider, model, logger = console }) {
   return async function handler(request, response) {
     const path = new URL(request.url, 'http://127.0.0.1').pathname;
     if (path !== '/health' && path !== '/v1/generate') {
@@ -101,7 +101,7 @@ export function createHandler({ generate, provider, logger = console }) {
       if (request.method !== 'GET') {
         return sendJson(response, 405, { error: 'Method not allowed' });
       }
-      return sendJson(response, 200, { status: 'ok', provider });
+      return sendJson(response, 200, { status: 'ok', provider, model });
     }
     if (request.method !== 'POST') {
       return sendJson(response, 405, { error: 'Method not allowed' });

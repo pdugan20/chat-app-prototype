@@ -26,9 +26,11 @@ For Anthropic, set:
 ```dotenv
 EXPO_PUBLIC_AI_PROXY_URL=http://127.0.0.1:8787
 AI_PROVIDER=anthropic
+AI_ANTHROPIC_MODEL=claude-sonnet-5
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 OPENAI_API_KEY=
 AI_PROXY_PORT=8787
+AI_PROXY_TIMEOUT_MS=20000
 ```
 
 For OpenAI, set:
@@ -36,9 +38,11 @@ For OpenAI, set:
 ```dotenv
 EXPO_PUBLIC_AI_PROXY_URL=http://127.0.0.1:8787
 AI_PROVIDER=openai
+AI_OPENAI_MODEL=gpt-5.6-luna
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=sk-your-key-here
 AI_PROXY_PORT=8787
+AI_PROXY_TIMEOUT_MS=20000
 ```
 
 Only `EXPO_PUBLIC_AI_PROXY_URL` is read by the mobile app. Provider selection
@@ -52,7 +56,7 @@ Start the proxy in the first terminal:
 npm run ai-proxy
 ```
 
-The ready message should name the provider and
+The ready message should name the provider, configured model, and
 `http://127.0.0.1:8787`. Keep this process running.
 
 Start the iOS app in a second terminal:
@@ -73,13 +77,14 @@ Check that the proxy is reachable:
 curl http://127.0.0.1:8787/health
 ```
 
-A configured Anthropic proxy returns:
+A configured OpenAI proxy returns:
 
 ```json
-{ "status": "ok", "provider": "anthropic" }
+{ "status": "ok", "provider": "openai", "model": "gpt-5.6-luna" }
 ```
 
-If startup reports a missing key, set the credential matching `AI_PROVIDER`.
+If startup reports a missing model or key, set the model and credential
+matching `AI_PROVIDER`.
 If the port is already in use, set `AI_PROXY_PORT` and update
 `EXPO_PUBLIC_AI_PROXY_URL` to the same port, then restart both processes.
 

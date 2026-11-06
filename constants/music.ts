@@ -3,7 +3,6 @@ const ALBUM_ART_SIZE = 200;
 
 /**
  * Formats an Apple Music artwork URL with the correct dimensions
- * Uses Cloudinary as an image proxy to improve reliability
  */
 export function formatArtworkUrl(url: string): string {
   if (!url) return '';
@@ -27,19 +26,12 @@ export function formatArtworkUrl(url: string): string {
         `/${ALBUM_ART_SIZE}x${ALBUM_ART_SIZE}bb.jpg`
       );
     } else {
-      // URL doesn't match expected patterns, use as-is
-      console.warn('Unexpected artwork URL format:', url);
+      // URL doesn't match an Apple template, so use it as-is.
       formattedUrl = url;
     }
   }
 
-  // Use Cloudinary as a proxy to improve reliability
-  // This helps with CORS issues and provides better caching
-  const cloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo';
-  const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/w_${ALBUM_ART_SIZE},h_${ALBUM_ART_SIZE},c_fill,f_auto,q_auto/${encodeURIComponent(
-    formattedUrl
-  )}`;
-
-  console.log(`🖼️ Using Cloudinary proxy: ${cloudinaryUrl}`);
-  return cloudinaryUrl;
+  // Native iOS image requests do not need a CORS proxy. Returning Apple's
+  // CDN URL directly avoids relying on an unrelated Cloudinary account.
+  return formattedUrl;
 }
